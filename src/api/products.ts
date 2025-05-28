@@ -2,7 +2,6 @@ import instance from '@/config/axios'
 import type { ApiResponse } from '@/types/api'
 
 export interface Product {
-  id: number
   appId: number
   name: string
   description: string
@@ -10,9 +9,9 @@ export interface Product {
   garminImageUrl: string
   garminStoreUrl: string
   trialLasts: number
-  createdAt: string
-  updatedAt: string
-  isDeleted: number
+  createdAt?: string
+  updatedAt?: string
+  isDeleted?: number
 }
 
 export interface ProductPageQuery {
@@ -45,4 +44,14 @@ export interface CreateProductDto {
 
 export const createProduct = (data: CreateProductDto): Promise<ApiResponse<Product>> => {
   return instance.post('/products', data)
+}
+
+// 查询单个产品
+export const getProduct = (appId: number): Promise<ApiResponse<Product>> => {
+  return instance.get(`/products/${appId}`)
+}
+
+// 更新产品
+export const updateProduct = (appId: number, data: Partial<Product>): Promise<ApiResponse<Product>> => {
+  return instance.post(`/products/update/${appId}`, data)
 } 

@@ -112,7 +112,7 @@
         class="create-btn"
         size="large"
         :disabled="!checked || loading"
-        @click="handleCreate"
+        @click="props.product ? handleSave() : handleCreate()"
       >
         {{ props.product ? 'Save' : 'CREATE PRODUCT' }}
       </el-button>
@@ -122,11 +122,10 @@
 
 <script setup lang="ts">
 import { ref, defineExpose, defineProps, watch } from "vue";
-import { createProduct } from '@/api/products'
+import { createProduct, getProduct, updateProduct, type Product } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import type { ApiResponse } from '@/types/api';
-import type { Product } from '@/api/products';
 
 const props = defineProps<{ product?: Product | null }>()
 
@@ -287,6 +286,44 @@ watch(() => props.product, (val) => {
   if (val) setForm(val);
   else resetForm();
 });
+
+const productDrawerVisible = ref(false)
+const currentProduct = ref<Product | null>(null)
+
+const handleProductClick = async (appId: number) => {
+  const res = await getProduct(appId)
+  if (res.code === 0 && res.data) {
+    currentProduct.value = res.data
+    productDrawerVisible.value = true
+  }
+}
+
+async function handleSave() {
+  if (!props.product) return
+  if (!validateForm()) return
+  loading.value = true
+  try {
+    const payload = {
+      name: form.value.name.trim(),
+      description: form.value.description.trim(),
+      garminImageUrl: form.value.garminImg || '',
+      garminStoreUrl: form.value.garminUrl || '',
+      trialLasts: form.value.trialLasts ? Number(form.value.trialLasts) : 0,
+      price: form.value.price ? Number(form.value.price) : 0,
+    }
+    const res = await updateProduct(props.product.appId, payload)
+    if (res.code === 0) {
+      ElMessage.success('Product updated successfully')
+      emits('close')
+    } else {
+      ElMessage.error(res.msg || 'Update failed')
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || 'Update failed')
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>

@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { fetchProductPage, type Product } from '@/api/products'
+import { fetchProductPage, getProduct, type Product } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
 
@@ -83,9 +83,15 @@ const drawerVisible = ref(false)
 const addProductDrawerRef = ref()
 const editProduct = ref<Product | null>(null)
 
-const openDrawer = (product?: Product) => {
+const openDrawer = async (product?: Product) => {
   drawerVisible.value = true
   if (product) {
+    console.log('product', product)
+    console.log('product.appId', product.appId)
+    const res = await getProduct(product.appId)
+    if (res.code === 0 && res.data) {
+      product = res.data
+    }
     editProduct.value = product
     addProductDrawerRef.value?.setForm(product)
   } else {
@@ -232,6 +238,10 @@ const handleSizeChange = (val: number) => {
 .product-trial {
   color: #888;
   font-size: 14px;
+}
+.product-trial-lasts {
+  color: #888;
+  font-size: 12px;
 }
 .pagination-bar {
   margin: 24px 0 0 0;
