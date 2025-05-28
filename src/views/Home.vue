@@ -7,19 +7,21 @@
           <span class="logo-icon">k</span>
           <span class="logo-text">pay</span>
         </div>
-        <nav class="nav">
-          <router-link to="/" exact-active-class="active">Dashboard</router-link>
-          <router-link to="/products" exact-active-class="active">Products</router-link>
-          <router-link to="/history" exact-active-class="active">History</router-link>
-          <router-link to="/discounts" exact-active-class="active">Discounts</router-link>
-          <router-link to="/profile" exact-active-class="active">Profile</router-link>
-        </nav>
         <div class="header-right">
-          <a href="#">ACCOUNT</a>
+          <a href="/account">ACCOUNT</a>
           <a href="#">DOCUMENTATION</a>
           <a href="#">API</a>
           <a href="#" @click.prevent="handleLogout">LOG OUT</a>
         </div>
+      </div>
+      <div class="header-sub">
+        <nav class="header-sub-nav">
+          <router-link to="/" exact-active-class="active">Dashboard</router-link>
+          <router-link to="/account/products" exact-active-class="active">Products</router-link>
+          <router-link to="/account/history" exact-active-class="active">History</router-link>
+          <router-link to="/account/discounts" exact-active-class="active">Discounts</router-link>
+          <router-link to="/account/profile" exact-active-class="active">Profile</router-link>
+        </nav>
       </div>
     </header>
 
@@ -67,21 +69,22 @@ const handleLogout = async () => {
   background: #f5f6f7;
 }
 .header {
-  background: #fff;
+  background: #f5f6f7;
   border-bottom: 1px solid #e5e5e5;
-  height: 56px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
 }
 .header-inner {
-  width: 100%;
+  width: 80%;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
-  padding: 0 32px;
+  min-height: 84px;
+  background: #f5f6f7;
 }
 .logo {
   display: flex;
@@ -105,19 +108,29 @@ const handleLogout = async () => {
   color: #222;
   font-weight: 600;
 }
-.nav {
+.header-sub {
+  width: 100%;
+  margin: 0 auto;
+  border-top: 1px solid #e5e5e5;
   display: flex;
-  gap: 32px;
+  align-items: center;
+  min-height: 64px;
 }
-.nav a {
+.header-sub-nav {
+  width: 60%;
+  margin: 0 auto;
+  display: flex;
+  gap: 72px;
+  padding: 12px 0;
+  align-items: center;
+}
+.header-sub-nav a {
   color: #222;
   text-decoration: none;
   font-size: 15px;
-  padding: 0 8px;
-  line-height: 56px;
   transition: color 0.2s;
 }
-.nav .active {
+.header-sub-nav .active {
   color: #1abc5b;
   border-bottom: 2px solid #1abc5b;
 }
