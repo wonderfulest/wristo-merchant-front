@@ -1,7 +1,10 @@
 <template>
   <div class="account-products-page">
+    <el-drawer v-model="drawerVisible" direction="ltr" size="480px" :with-header="false">
+      <ProductDrawer ref="addProductDrawerRef" :product="editProduct" @close="closeDrawer" />
+    </el-drawer>
     <div class="products-header">
-      <el-button type="success" class="add-new-btn">ADD NEW <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+      <el-button type="success" class="add-new-btn" @click="() => openDrawer()">ADD NEW <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
       <div class="products-header-actions">
         <el-button type="success" plain>GENERATE SHOP</el-button>
         <el-button type="success" plain>UNLOCK APP</el-button>
@@ -32,40 +35,108 @@
         <span class="section-title">APPS/WATCH-FACES</span>
       </div>
       <div class="product-list">
-        <el-card class="product-card" v-for="item in products" :key="item.id" shadow="hover">
+        <el-card class="product-card" v-for="item in products" :key="item.id" shadow="hover" @click="() => openDrawer(item)">
           <div class="product-card-content">
-            <img :src="item.img" class="product-img" />
+            <img :src="item.garminImageUrl" class="product-img" />
             <div class="product-info">
               <div class="product-title">{{ item.name }}</div>
-              <div class="product-trial">{{ item.trial }}</div>
+              <div class="product-trial">{{ item.description }}</div>
             </div>
             <div class="product-price">${{ item.price }}</div>
             <el-button class="download-btn">DOWNLOAD LIB <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
           </div>
         </el-card>
       </div>
+      <div class="pagination-bar">
+        <el-pagination
+          background
+          layout="sizes, prev, pager, next"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="pageNum"
+          :page-sizes="pageSizes"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { fetchProductPage, type Product } from '@/api/products'
+import { ElMessage } from 'element-plus'
+import ProductDrawer from './ProductDrawer.vue'
+
 const bundles = [
-  { id: 1, name: 'Whole Neon', img: 'https://via.placeholder.com/56', products: 41, price: '9.90' },
-  { id: 2, name: 'Whole Shop', img: 'https://via.placeholder.com/56', products: 510, price: '9.90' },
-  { id: 3, name: 'Whole Store', img: 'https://via.placeholder.com/56', products: 631, price: '9.90' },
-  { id: 4, name: 'Whole Store', img: 'https://via.placeholder.com/56', products: 506, price: '9.90' },
-  { id: 5, name: 'Whole Venu', img: 'https://via.placeholder.com/56', products: 480, price: '9.90' },
+  { id: 1, name: 'Whole Neon', img: '', products: 41, price: '9.90' },
 ]
-const products = [
-  { id: 1, name: 'Arcane Glow', img: 'https://via.placeholder.com/56', trial: 'No Trial', price: '1.99' },
-  { id: 2, name: 'Another App', img: 'https://via.placeholder.com/56', trial: 'Trial', price: '2.99' },
-]
+
+const products = ref<Product[]>([])
+const pageNum = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const pageSizes = [10, 20, 50]
+
+const drawerVisible = ref(false)
+const addProductDrawerRef = ref()
+const editProduct = ref<Product | null>(null)
+
+const openDrawer = (product?: Product) => {
+  drawerVisible.value = true
+  if (product) {
+    editProduct.value = product
+    addProductDrawerRef.value?.setForm(product)
+  } else {
+    editProduct.value = null
+    addProductDrawerRef.value?.resetForm()
+  }
+}
+
+const closeDrawer = () => { 
+  drawerVisible.value = false
+  getProducts()
+}
+
+const getProducts = async () => {
+  try {
+    const res = await fetchProductPage({ pageNum: pageNum.value, pageSize: pageSize.value, orderBy: 'created_at:desc' })
+    if (res.code === 0 && res.data) {
+      products.value = res.data.list
+      total.value = res.data.total
+    } else {
+      ElMessage.error(res.msg || '获取产品失败')
+    }
+  } catch (e) {
+    ElMessage.error('获取产品失败')
+  }
+}
+
+onMounted(getProducts)
+
+const handlePageChange = (val: number) => {
+  pageNum.value = val
+  getProducts()
+}
+
+const handleSizeChange = (val: number) => {
+  pageSize.value = val
+  pageNum.value = 1
+  getProducts()
+}
 </script>
 
 <style scoped>
+:deep(.el-card__body) {
+  padding: 12px 20px !important;
+}
 .account-products-page {
   padding: 32px 0;
   background: #f5f6f7;
+}
+.drawer-content {
+  padding: 32px 32px 0 32px;
 }
 .products-header {
   display: flex;
@@ -103,7 +174,7 @@ const products = [
 .bundle-list, .product-list {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
 }
 .bundle-card, .product-card {
   border-radius: 10px;
@@ -113,8 +184,8 @@ const products = [
 .bundle-card-content, .product-card-content {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 18px 24px;
+  gap: 4px;
+  padding: 0px 24px;
 }
 .bundle-img, .product-img {
   width: 56px;
@@ -161,5 +232,10 @@ const products = [
 .product-trial {
   color: #888;
   font-size: 14px;
+}
+.pagination-bar {
+  margin: 24px 0 0 0;
+  display: flex;
+  justify-content: center;
 }
 </style> 

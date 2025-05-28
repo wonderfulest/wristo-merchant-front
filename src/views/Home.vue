@@ -4,7 +4,7 @@
     <header class="header">
       <div class="header-inner">
         <div class="logo">
-          <span class="logo-icon">k</span>
+          <span class="logo-icon">W</span>
           <span class="logo-text">pay</span>
         </div>
         <div class="header-right">
