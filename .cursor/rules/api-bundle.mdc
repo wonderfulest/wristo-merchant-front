@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+### 新增套餐
+POST {{baseUrl}}/api/bundles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "bundleName": "测试套餐",
+  "bundleDesc": "这是一个测试套餐"
+}
+
+
+返回：
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "id": 2,
+    "bundleId": 115860,
+    "bundleName": "测试套餐",
+    "bundleDesc": "这是一个测试套餐",
+    "createdAt": "2025-05-28T12:56:57.669+00:00",
+    "updatedAt": "2025-05-28T12:56:57.669+00:00",
+    "products": []
+  }
+}

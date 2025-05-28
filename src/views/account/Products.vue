@@ -3,6 +3,9 @@
     <el-drawer v-model="drawerVisible" direction="ltr" size="480px" :with-header="false">
       <ProductDrawer ref="addProductDrawerRef" :product="editProduct" @close="closeDrawer" />
     </el-drawer>
+    <el-drawer v-model="bundleDrawerVisible" direction="ltr" size="480px" :with-header="false">
+      <BundleDrawer ref="bundleDrawerRef" :bundle="editBundle" @close="closeBundleDrawer" />
+    </el-drawer>
     <div class="products-header">
       <el-button type="success" class="add-new-btn" @click="() => openDrawer()">ADD NEW <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
       <div class="products-header-actions">
@@ -16,15 +19,13 @@
         <el-checkbox>SHOW INACTIVE BUNDLES</el-checkbox>
       </div>
       <div class="bundle-list">
-        <el-card class="bundle-card" v-for="item in bundles" :key="item.id" shadow="hover">
+        <el-card class="bundle-card" v-for="item in bundles" :key="item.bundleId" shadow="hover" @click="() => openBundleDrawer(item)">
           <div class="bundle-card-content">
-            <img :src="item.img" class="bundle-img" />
             <div class="bundle-info">
-              <div class="bundle-title">{{ item.name }}</div>
-              <el-button type="success" size="small" class="status-btn">ACTIVE <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+              <div class="bundle-title">{{ item.bundleName }}</div>
+              <div class="bundle-desc">{{ item.bundleDesc }}</div>
             </div>
-            <div class="bundle-meta">{{ item.products }} products</div>
-            <div class="bundle-price">${{ item.price }}</div>
+            <div class="bundle-meta">{{ item.products.length }} products</div>
             <el-button class="view-content-btn">VIEW CONTENT <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
           </div>
         </el-card>
@@ -66,12 +67,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { fetchProductPage, getProduct, type Product } from '@/api/products'
+import { fetchBundles, type Bundle } from '@/api/bundles'
 import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
+import BundleDrawer from './BundleDrawer.vue'
 
-const bundles = [
-  { id: 1, name: 'Whole Neon', img: '', products: 41, price: '9.90' },
-]
+// 新增：套餐相关接口和类型
+import instance from '@/config/axios'
+import type { ApiResponse } from '@/types/api'
+
+
+const bundles = ref<Bundle[]>([])
 
 const products = ref<Product[]>([])
 const pageNum = ref(1)
@@ -82,6 +88,10 @@ const pageSizes = [10, 20, 50]
 const drawerVisible = ref(false)
 const addProductDrawerRef = ref()
 const editProduct = ref<Product | null>(null)
+
+const bundleDrawerVisible = ref(false)
+const bundleDrawerRef = ref()
+const editBundle = ref<Bundle | null>(null)
 
 const openDrawer = async (product?: Product) => {
   drawerVisible.value = true
@@ -119,7 +129,34 @@ const getProducts = async () => {
   }
 }
 
-onMounted(getProducts)
+const getBundles = async () => {
+  try {
+    const res: ApiResponse<Bundle[]> = await fetchBundles()
+    if (res.code === 0 && res.data) {
+      bundles.value = res.data
+    } else {
+      ElMessage.error(res.msg || '获取套餐失败')
+    }
+  } catch (e) {
+    ElMessage.error('获取套餐失败')
+  }
+}
+
+const openBundleDrawer = (bundle: Bundle) => {
+  bundleDrawerVisible.value = true
+  editBundle.value = bundle
+  bundleDrawerRef.value?.setForm(bundle)
+}
+
+const closeBundleDrawer = () => {
+  bundleDrawerVisible.value = false
+  getBundles()
+}
+
+onMounted(() => {
+  getProducts()
+  getBundles()
+})
 
 const handlePageChange = (val: number) => {
   pageNum.value = val
@@ -211,11 +248,9 @@ const handleSizeChange = (val: number) => {
   font-weight: 600;
   color: #222;
 }
-.status-btn {
-  width: 90px;
-  font-size: 13px;
-  font-weight: 500;
-  margin-top: 4px;
+.bundle-desc {
+  color: #888;
+  font-size: 14px;
 }
 .bundle-meta {
   flex: 1 1 120px;
