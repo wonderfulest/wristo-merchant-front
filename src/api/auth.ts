@@ -1,26 +1,24 @@
-import axios from '@/config/axios'
-import type { UserInfo as UserInfoType } from './user'
-
-export interface LoginCredentials {
+import instance from '@/config/axios'
+import type { ApiResponse, LoginResponseData } from '@/types/api'
+export interface LoginCredentialsDto {
   email: string
   password: string
 }
 
-export interface RegisterData {
+export interface RegisterDto {
   username: string
   password: string
   email: string
 }
 
-export interface LoginResponseData {
-  token: string
-  userInfo: UserInfoType
+export const login = (credentials: LoginCredentialsDto) : Promise<ApiResponse<LoginResponseData>> => {
+  return instance.post('/auth/login/email', credentials)
 }
 
-export const login = async (credentials: LoginCredentials) => {
-  return await axios.post<LoginResponseData>('/auth/login/email', credentials)
+export const register =  (userData: RegisterDto) : Promise<ApiResponse<string>> => {
+  return instance.post('/auth/register', userData)
 }
 
-export const register = async (userData: RegisterData) => {
-  return await axios.post<string>('/auth/register', userData)
+export const logout = async () : Promise<ApiResponse<string>> => {
+  return instance.post('/auth/logout')
 }

@@ -27,6 +27,9 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
+  console.log('to', to)
+  console.log('from', from)
+  console.log('next', next)
   const userStore = useUserStore()
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 

@@ -57,3 +57,17 @@ Response:
     }
   }
 }
+
+
+### 用户签退
+
+POST {{baseUrl}}/api/auth/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+返回：
+{
+  "code": 0,
+  "msg": "success",
+  "data": "退出成功"
+}

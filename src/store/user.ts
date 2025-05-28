@@ -1,48 +1,40 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { login as loginApi, register as registerApi } from '@/api/auth'
-import { type UserInfo } from '@/api/user'
+import { login as loginApi, register as registerApi, logout as logoutApi } from '@/api/auth'
+import { type UserInfo, type LoginResponseData, type ApiResponse } from '@/types/api'
 
-export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('token') || '')
-  const userInfo = ref<UserInfo | null>(null)
-
-  const login = async (credentials: { email: string; password: string }) => {
-    try {
-      const response = await loginApi(credentials)
-      token.value = response.token
-      userInfo.value = response.userInfo
-      localStorage.setItem('token', response.token)
-      localStorage.setItem('userInfo', JSON.stringify(response.userInfo))
-      return response
-    } catch (error) {
-      throw error
-    }
-  }
-
-  const register = async (userData: { username: string; password: string; email: string }) => {
-    try {
-      const response = await registerApi(userData)
-      if (response.code === 0) {
-        return response
+export const useUserStore = defineStore('user', {
+  state: () => ({
+    token: localStorage.getItem('token') || '',
+    userInfo: JSON.parse(localStorage.getItem('userInfo') || 'null') as UserInfo | null
+  }),
+  actions: {
+    async login(credentials: { email: string; password: string }) {
+      const response: ApiResponse<LoginResponseData> = await loginApi(credentials)
+      this.token = response.data?.token || ''
+      this.userInfo = response.data?.userInfo || null
+      localStorage.setItem('token', this.token)
+      localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
+      return response.data
+    },
+    async register(userData: { username: string; password: string; email: string }) {
+      const response: ApiResponse<string> = await registerApi(userData)
+      if (response.data) {
+        return response.data
       }
       throw new Error(response.msg || '注册失败')
-    } catch (error) {
-      throw error
+    },
+    async logout() {
+      try {
+        await logoutApi()
+      } catch (e) {
+        // 可选：错误处理
+        console.error('logout error', e)
+      }
+      this.token = ''
+      this.userInfo = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
+      // 路由跳转请在组件中处理
     }
-  }
-
-  const logout = () => {
-    token.value = ''
-    userInfo.value = null
-    localStorage.removeItem('token')
-  }
-
-  return {
-    token,
-    userInfo,
-    login,
-    register,
-    logout
   }
 }) 

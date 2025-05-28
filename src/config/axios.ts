@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { BizErrorCode } from '@/constant/errorCode'
+import type { ApiResponse } from '@/types/api'
 
 const instance = axios.create({
   baseURL: '/api', // 走 vite 代理
@@ -10,23 +11,25 @@ const instance = axios.create({
   }
 })
 
+// 请求拦截器
+instance.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 // 响应拦截器
 instance.interceptors.response.use(
-  response => {
-    console.log('response', response)
-    // 统一处理 code
-    if (response.data.code == BizErrorCode.SUCCESS) {
-      console.log('1111 response.data', response.data)
-      return response.data
-    }
-    if (response.data.code == BizErrorCode.SYSTEM_ERROR) { // 系统未知异常，进行弹框提示；其他业务异常，直接返回 data，在业务中处理
-      console.log('22222 response.data', response.data)
-      ElMessage.error(response.data.message || '请求失败')
-      // 直接 reject，业务代码不用再判断 code
+  (response) => {
+    const res: ApiResponse<any> = response.data
+    if (res.code === BizErrorCode.SUCCESS) {
+      return response.data // 返回原始 response
+    } else {
+      ElMessage.error(response.data.msg || '请求失败')
       return Promise.reject(response.data)
     }
-    // code === 0，直接返回 data
-    return response.data
   },
   error => {
     ElMessage.error('网络错误，请稍后重试')

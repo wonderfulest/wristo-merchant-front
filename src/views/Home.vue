@@ -18,7 +18,7 @@
           <a href="#">ACCOUNT</a>
           <a href="#">DOCUMENTATION</a>
           <a href="#">API</a>
-          <a href="#">LOG OUT</a>
+          <a href="#" @click.prevent="handleLogout">LOG OUT</a>
         </div>
       </div>
     </header>
@@ -49,7 +49,14 @@
 </template>
 
 <script setup lang="ts">
-// 这里可以引入用户信息等
+import { useUserStore } from '@/store/user'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const userStore = useUserStore()
+const handleLogout = async () => {
+  await userStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped>
