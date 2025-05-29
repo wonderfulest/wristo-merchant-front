@@ -2,10 +2,11 @@ import instance from '@/config/axios'
 import type { ApiResponse } from '@/types/api'
 
 export interface Bundle {
-  id: number
   bundleId: number
   bundleName: string
   bundleDesc: string
+  price: number
+  isActive: number
   createdAt: string
   updatedAt: string
   products: any[]
@@ -20,6 +21,8 @@ export const fetchBundles = (): Promise<ApiResponse<Bundle[]>> => {
 export interface CreateBundleDto {
   bundleName: string
   bundleDesc: string
+  price: number
+  appIds: number[]
 }
 export const createBundle = (data: CreateBundleDto): Promise<ApiResponse<Bundle>> => {
   return instance.post('/bundles', data)
@@ -38,4 +41,8 @@ export const updateBundle = (data: UpdateBundleDto, bundleId: number): Promise<A
 
 export const getBundle = (bundleId: number): Promise<ApiResponse<Bundle>> => {
   return instance.get(`/bundles/${bundleId}`)
+}
+
+export const updateBundleActive = (bundleId: number, isActive: number): Promise<ApiResponse<Bundle>> => {
+  return instance.post(`/bundles/${bundleId}/activate/${isActive}`)
 }

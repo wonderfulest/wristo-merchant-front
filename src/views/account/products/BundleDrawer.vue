@@ -6,41 +6,29 @@
     <div class="drawer-body">
       <!-- 套餐信息 -->
       <div class="custom-form">
-        <div class="custom-form-item">
-          <label class="custom-label" :class="{ active: isActive('bundleName') || form.bundleName }">Bundle Name</label>
+        <div
+          v-for="item in inputItems"
+          :key="item.key"
+          class="custom-form-item"
+          :style="item.key === 'price' ? 'display: flex; align-items: center;' : ''"
+        >
+          <label
+            :class="['custom-label', { active: isActive(item.key) || form[item.key as keyof AddBundleForm] }]"
+          >{{ item.label }}</label>
           <input
-            type="text"
-            v-model="form.bundleName"
-            placeholder="Enter bundle name"
+            :type="item.type || 'text'"
+            v-model="form[item.key as keyof AddBundleForm]"
+            :placeholder="item.placeholder"
             class="custom-input"
-            @focus="activeInput = 'bundleName'"
+            @focus="activeInput = item.key"
             @blur="activeInput = ''"
             autocomplete="off"
+            :style="item.key === 'price' ? 'flex: 1;' : ''"
           />
-        </div>
-        <div class="custom-form-item">
-          <label class="custom-label" :class="{ active: isActive('bundleDesc') || form.bundleDesc }">Bundle Description</label>
-          <input
-            type="text"
-            v-model="form.bundleDesc"
-            placeholder="Enter bundle description"
-            class="custom-input"
-            @focus="activeInput = 'bundleDesc'"
-            @blur="activeInput = ''"
-            autocomplete="off"
-          />
-        </div>
-        <div class="custom-form-item">
-          <label class="custom-label" :class="{ active: isActive('price') || form.price }">Price</label>
-          <input
-            type="text"
-            v-model="form.price"
-            placeholder="Enter bundle price"
-            class="custom-input"
-            @focus="activeInput = 'price'"
-            @blur="activeInput = ''"
-            autocomplete="off"
-          />
+          <span
+            v-if="item.unit"
+            style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
+          >{{ item.unit }}</span>
         </div>
       </div>
       <!-- 产品选择器 -->
@@ -56,25 +44,25 @@
           </div>
           <div
             class="selector-item"
-            v-for="element in allSelectedProducts"
-            :key="element.appId"
-            :class="historySelectedIds.includes(element.appId) ? 'selector-item-disabled' : ''"
+            v-for="product in products"
+            :key="product.appId"
+            :class="historySelectedIds.includes(product.appId) ? 'selector-item-disabled' : ''"
             @click="
-              historySelectedIds.includes(element.appId)
+              historySelectedIds.includes(product.appId)
                 ? null
-                : (selectedProductIds.includes(element.appId)
-                    ? removeSelected(element.appId)
-                    : toggleProduct(element.appId))
+                : (selectedProductIds.includes(product.appId)
+                    ? removeSelected(product.appId)
+                    : toggleProduct(product.appId))
             "
           >
             <span
               :class="['selector-checkbox',
-                selectedProductIds.includes(element.appId) || historySelectedIds.includes(element.appId) ? 'checked' : '',
-                historySelectedIds.includes(element.appId) ? 'selector-checkbox-disabled' : '']"
+                selectedProductIds.includes(product.appId) || historySelectedIds.includes(product.appId) ? 'checked' : '',
+                historySelectedIds.includes(product.appId) ? 'selector-checkbox-disabled' : '']"
             ></span>
             <span
-              :class="['selector-label', historySelectedIds.includes(element.appId) ? 'selector-label-disabled' : '']"
-            >{{ element.name }}</span>
+              :class="['selector-label', historySelectedIds.includes(product.appId) ? 'selector-label-disabled' : '']"
+            >{{ product.name }}</span>
           </div>
         </div>
       </div>
@@ -102,7 +90,6 @@
       <draggable
         v-model="orderDialogIds"
         item-key="appId"
-        handle=".order-label"
         ghost-class="drag-ghost"
         chosen-class="drag-chosen"
         animation="200"
@@ -142,14 +129,40 @@ const loading = ref(false)
 interface AddBundleForm {
   bundleName: string
   bundleDesc: string
-  price: number
+  price: string
 }
 
 const form = ref<AddBundleForm>({
   bundleName: '',
   bundleDesc: '',
-  price: 0,
+  price: '',
 })
+
+// inputItems 配置
+const inputItems = [
+  {
+    key: 'bundleName',
+    label: 'Bundle Name',
+    placeholder: '',
+    type: 'text',
+    tip: '',
+  },
+  {
+    key: 'bundleDesc',
+    label: 'Bundle Description',
+    placeholder: '',
+    type: 'text',
+    tip: '',
+  },
+  {
+    key: 'price',
+    label: 'Price',
+    placeholder: '',
+    type: 'text',
+    tip: '',
+    unit: 'USD',
+  },
+]
 
 // 产品列表
 const products = ref<Product[]>([])
@@ -178,14 +191,6 @@ const allSelectedIds = computed({
   }
 })
 
-// 计算所有已选产品对象（历史+新选），顺序为 allSelectedIds
-const allSelectedProducts = computed(() => {
-  const idSet = new Set(allSelectedIds.value)
-  const selected = allSelectedIds.value.map(id => products.value.find(p => p.appId === id)).filter(Boolean) as Product[]
-  const unselected = products.value.filter(p => !idSet.has(p.appId))
-  return [...selected, ...unselected]
-})
-
 function toggleProduct(appId: number) {
   if (!selectedProductIds.value.includes(appId) && !historySelectedIds.value.includes(appId)) {
     selectedProductIds.value.push(appId)
@@ -195,6 +200,8 @@ function toggleProduct(appId: number) {
 function toggleSelectAll() {
   if (!isAllSelected.value) {
     selectedProductIds.value = selectableProducts.value.map(p => p.appId)
+  } else {
+    selectedProductIds.value = []
   }
 }
 
@@ -253,6 +260,7 @@ async function handleCreate() {
     const payload = {
       bundleName: form.value.bundleName.trim(),
       bundleDesc: form.value.bundleDesc.trim(),
+      price: Number(form.value.price),
       appIds: selectedProductIds.value.slice(),
     }
     const res = await createBundle(payload)
@@ -300,7 +308,7 @@ async function handleSave() {
     const payload = {
       bundleName: form.value.bundleName.trim(),
       bundleDesc: form.value.bundleDesc.trim(),
-      price: form.value.price,
+      price: Number(form.value.price),
       appIds: [...historySelectedIds.value, ...selectedProductIds.value],
     }
     const res = await updateBundle(payload, props.bundle?.bundleId || 0)
@@ -430,6 +438,7 @@ function removeSelected(appId: number) {
 .selector-header {
   font-size: 20px;
   margin-bottom: 16px;
+  text-align: left;
 }
 .change-order {
   color: #19b36b;
@@ -447,15 +456,15 @@ function removeSelected(appId: number) {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 14px;
   margin-bottom: 4px;
 }
 .selector-checkbox {
-  width: 38px;
-  height: 38px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 3px solid #bbb;
-  margin-right: 18px;
+  margin-right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -470,17 +479,17 @@ function removeSelected(appId: number) {
 .selector-checkbox.checked::after {
   content: '';
   display: block;
-  width: 18px;
-  height: 10px;
+  width: 14px;
+  height: 8px;
   border-left: 3px solid #fff;
   border-bottom: 3px solid #fff;
   transform: rotate(-45deg);
   position: absolute;
-  left: 8px;
-  top: 10px;
+  left: 4px;
+  top: 4px;
 }
 .selector-label {
-  font-size: 22px;
+  font-size: 18px;
   color: #222;
 }
 .selector-item-disabled {

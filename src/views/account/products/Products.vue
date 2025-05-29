@@ -7,7 +7,10 @@
       <BundleDrawer ref="bundleDrawerRef" :bundle="editBundle" @close="closeBundleDrawer" />
     </el-drawer>
     <div class="products-header">
-      <el-button type="success" class="add-new-btn" @click="() => openDrawer()">ADD NEW <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+      <div class="products-header-left">
+        <el-button type="success" class="add-new-btn" @click="() => openProductDrawer()">NEW PRODUCT<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+        <el-button style="margin-left: 12px; background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">NEW BUNDLE<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+      </div>
       <div class="products-header-actions">
         <el-button type="success" plain>GENERATE SHOP</el-button>
         <el-button type="success" plain>UNLOCK APP</el-button>
@@ -23,7 +26,13 @@
           <div class="bundle-card-content">
             <div class="bundle-info">
               <div class="bundle-title">{{ item.bundleName }}</div>
-              <div class="bundle-desc">{{ item.bundleDesc }}</div>
+              <el-button
+                size="small"
+                :class="item.isActive === 1 ? 'active-btn' : 'inactive-btn'"
+                plain
+                @click.stop="toggleBundleActive(item)"
+                style="width: 72px; min-width: 72px; text-align: center;"
+              >{{ item.isActive === 1 ? 'ACTIVE' : 'INACTIVE' }}</el-button>
             </div>
             <div class="bundle-meta">{{ item.products.length }} products</div>
             <el-button class="view-content-btn">VIEW CONTENT <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
@@ -36,7 +45,7 @@
         <span class="section-title">APPS/WATCH-FACES</span>
       </div>
       <div class="product-list">
-        <el-card class="product-card" v-for="item in products" :key="item.appId" shadow="hover" @click="() => openDrawer(item)">
+        <el-card class="product-card" v-for="item in products" :key="item.appId" shadow="hover" @click="() => openProductDrawer(item)">
           <div class="product-card-content">
             <img :src="item.garminImageUrl" class="product-img" />
             <div class="product-info">
@@ -67,7 +76,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { fetchProductPage, getProduct, type Product } from '@/api/products'
-import { fetchBundles, type Bundle, getBundle } from '@/api/bundles'
+import { fetchBundles, type Bundle, getBundle, updateBundleActive } from '@/api/bundles'
 import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
 import BundleDrawer from './BundleDrawer.vue'
@@ -89,20 +98,47 @@ const bundleDrawerVisible = ref(false)
 const bundleDrawerRef = ref()
 const editBundle = ref<Bundle | null>(null)
 
-const openDrawer = async (product?: Product) => {
+const toggleBundleActive = async (bundle: Bundle) => {
+  const res = await updateBundleActive(bundle.bundleId, bundle.isActive === 1 ? 0 : 1)
+  if (res.code === 0) {
+    ElMessage.success('更新成功')
+  } else {
+    ElMessage.error(res.msg || '更新失败')
+  }
+  getBundles()
+}
+
+const openProductDrawer = async (product?: Product) => {
   drawerVisible.value = true
   if (product) {
-    console.log('product', product)
-    console.log('product.appId', product.appId)
-    const res = await getProduct(product.appId)
+    const res: ApiResponse<Product> = await getProduct(product.appId)
     if (res.code === 0 && res.data) {
-      product = res.data
+      editProduct.value = res.data
+      addProductDrawerRef.value?.setForm(res.data)
+    } else {
+      editProduct.value = product
+      addProductDrawerRef.value?.setForm(product)
     }
-    editProduct.value = product
-    addProductDrawerRef.value?.setForm(product)
   } else {
     editProduct.value = null
     addProductDrawerRef.value?.resetForm()
+  }
+}
+
+const openBundleDrawer = async (bundle?: Bundle) => {
+  bundleDrawerVisible.value = true
+  if (bundle) {
+    const res: ApiResponse<Bundle> = await getBundle(bundle.bundleId)
+    if (res.code === 0 && res.data) {
+      editBundle.value = res.data
+      bundleDrawerRef.value?.setForm(res.data)
+    } else {
+      editBundle.value = bundle
+      bundleDrawerRef.value?.setForm(bundle)
+    }
+  } else {
+    editBundle.value = null
+    bundleDrawerRef.value?.resetForm()
   }
 }
 
@@ -138,18 +174,6 @@ const getBundles = async () => {
   }
 }
 
-const openBundleDrawer = async (bundle: Bundle) => {
-  bundleDrawerVisible.value = true
-  // 请求最新套餐详情
-  const res: ApiResponse<Bundle> = await getBundle(bundle.bundleId)
-  if (res.code === 0 && res.data) {
-    editBundle.value = res.data
-    bundleDrawerRef.value?.setForm(res.data)
-  } else {
-    editBundle.value = bundle
-    bundleDrawerRef.value?.setForm(bundle)
-  }
-}
 
 const closeBundleDrawer = () => {
   bundleDrawerVisible.value = false
@@ -192,6 +216,10 @@ const handleSizeChange = (val: number) => {
   width: 90%;
   margin-left: auto;
   margin-right: auto;
+}
+.products-header-left {
+  display: flex;
+  gap: 24px;
 }
 .add-new-btn {
   min-width: 140px;
@@ -250,6 +278,7 @@ const handleSizeChange = (val: number) => {
   font-size: 18px;
   font-weight: 600;
   color: #222;
+  text-align: left;
 }
 .bundle-desc {
   color: #888;
@@ -285,5 +314,19 @@ const handleSizeChange = (val: number) => {
   margin: 24px 0 0 0;
   display: flex;
   justify-content: center;
+}
+.active-btn {
+  background: #19b36b !important;
+  border-color: #19b36b !important;
+  color: #fff !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+.inactive-btn {
+  background: #e0e0e0 !important;
+  border-color: #e0e0e0 !important;
+  color: #888 !important;
+  font-size: 13px;
+  font-weight: 600;
 }
 </style> 

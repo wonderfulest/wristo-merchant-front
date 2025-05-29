@@ -136,7 +136,7 @@ const handleLogout = async () => {
 }
 .header-right {
   display: flex;
-  gap: 18px;
+  gap: 32px;
 }
 .header-right a {
   color: #888;
