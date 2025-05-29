@@ -36,7 +36,7 @@
         <span class="section-title">APPS/WATCH-FACES</span>
       </div>
       <div class="product-list">
-        <el-card class="product-card" v-for="item in products" :key="item.id" shadow="hover" @click="() => openDrawer(item)">
+        <el-card class="product-card" v-for="item in products" :key="item.appId" shadow="hover" @click="() => openDrawer(item)">
           <div class="product-card-content">
             <img :src="item.garminImageUrl" class="product-img" />
             <div class="product-info">
@@ -67,15 +67,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { fetchProductPage, getProduct, type Product } from '@/api/products'
-import { fetchBundles, type Bundle } from '@/api/bundles'
+import { fetchBundles, type Bundle, getBundle } from '@/api/bundles'
 import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
 import BundleDrawer from './BundleDrawer.vue'
-
-// 新增：套餐相关接口和类型
-import instance from '@/config/axios'
 import type { ApiResponse } from '@/types/api'
-
 
 const bundles = ref<Bundle[]>([])
 
@@ -142,10 +138,17 @@ const getBundles = async () => {
   }
 }
 
-const openBundleDrawer = (bundle: Bundle) => {
+const openBundleDrawer = async (bundle: Bundle) => {
   bundleDrawerVisible.value = true
-  editBundle.value = bundle
-  bundleDrawerRef.value?.setForm(bundle)
+  // 请求最新套餐详情
+  const res: ApiResponse<Bundle> = await getBundle(bundle.bundleId)
+  if (res.code === 0 && res.data) {
+    editBundle.value = res.data
+    bundleDrawerRef.value?.setForm(res.data)
+  } else {
+    editBundle.value = bundle
+    bundleDrawerRef.value?.setForm(bundle)
+  }
 }
 
 const closeBundleDrawer = () => {

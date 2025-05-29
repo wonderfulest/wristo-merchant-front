@@ -32,6 +32,10 @@ export const fetchProductPage = (params: ProductPageQuery): Promise<ApiResponse<
   return instance.post('/products/page', params)
 }
 
+export const fetchAllProducts = (): Promise<ApiResponse<Product[]>> => {
+  return instance.get('/products/all')
+}
+
 // 新增产品
 export interface CreateProductDto {
   name: string;

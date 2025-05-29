@@ -23,4 +23,19 @@ export interface CreateBundleDto {
 }
 export const createBundle = (data: CreateBundleDto): Promise<ApiResponse<Bundle>> => {
   return instance.post('/bundles', data)
-} 
+}
+
+export interface UpdateBundleDto {
+  bundleName: string
+  bundleDesc: string
+  price: number
+  appIds: number[]
+}
+
+export const updateBundle = (data: UpdateBundleDto, bundleId: number): Promise<ApiResponse<Bundle>> => {
+  return instance.post(`/bundles/update/${bundleId}`, data)
+}
+
+export const getBundle = (bundleId: number): Promise<ApiResponse<Bundle>> => {
+  return instance.get(`/bundles/${bundleId}`)
+}

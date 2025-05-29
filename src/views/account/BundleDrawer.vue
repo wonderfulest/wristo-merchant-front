@@ -4,6 +4,7 @@
       <h2>{{ props.bundle ? 'Edit Bundle' : 'Add New Bundle' }}</h2>
     </div>
     <div class="drawer-body">
+      <!-- 套餐信息 -->
       <div class="custom-form">
         <div class="custom-form-item">
           <label class="custom-label" :class="{ active: isActive('bundleName') || form.bundleName }">Bundle Name</label>
@@ -42,6 +43,41 @@
           />
         </div>
       </div>
+      <!-- 产品选择器 -->
+      <div class="product-selector">
+        <div class="selector-header">
+          <span>Select Products Included</span>
+          <a class="change-order" @click="handleChangeOrder">Change Order</a>
+        </div>
+        <div class="selector-list">
+          <div class="selector-item" @click="toggleSelectAll">
+            <span :class="['selector-checkbox', isAllSelected ? 'checked' : '']"></span>
+            <span class="selector-label">Select All</span>
+          </div>
+          <div
+            class="selector-item"
+            v-for="element in allSelectedProducts"
+            :key="element.appId"
+            :class="historySelectedIds.includes(element.appId) ? 'selector-item-disabled' : ''"
+            @click="
+              historySelectedIds.includes(element.appId)
+                ? null
+                : (selectedProductIds.includes(element.appId)
+                    ? removeSelected(element.appId)
+                    : toggleProduct(element.appId))
+            "
+          >
+            <span
+              :class="['selector-checkbox',
+                selectedProductIds.includes(element.appId) || historySelectedIds.includes(element.appId) ? 'checked' : '',
+                historySelectedIds.includes(element.appId) ? 'selector-checkbox-disabled' : '']"
+            ></span>
+            <span
+              :class="['selector-label', historySelectedIds.includes(element.appId) ? 'selector-label-disabled' : '']"
+            >{{ element.name }}</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="drawer-footer">
       <el-button
@@ -54,14 +90,48 @@
         {{ props.bundle ? 'Save' : 'CREATE BUNDLE' }}
       </el-button>
     </div>
+    <el-dialog v-model="orderDialogVisible" width="700px" append-to-body class="sort-order-dialog" :show-close="true" :close-on-click-modal="false">
+      <template #header>
+        <div class="sort-dialog-header">
+          <div class="sort-dialog-title">Manage App Sort Order</div>
+        </div>
+      </template>
+      <div class="sort-dialog-desc">
+        Change the order in which apps will be shown to your customers in the bundle overviews during purchase.
+      </div>
+      <draggable
+        v-model="orderDialogIds"
+        item-key="appId"
+        handle=".order-label"
+        ghost-class="drag-ghost"
+        chosen-class="drag-chosen"
+        animation="200"
+        :force-fallback="true"
+        :class="['order-list']"
+      >
+        <template #item="{ element, index }">
+          <div class="order-item">
+            <span class="order-label">{{ products.find(p => p.appId === element)?.name }}</span>
+          </div>
+        </template>
+      </draggable>
+      <template #footer>
+        <div class="sort-dialog-footer">
+          <el-button class="save-btn" type="success" @click="saveOrder">SAVE</el-button>
+          <el-button class="cancel-btn" @click="orderDialogVisible = false">CANCEL</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, defineExpose, defineProps, watch } from 'vue'
-import { createBundle, type Bundle } from '@/api/bundles'
+import { ref, defineExpose, defineProps, watch, computed, onMounted } from 'vue'
+import { createBundle, updateBundle, type Bundle } from '@/api/bundles'
+import { fetchAllProducts, type Product } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
+import draggable from 'vuedraggable'
 
 const props = defineProps<{ bundle?: Bundle | null }>()
 const emits = defineEmits(['close'])
@@ -72,12 +142,83 @@ const loading = ref(false)
 interface AddBundleForm {
   bundleName: string
   bundleDesc: string
+  price: number
 }
 
 const form = ref<AddBundleForm>({
   bundleName: '',
-  bundleDesc: ''
+  bundleDesc: '',
+  price: 0,
 })
+
+// 产品列表
+const products = ref<Product[]>([])
+const selectedProductIds = ref<number[]>([])
+const historySelectedIds = ref<number[]>([])
+
+const isAllSelected = computed(() => products.value.length > 0 && selectableProducts.value.length > 0 && selectedProductIds.value.length === selectableProducts.value.length)
+
+const selectableProducts = computed(() => products.value.filter(p => !historySelectedIds.value.includes(p.appId)))
+
+// 合并所有已选 id，顺序为历史+新选
+const allSelectedIds = computed({
+  get() {
+    return [...historySelectedIds.value, ...selectedProductIds.value]
+  },
+  set(newArr: number[]) {
+    // 拖拽后同步拆分
+    const newHistory: number[] = []
+    const newSelected: number[] = []
+    for (const id of newArr) {
+      if (historySelectedIds.value.includes(id)) newHistory.push(id)
+      else newSelected.push(id)
+    }
+    historySelectedIds.value = newHistory
+    selectedProductIds.value = newSelected
+  }
+})
+
+// 计算所有已选产品对象（历史+新选），顺序为 allSelectedIds
+const allSelectedProducts = computed(() => {
+  const idSet = new Set(allSelectedIds.value)
+  const selected = allSelectedIds.value.map(id => products.value.find(p => p.appId === id)).filter(Boolean) as Product[]
+  const unselected = products.value.filter(p => !idSet.has(p.appId))
+  return [...selected, ...unselected]
+})
+
+function toggleProduct(appId: number) {
+  if (!selectedProductIds.value.includes(appId) && !historySelectedIds.value.includes(appId)) {
+    selectedProductIds.value.push(appId)
+  }
+}
+
+function toggleSelectAll() {
+  if (!isAllSelected.value) {
+    selectedProductIds.value = selectableProducts.value.map(p => p.appId)
+  }
+}
+
+const orderDialogVisible = ref(false)
+const orderDialogIds = ref<number[]>([])
+
+function handleChangeOrder() {
+  // 打开排序弹窗，初始化顺序为当前所有已选
+  orderDialogIds.value = allSelectedIds.value.slice()
+  orderDialogVisible.value = true
+}
+
+function saveOrder() {
+  // 拖拽后保存顺序，拆分历史和新选
+  const newHistory: number[] = []
+  const newSelected: number[] = []
+  for (const id of orderDialogIds.value) {
+    if (historySelectedIds.value.includes(id)) newHistory.push(id)
+    else newSelected.push(id)
+  }
+  historySelectedIds.value = newHistory
+  selectedProductIds.value = newSelected
+  orderDialogVisible.value = false
+}
 
 function isActive(key: string) {
   return activeInput.value === key
@@ -95,13 +236,24 @@ function validateForm() {
   return true
 }
 
+async function getAllProducts() {
+  // 拉取所有产品，假设产品总数不会太大
+  const res = await fetchAllProducts()
+  if (res.code === 0 && res.data) {
+    products.value = res.data
+  } else {
+    products.value = []
+  }
+}
+
 async function handleCreate() {
   if (!validateForm()) return
   loading.value = true
   try {
     const payload = {
       bundleName: form.value.bundleName.trim(),
-      bundleDesc: form.value.bundleDesc.trim()
+      bundleDesc: form.value.bundleDesc.trim(),
+      appIds: selectedProductIds.value.slice(),
     }
     const res = await createBundle(payload)
     if (res.code === 0) {
@@ -118,33 +270,65 @@ async function handleCreate() {
 }
 
 function setForm(bundle: Bundle) {
-  form.value = {
-    bundleName: bundle.bundleName || '',
-    bundleDesc: bundle.bundleDesc || ''
-  }
+  form.value.bundleName = bundle.bundleName || ''
+  form.value.bundleDesc = bundle.bundleDesc || ''
+  const ids = Array.isArray(bundle.products) ? bundle.products.map(p => p.appId) : []
+  selectedProductIds.value = ids.filter(id => !historySelectedIds.value.includes(id))
+  historySelectedIds.value = ids.slice()
 }
 
 function resetForm() {
-  form.value = {
-    bundleName: '',
-    bundleDesc: ''
-  }
+  form.value.bundleName = ''
+  form.value.bundleDesc = ''
+  selectedProductIds.value = []
+  historySelectedIds.value = []
 }
 
 defineExpose({ setForm, resetForm })
 
-watch(() => props.bundle, (val) => {
+watch(() => props.bundle, async (val) => {
   if (val) setForm(val)
   else resetForm()
 })
 
+onMounted(getAllProducts)
+
 async function handleSave() {
-  // 这里可扩展为更新套餐接口
-  ElMessage.success('Bundle updated (mock)')
-  emits('close')
+  if (!validateForm()) return
+  loading.value = true
+  try {
+    const payload = {
+      bundleName: form.value.bundleName.trim(),
+      bundleDesc: form.value.bundleDesc.trim(),
+      price: form.value.price,
+      appIds: [...historySelectedIds.value, ...selectedProductIds.value],
+    }
+    const res = await updateBundle(payload, props.bundle?.bundleId || 0)
+    if (res.code === 0) {
+      ElMessage.success('Bundle updated successfully')
+      emits('close')
+    } else {
+      ElMessage.error(res.msg || 'Update failed')
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || 'Update failed')
+  } finally {
+    loading.value = false
+  }
+}
+
+function removeSelected(appId: number) {
+  // 只允许移除新选中的
+  const idx = selectedProductIds.value.indexOf(appId)
+  if (idx !== -1) selectedProductIds.value.splice(idx, 1)
 }
 </script>
 
+<style>
+.el-dialog {
+  --el-dialog-padding-primary: 0;
+}
+</style>
 <style scoped>
 .add-bundle-drawer {
   background: #fff;
@@ -239,5 +423,163 @@ async function handleSave() {
   background: #b2dfc7;
   color: #fff;
   cursor: not-allowed;
+}
+.product-selector {
+  margin: 32px 0;
+}
+.selector-header {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.change-order {
+  color: #19b36b;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: underline;
+}
+.selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.selector-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.selector-checkbox {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 3px solid #bbb;
+  margin-right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.selector-checkbox.checked {
+  background: #19b36b;
+  border-color: #19b36b;
+}
+.selector-checkbox.checked::after {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 10px;
+  border-left: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  transform: rotate(-45deg);
+  position: absolute;
+  left: 8px;
+  top: 10px;
+}
+.selector-label {
+  font-size: 22px;
+  color: #222;
+}
+.selector-item-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.selector-checkbox-disabled {
+  background: #19b36b !important;
+  border-color: #19b36b !important;
+}
+.selector-label-disabled {
+  color: #aaa !important;
+}
+.selector-history-title {
+  font-size: 16px;
+  color: #888;
+  margin: 18px 0 8px 0;
+  font-weight: 500;
+}
+.drag-ghost {
+  opacity: 0.5;
+  background: #f5f6f7;
+}
+.drag-chosen {
+  background: #e0f7ef;
+}
+
+.sort-order-dialog >>> .el-dialog__header {
+  padding: 0;
+  background: #19b36b;
+  border-radius: 8px 8px 0 0;
+}
+.sort-dialog-header {
+  background: #19b36b;
+  padding: 24px 32px 16px 32px;
+  border-radius: 8px 8px 0 0;
+}
+.sort-dialog-title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-radius: 8px 8px 0 0;
+}
+.sort-dialog-desc {
+  font-size: 1.15rem;
+  color: #555;
+  margin: 32px 0 32px 0;
+  padding: 0 16px;
+  text-align: left;
+}
+.sort-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 0 8px 8px 8px;
+}
+.order-list {
+  padding: 0 32px;
+}
+.order-item {
+  background: #f3f3f3;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 8px 24px;
+  font-size: 1.18rem;
+  font-weight: 500;
+  color: #222;
+  cursor: grab;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.order-label {
+  flex: 1;
+  color: #222;
+  font-weight: 500;
+}
+.save-btn {
+  background: #19b36b;
+  color: #fff;
+  font-weight: 600;
+  min-width: 120px;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  border: none;
+}
+.save-btn:hover {
+  background: #13a05a;
+}
+.cancel-btn {
+  color: #f44336;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  min-width: 90px;
+  font-size: 1.1rem;
+}
+.cancel-btn:hover {
+  color: #c62828;
+  background: #fbe9e7;
 }
 </style>
