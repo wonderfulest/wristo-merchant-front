@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-logo">
-      <span class="logo-bold">Wristo</span>
+      <span class="logo-bold">Wristo<span class="logo-green">Io</span></span>
     </div>
     <h2 class="login-title">Developer Log In</h2>
     <form class="login-form" @submit.prevent="handleLogin">
@@ -110,9 +110,10 @@ const handleLogin = async () => {
   gap: 10px;
 }
 .login-label {
-  font-weight: 600;
+  font-weight: 800;
   margin-bottom: 4px;
   margin-top: 10px;
+  text-align: left;
 }
 .login-input {
   width: 100%;
