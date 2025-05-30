@@ -119,7 +119,6 @@ const handleLogin = async () => {
   text-align: left;
 }
 .login-input {
-  width: 100%;
   padding: 12px 14px;
   border: 3px solid #d1d3d4;
   border-radius: 10px;
