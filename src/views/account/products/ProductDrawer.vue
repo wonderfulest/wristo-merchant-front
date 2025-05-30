@@ -122,7 +122,7 @@
 
 <script setup lang="ts">
 import { ref, defineExpose, defineProps, watch } from "vue";
-import { createProduct, getProduct, updateProduct, type Product } from '@/api/products'
+import { createProduct, getProduct, updateProduct, type Product, uploadProductImage } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import type { ApiResponse } from '@/types/api';
@@ -193,11 +193,23 @@ const inputItems = [
 ];
 
 function handleImageChange(file: any, key: string) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    form.value[`${key}Img`] = e.target?.result as string;
-  };
-  reader.readAsDataURL(file.raw);
+  if (!file || !file.raw) return;
+  loading.value = true;
+  uploadProductImage(file.raw, 'hero', file.raw.type.split('/')[1] || 'png')
+    .then((res: any) => {
+      if (res.code === 0 && res.data) {
+        form.value[`${key}Img`] = res.data;
+        ElMessage.success('图片上传成功');
+      } else {
+        ElMessage.error(res.msg || '图片上传失败');
+      }
+    })
+    .catch(() => {
+      ElMessage.error('图片上传失败');
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 function isActive(key: string) {
@@ -287,16 +299,16 @@ watch(() => props.product, (val) => {
   else resetForm();
 });
 
-const productDrawerVisible = ref(false)
-const currentProduct = ref<Product | null>(null)
+// const productDrawerVisible = ref(false)
+// const currentProduct = ref<Product | null>(null)
 
-const handleProductClick = async (appId: number) => {
-  const res = await getProduct(appId)
-  if (res.code === 0 && res.data) {
-    currentProduct.value = res.data
-    productDrawerVisible.value = true
-  }
-}
+// const handleProductClick = async (appId: number) => {
+//   const res = await getProduct(appId)
+//   if (res.code === 0 && res.data) {
+//     currentProduct.value = res.data
+//     productDrawerVisible.value = true
+//   }
+// }
 
 async function handleSave() {
   if (!props.product) return
@@ -324,6 +336,7 @@ async function handleSave() {
     loading.value = false
   }
 }
+
 </script>
 
 <style scoped>
@@ -410,6 +423,8 @@ async function handleSave() {
   margin: 0 auto;
   margin-bottom: 8px;
   transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
 .img-uploader:hover {
@@ -427,11 +442,11 @@ async function handleSave() {
 }
 
 .img-preview {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: block;
+  margin: auto;
 }
 
 .custom-form {
@@ -572,10 +587,18 @@ async function handleSave() {
   background: #d2f4e3;
   color: #19b36b;
 }
+
+:deep(.el-upload-dragger) {
+  all: unset !important;
+  /* 你可以在这里添加自己的样式 */
+}
 </style>
 
 <style>
 .el-drawer {
   --el-drawer-padding-primary: 0 !important;
+}
+.el-upload-dragger {
+  border: none !important;
 }
 </style>

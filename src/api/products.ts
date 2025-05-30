@@ -58,4 +58,15 @@ export const getProduct = (appId: number): Promise<ApiResponse<Product>> => {
 // 更新产品
 export const updateProduct = (appId: number, data: Partial<Product>): Promise<ApiResponse<Product>> => {
   return instance.post(`/products/update/${appId}`, data)
+}
+
+// 上传产品图片
+export const uploadProductImage = (file: File, folder = 'hero', suffix = 'png') => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('folder', folder);
+  formData.append('suffix', suffix);
+  return instance.post('/files/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
 } 
