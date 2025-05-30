@@ -62,7 +62,7 @@
           v-for="item in inputItems"
           :key="item.key"
           class="custom-form-item"
-          :style="item.key === 'trialLasts' ? 'display: flex; align-items: center;' : ''"
+          :style="item.key === 'trialLasts' || item.key === 'price' ? 'display: flex; align-items: center;' : ''"
         >
           <label
             :class="['custom-label', { active: isActive(item.key) || form[item.key] }]"
@@ -76,12 +76,18 @@
             @focus="activeInput = item.key"
             @blur="activeInput = ''"
             autocomplete="off"
-            :style="item.key === 'trialLasts' ? 'flex: 1;' : ''"
+            :style="item.key === 'trialLasts' || item.key === 'price' ? 'flex: 1;' : ''"
+            :data-short-underline="item.key === 'trialLasts' || item.key === 'price' ? true : null"
           />
           <span
             v-if="item.key === 'trialLasts'"
             style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
             >Hours</span
+          >
+          <span
+            v-if="item.key === 'price'"
+            style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
+            >USD</span
           >
           <div
             v-if="item.tip && activeInput === item.key"
@@ -591,6 +597,13 @@ async function handleSave() {
 :deep(.el-upload-dragger) {
   all: unset !important;
   /* 你可以在这里添加自己的样式 */
+}
+
+/* 针对 trialLasts 和 price，缩短下划线宽度 */
+input[data-short-underline] {
+  width: 80px !important;
+  min-width: 0;
+  display: inline-block;
 }
 </style>
 
