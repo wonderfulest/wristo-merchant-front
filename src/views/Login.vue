@@ -38,6 +38,9 @@
 
       <button class="login-btn" type="submit">Continue</button>
     </form>
+    <div class="register-tip">
+      No account? <router-link to="/register">Sign up here.</router-link>
+    </div>
     <div class="login-footer">
       © 2025 Wristo.
       <a href="#" class="footer-link">Terms of Use.</a>
@@ -178,5 +181,18 @@ const handleLogin = async () => {
   color: #222;
   text-decoration: underline;
   margin: 0 4px;
+}
+.register-tip {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 1rem;
+}
+.register-tip a {
+  color:  #111;
+  text-decoration: none;
+  margin-left: 4px;
+}
+.register-tip a:hover {
+  text-decoration: underline;
 }
 </style> 

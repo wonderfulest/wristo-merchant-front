@@ -1,54 +1,61 @@
 <template>
-  <div class="register-container">
-    <div class="register-box">
-      <h2>注册</h2>
-      <form @submit.prevent="handleRegister">
-        <div class="form-group">
-          <label for="username">用户名</label>
-          <input
-            type="text"
-            id="username"
-            v-model="username"
-            required
-            placeholder="请输入用户名"
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">邮箱</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            required
-            placeholder="请输入邮箱"
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">密码</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            required
-            placeholder="请输入密码"
-          />
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">确认密码</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            v-model="confirmPassword"
-            required
-            placeholder="请再次输入密码"
-          />
-        </div>
-        <button type="submit" class="register-btn">注册</button>
-        <p class="login-link">
-          已有账号？
-          <router-link to="/login">立即登录</router-link>
-        </p>
-      </form>
+  <div class="register-page">
+    <div class="register-logo">
+      <span class="logo-bold">Wristo<span class="logo-green">Io</span></span>
+    </div>
+    <h2 class="register-title">Developer Sign Up</h2>
+    <form class="register-form" @submit.prevent="handleRegister">
+      <label class="register-label" for="username">Full Name</label>
+      <input
+        id="username"
+        v-model="username"
+        type="text"
+        class="register-input"
+        required
+        placeholder="Please enter your full name"
+      />
+
+      <label class="register-label" for="email">Email Address</label>
+      <input
+        id="email"
+        v-model="email"
+        type="email"
+        class="register-input"
+        required
+        placeholder="Please enter your email"
+      />
+
+      <label class="register-label" for="password">Password</label>
+      <input
+        id="password"
+        v-model="password"
+        type="password"
+        class="register-input"
+        required
+        placeholder="Please enter your password"
+      />
+
+      <label class="register-label" for="confirmPassword">Confirm Password</label>
+      <input
+        id="confirmPassword"
+        v-model="confirmPassword"
+        type="password"
+        class="register-input"
+        required
+        placeholder="Please confirm your password"
+      />
+
+      <button class="register-btn" type="submit">Continue</button>
+      <div class="register-link">
+        Already have an account?
+        <router-link to="/login">Log In</router-link>
+      </div>
+    </form>
+    <div class="register-footer">
+      © 2025 Wristo.
+      <a href="#" class="footer-link">Terms of Use.</a>
+      <a href="#" class="footer-link">Privacy Policy.</a>
+      Wristo is not affiliated with Fitbit or Garmin.
     </div>
   </div>
 </template>
@@ -71,7 +78,6 @@ const handleRegister = async () => {
     alert('两次输入的密码不一致')
     return
   }
-
   try {
     await userStore.register({
       username: username.value,
@@ -87,74 +93,101 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-.register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.register-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: #fff;
+  padding-top: 40px;
 }
-
-.register-box {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
+.register-logo {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
   text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
 }
-
-.form-group {
-  margin-bottom: 1rem;
+.logo-bold {
+  color: #222;
+  font-weight: 700;
 }
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #666;
+.logo-green {
+  color: #7ca89c;
+  font-weight: 700;
+  margin-left: 2px;
 }
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.register-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.register-form {
+  width: 370px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.register-label {
+  font-weight: 800;
+  margin-bottom: 4px;
+  margin-top: 10px;
+  text-align: left;
+}
+.register-input {
+  padding: 12px 14px;
+  border: 3px solid #d1d3d4;
+  border-radius: 10px;
   font-size: 1rem;
+  margin-bottom: 2px;
+  background: #fff;
+  outline: none;
+  transition: border 0.2s;
 }
-
+.register-input:focus {
+  border-color: #7ca89c;
+}
 .register-btn {
+  margin-top: 22px;
   width: 100%;
-  padding: 0.75rem;
-  background-color: #4CAF50;
-  color: white;
+  background: #111;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: bold;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 28px;
+  padding: 14px 0;
   cursor: pointer;
-  margin-top: 1rem;
+  transition: background 0.2s;
 }
-
 .register-btn:hover {
-  background-color: #45a049;
+  background: #333;
 }
-
-.login-link {
+.register-link {
   text-align: center;
   margin-top: 1rem;
+  font-size: 1rem;
 }
-
-.login-link a {
+.register-link a {
   color: #4CAF50;
   text-decoration: none;
+  margin-left: 4px;
 }
-
-.login-link a:hover {
+.register-link a:hover {
   text-decoration: underline;
+}
+.register-footer {
+  margin-top: 38px;
+  text-align: center;
+  color: #444;
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+.footer-link {
+  color: #222;
+  text-decoration: underline;
+  margin: 0 4px;
 }
 </style> 
