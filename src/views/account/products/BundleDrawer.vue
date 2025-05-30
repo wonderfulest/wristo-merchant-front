@@ -96,7 +96,7 @@
         :force-fallback="true"
         :class="['order-list']"
       >
-        <template #item="{ element, index }">
+        <template #item="{ element }">
           <div class="order-item">
             <span class="order-label">{{ products.find(p => p.appId === element)?.name }}</span>
           </div>

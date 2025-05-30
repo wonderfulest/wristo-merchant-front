@@ -122,7 +122,7 @@
 
 <script setup lang="ts">
 import { ref, defineExpose, defineProps, watch } from "vue";
-import { createProduct, getProduct, updateProduct, type Product, uploadProductImage } from '@/api/products'
+import { createProduct, updateProduct, type Product, uploadProductImage } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import type { ApiResponse } from '@/types/api';
