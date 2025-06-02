@@ -81,9 +81,6 @@ import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
 import BundleDrawer from './BundleDrawer.vue'
 import type { ApiResponse } from '@/types/api'
-import { useUserStore } from '@/store/user'
-
-const userStore = useUserStore()
 
 const bundles = ref<Bundle[]>([])
 
