@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import Layout from '@/layout/Layout.vue'
+const route = useRoute()
 </script>
 
 <template>
-  <router-view />
+  <component :is="['/login', '/register'].includes(route.path) ? 'router-view' : Layout" />
 </template>
 
 <style scoped>

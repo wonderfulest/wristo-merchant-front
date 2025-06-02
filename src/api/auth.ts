@@ -9,6 +9,7 @@ export interface RegisterDto {
   username: string
   password: string
   email: string
+  roles?: string[]
 }
 
 export const login = (credentials: LoginCredentialsDto) : Promise<ApiResponse<LoginResponseData>> => {
@@ -16,6 +17,7 @@ export const login = (credentials: LoginCredentialsDto) : Promise<ApiResponse<Lo
 }
 
 export const register =  (userData: RegisterDto) : Promise<ApiResponse<string>> => {
+  userData.roles = ['ROLE_MERCHANT']
   return instance.post('/auth/register', userData)
 }
 

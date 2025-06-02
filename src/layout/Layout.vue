@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div class="global-layout">
     <!-- Header -->
     <header class="header">
       <div class="header-inner">
@@ -10,26 +10,15 @@
         <div class="header-right">
           <a href="/account">ACCOUNT</a>
           <a href="#">DOCUMENTATION</a>
-          <a href="#">API</a>
+          <a href="/API" v-if="hasMerchantRole">API</a>
           <a href="#" @click.prevent="handleLogout">LOG OUT</a>
         </div>
       </div>
-      <div class="header-sub">
-        <nav class="header-sub-nav">
-          <router-link to="/" exact-active-class="active">Dashboard</router-link>
-          <router-link to="/account/products" exact-active-class="active">Products</router-link>
-          <router-link to="/account/history" exact-active-class="active">History</router-link>
-          <router-link to="/account/discounts" exact-active-class="active">Discounts</router-link>
-          <router-link to="/account/profile" exact-active-class="active">Profile</router-link>
-        </nav>
-      </div>
     </header>
-
     <!-- Main Content -->
     <main class="main-content">
       <router-view />
     </main>
-
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-inner">
@@ -53,112 +42,91 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 const router = useRouter()
 const userStore = useUserStore()
 const handleLogout = async () => {
   await userStore.logout()
   router.push('/login')
 }
+
+const hasMerchantRole = computed(() => {
+  const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []
+  return roles.some((role: any) => role.roleCode === 'ROLE_MERCHANT')
+})
 </script>
 
-<style scoped>
-.layout {
+<style lang="scss" scoped>
+@import '@/assets/styles/variables.scss';
+
+.global-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f5f6f7;
+  background: $color-bg;
 }
 .header {
-  background: #f5f6f7;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin: 0 auto;
+  background: $color-bg;
+  color: $color-link;
+  padding: 0;
 }
 .header-inner {
-  width: 80%;
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  min-height: 84px;
-  background: #f5f6f7;
+  align-items: center;
+  height: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
 }
 .logo {
   display: flex;
   align-items: center;
-  font-size: 24px;
+  font-size: 2.2rem;
   font-weight: bold;
 }
 .logo-icon {
-  background: #1abc5b;
-  color: #fff;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: $color-success;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin-right: 6px;
-  font-size: 22px;
 }
 .logo-text {
-  color: #222;
-  font-weight: 600;
-}
-.header-sub {
-  width: 100%;
-  margin: 0 auto;
-  border-top: 1px solid #e5e5e5;
-  display: flex;
-  align-items: center;
-  min-height: 64px;
-}
-.header-sub-nav {
-  width: 60%;
-  margin: 0 auto;
-  display: flex;
-  gap: 72px;
-  padding: 12px 0;
-  align-items: center;
-}
-.header-sub-nav a {
-  color: #222;
-  text-decoration: none;
-  font-size: 15px;
-  transition: color 0.2s;
-}
-.header-sub-nav .active {
-  color: #1abc5b;
-  border-bottom: 2px solid #1abc5b;
+  color: $color-link;
+  font-weight: 700;
+  font-size: 2.2rem;
 }
 .header-right {
   display: flex;
-  gap: 32px;
+  gap: 24px;
+  align-items: center;
 }
 .header-right a {
-  color: #888;
-  font-size: 12px;
+  color: $color-link;
+  font-weight: 500;
   text-decoration: none;
+  font-size: 1.1rem;
   transition: color 0.2s;
 }
 .header-right a:hover {
-  color: #1abc5b;
+  color: $color-success;
 }
 .main-content {
   flex: 1;
-  width: 100%;
   max-width: 1200px;
-  margin: 32px auto 0 auto;
-  background: transparent;
-  min-height: 400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 0 0 0;
 }
 .footer {
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
-  padding: 16px 0;
+  background: $color-footer-bg;
+  padding: 8px 0;
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  margin-top: auto;
+  font-size: $font-size-xs;
 }
 .footer-inner {
   max-width: 1400px;
@@ -167,8 +135,8 @@ const handleLogout = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  font-size: 13px;
-  color: #888;
+  font-size: $font-size-sm;
+  color: $color-footer-text;
 }
 .footer-left {
   display: flex;
@@ -176,22 +144,22 @@ const handleLogout = async () => {
   gap: 8px;
 }
 .footer-icon {
-  font-size: 16px;
+  font-size: $font-size-sm;
 }
 .footer-links {
   display: flex;
   gap: 18px;
 }
 .footer-links a {
-  color: #888;
+  color: $color-footer-text;
   text-decoration: none;
   transition: color 0.2s;
 }
 .footer-links a:hover {
-  color: #1abc5b;
+  color: $color-success;
 }
 .footer-right {
   font-weight: bold;
-  color: #888;
+  color: $color-footer-text;
 }
-</style>
+</style> 

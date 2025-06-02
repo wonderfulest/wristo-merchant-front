@@ -13,7 +13,9 @@
         class="register-input"
         required
         placeholder="Please enter your full name"
+        @blur="validateField('username')"
       />
+      <div v-if="errors.username" class="input-error">{{ errors.username }}</div>
 
       <label class="register-label" for="email">Email Address</label>
       <input
@@ -23,7 +25,9 @@
         class="register-input"
         required
         placeholder="Please enter your email"
+        @blur="validateField('email')"
       />
+      <div v-if="errors.email" class="input-error">{{ errors.email }}</div>
 
       <label class="register-label" for="password">Password</label>
       <input
@@ -33,7 +37,9 @@
         class="register-input"
         required
         placeholder="Please enter your password"
+        @blur="validateField('password')"
       />
+      <div v-if="errors.password" class="input-error">{{ errors.password }}</div>
 
       <label class="register-label" for="confirmPassword">Confirm Password</label>
       <input
@@ -43,7 +49,9 @@
         class="register-input"
         required
         placeholder="Please confirm your password"
+        @blur="validateField('confirmPassword')"
       />
+      <div v-if="errors.confirmPassword" class="input-error">{{ errors.confirmPassword }}</div>
 
       <button class="register-btn" type="submit">Continue</button>
       <div class="register-link">
@@ -61,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 
@@ -73,9 +81,62 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
+const errors = reactive({
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+
+function validateField(field: string) {
+  switch (field) {
+    case 'username':
+      if (!username.value.trim()) {
+        errors.username = 'Username must not be blank.'
+      } else if (username.value.length < 4 || username.value.length > 20) {
+        errors.username = 'Username length must be between 4 and 20 characters.'
+      } else {
+        errors.username = ''
+      }
+      break
+    case 'password':
+      if (!password.value.trim()) {
+        errors.password = 'Password must not be blank.'
+      } else if (password.value.length < 6 || password.value.length > 20) {
+        errors.password = 'Password length must be between 6 and 20 characters.'
+      } else {
+        errors.password = ''
+      }
+      break
+    case 'email':
+      if (!email.value.trim()) {
+        errors.email = 'Email must not be blank.'
+      } else if (!/^\S+@\S+\.\S+$/.test(email.value)) {
+        errors.email = 'Invalid email format.'
+      } else {
+        errors.email = ''
+      }
+      break
+    case 'confirmPassword':
+      if (confirmPassword.value !== password.value) {
+        errors.confirmPassword = 'Passwords do not match.'
+      } else {
+        errors.confirmPassword = ''
+      }
+      break
+  }
+}
+
+function validateAll() {
+  validateField('username')
+  validateField('email')
+  validateField('password')
+  validateField('confirmPassword')
+  return !errors.username && !errors.email && !errors.password && !errors.confirmPassword
+}
+
 const handleRegister = async () => {
-  if (password.value !== confirmPassword.value) {
-    alert('两次输入的密码不一致')
+  if (!validateAll()) {
     return
   }
   try {
@@ -87,7 +148,7 @@ const handleRegister = async () => {
     alert('注册成功')
     router.push('/login')
   } catch (error: any) {
-    alert(error.message || '注册失败')
+    alert(error.msg || '注册失败')
   }
 }
 </script>
@@ -148,6 +209,13 @@ const handleRegister = async () => {
 }
 .register-input:focus {
   border-color: #7ca89c;
+}
+.input-error {
+  color: #e53935;
+  font-size: 0.92rem;
+  margin-bottom: 2px;
+  margin-top: -2px;
+  min-height: 18px;
 }
 .register-btn {
   margin-top: 22px;

@@ -33,7 +33,7 @@ export const fetchProductPage = (params: ProductPageQuery): Promise<ApiResponse<
 }
 
 export const fetchAllProducts = (): Promise<ApiResponse<Product[]>> => {
-  return instance.get('/products/all')
+  return instance.get('/products/all-by-user')
 }
 
 // 新增产品

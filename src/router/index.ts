@@ -19,7 +19,7 @@ const router = createRouter({
     {
       path: '/account',
       name: 'Account',
-      component: () => import('@/views/Home.vue'),
+      component: () => import('@/views/account/Account.vue'),
       meta: { requiresAuth: true },
       children: [
         {
@@ -55,8 +55,14 @@ const router = createRouter({
       ]
     },
     {
+      path: '/api',
+      name: 'API',
+      component: () => import('@/views/API.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/',
-      redirect: '/account/dashboard'
+      redirect: '/account/products'
     }
   ]
 })
@@ -69,8 +75,11 @@ router.beforeEach((to, from, next) => {
 
   if (requiresAuth && !userStore.token) {
     next('/login')
-  } else if (!requiresAuth && userStore.token) {
-    next('/account/dashboard')
+  } else if (
+    userStore.token &&
+    (to.path === '/login' || to.path === '/register')
+  ) {
+    next('/account/products')
   } else {
     next()
   }
