@@ -11,7 +11,17 @@
           <a href="/account">ACCOUNT</a>
           <a href="#">DOCUMENTATION</a>
           <a href="/API" v-if="hasMerchantRole">API</a>
-          <a href="#" @click.prevent="handleLogout">LOG OUT</a>
+        </div>
+        <div class="user-profile-dropdown">
+          <div class="user-profile-name" @click="toggleDropdown">
+            {{ userStore.userInfo?.username }}
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-content" v-if="isDropdownOpen">
+            <a href="/account/profile">Edit Profile</a>
+            <a href="/account/password">Change Password</a>
+            <a href="#" @click.prevent="handleLogout">Log Out</a>
+          </div>
         </div>
       </div>
     </header>
@@ -42,7 +52,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 const router = useRouter()
 const userStore = useUserStore()
 const handleLogout = async () => {
@@ -54,6 +64,12 @@ const hasMerchantRole = computed(() => {
   const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []
   return roles.some((role: any) => role.roleCode === 'ROLE_MERCHANT')
 })
+
+// 下拉菜单控制
+const isDropdownOpen = ref(false)
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+}
 </script>
 
 <style lang="scss" scoped>
@@ -161,5 +177,36 @@ const hasMerchantRole = computed(() => {
 .footer-right {
   font-weight: bold;
   color: $color-footer-text;
+}
+.dropdown-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 10px 0;
+  position: absolute;
+  right: 0;
+  top: 60px;
+  min-width: 160px;
+  z-index: 100;
+}
+.dropdown-content a {
+  width: 100%;
+  padding: 10px 24px;
+  color: #222;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background 0.2s, color 0.2s;
+  box-sizing: border-box;
+  display: block;
+}
+.dropdown-content a:hover {
+  background: #f5f5f5;
+  color: #19b36b;
+}
+.user-profile-dropdown {
+  position: relative;
 }
 </style> 
