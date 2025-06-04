@@ -29,7 +29,7 @@
           <div class="section-desc">
             Upload an image for the platform that this product is available for.<br>
             Leave blank if your product doesn't support that platform. Customers will view this before purchasing.<br>
-            We recommend using the same preview you used in the Fitbit, Garmin, Amazfit or Pebble store.
+            We recommend using the same preview you used in the Garmin store.
           </div>
         </template>
         <span></span>
@@ -196,6 +196,12 @@ const inputItems = [
     type: "text",
     tip: "Enter the number of hours the trial will last. Leave blank if you do not want to offer a trial. support 0 means no trial, 0.5 means 0.5 hours.",
   },
+  {
+    key: "contactUrl",
+    label: "Product FAQ & Contact Page",
+    placeholder: "",
+    type: "text",
+  },
 ];
 
 function handleImageChange(file: any, key: string) {
@@ -293,6 +299,7 @@ function setForm(product: Product) {
     price: product.price != null ? String(product.price) : "",
     garminUrl: product.garminStoreUrl || "",
     trialLasts: product.trialLasts != null ? String(product.trialLasts) : "",
+    contactUrl: product.appId != null ? "https://wristo.io/contact/" +  product.appId : ""
   };
   checked.value = true;
 }
@@ -358,9 +365,9 @@ async function handleSave() {
 }
 
 .drawer-header {
-  background: #434a4f;
+  background: #19b36b;
   color: #fff;
-  padding: 24px 0 12px 0;
+  padding: 36px 0 24px 0;
   text-align: center;
 }
 

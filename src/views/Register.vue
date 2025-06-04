@@ -63,7 +63,7 @@
       © 2025 Wristo.
       <a href="#" class="footer-link">Terms of Use.</a>
       <a href="#" class="footer-link">Privacy Policy.</a>
-      Wristo is not affiliated with Fitbit or Garmin.
+      Wristo is not affiliated with Garmin.
     </div>
   </div>
 </template>
