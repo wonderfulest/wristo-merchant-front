@@ -535,7 +535,7 @@ async function handleSave() {
 }
 
 .drawer-footer {
-  padding: 32px 32px 24px 32px;
+  padding: 12px 32px 24px 32px;
   background: #fff;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
   display: flex;

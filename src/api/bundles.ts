@@ -14,7 +14,7 @@ export interface Bundle {
 
 // 获取所有套餐列表
 export const fetchBundles = (): Promise<ApiResponse<Bundle[]>> => {
-  return instance.get('/bundles')
+  return instance.get('/bundles/list')
 }
 
 // 新增套餐
@@ -25,7 +25,7 @@ export interface CreateBundleDto {
   appIds: number[]
 }
 export const createBundle = (data: CreateBundleDto): Promise<ApiResponse<Bundle>> => {
-  return instance.post('/bundles', data)
+  return instance.post('/bundles/create', data)
 }
 
 export interface UpdateBundleDto {
