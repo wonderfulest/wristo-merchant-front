@@ -14,7 +14,7 @@ export interface Bundle {
 
 // 获取所有套餐列表
 export const fetchBundles = (): Promise<ApiResponse<Bundle[]>> => {
-  return instance.get('/bundles/list')
+  return instance.get('/mch/bundles/all')
 }
 
 // 新增套餐
@@ -25,7 +25,7 @@ export interface CreateBundleDto {
   appIds: number[]
 }
 export const createBundle = (data: CreateBundleDto): Promise<ApiResponse<Bundle>> => {
-  return instance.post('/bundles/create', data)
+  return instance.post('/mch/bundles/create', data)
 }
 
 export interface UpdateBundleDto {
@@ -36,13 +36,13 @@ export interface UpdateBundleDto {
 }
 
 export const updateBundle = (data: UpdateBundleDto, bundleId: number): Promise<ApiResponse<Bundle>> => {
-  return instance.post(`/bundles/update/${bundleId}`, data)
+  return instance.post(`/mch/bundles/update/${bundleId}`, data)
 }
 
 export const getBundle = (bundleId: number): Promise<ApiResponse<Bundle>> => {
-  return instance.get(`/bundles/${bundleId}`)
+  return instance.get(`/mch/bundles/${bundleId}`)
 }
 
 export const updateBundleActive = (bundleId: number, isActive: number): Promise<ApiResponse<Bundle>> => {
-  return instance.post(`/bundles/${bundleId}/activate/${isActive}`)
+  return instance.post(`/mch/bundles/${bundleId}/activate/${isActive}`)
 }
