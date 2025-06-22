@@ -16,9 +16,9 @@ export interface TokenData {
 }
 
 export const createOrUpdateToken = async (name: string): Promise<ApiResponse<TokenData>> => {
-  return instance.post('/v1/tokens/create-or-update', { name })
+  return instance.post('/mch/tokens/create-or-update', { name })
 }
 
 export const getToken = async (): Promise<ApiResponse<TokenData>> => {
-  return instance.get('/v1/tokens/get-by-name', { params: { name: TOKEN_NAME } })
+  return instance.get('/mch/tokens/get-by-name', { params: { name: TOKEN_NAME } })
 }
