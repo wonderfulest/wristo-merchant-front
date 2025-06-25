@@ -19,7 +19,7 @@
     <div class="products-section">
       <div class="section-title-row">
         <span class="section-title">BUNDLES</span>
-        <el-checkbox>SHOW INACTIVE BUNDLES</el-checkbox>
+        <el-checkbox v-model="showInactiveBundles" @change="handleShowInactiveBundlesChange">SHOW INACTIVE BUNDLES</el-checkbox>
       </div>
       <div class="bundle-list">
         <el-card class="bundle-card" v-for="item in bundles" :key="item.bundleId" shadow="hover" @click="() => openBundleDrawer(item)">
@@ -97,6 +97,7 @@ const editProduct = ref<Product | null>(null)
 const bundleDrawerVisible = ref(false)
 const bundleDrawerRef = ref()
 const editBundle = ref<Bundle | null>(null)
+const showInactiveBundles = ref(false)
 
 const toggleBundleActive = async (bundle: Bundle) => {
   const res = await updateBundleActive(bundle.bundleId, bundle.isActive === 1 ? 0 : 1)
@@ -105,6 +106,11 @@ const toggleBundleActive = async (bundle: Bundle) => {
   } else {
     ElMessage.error(res.msg || '更新失败')
   }
+  getBundles()
+}
+
+const handleShowInactiveBundlesChange = () => {
+  console.log('handleShowInactiveBundlesChange', showInactiveBundles.value)
   getBundles()
 }
 
@@ -163,7 +169,7 @@ const getProducts = async () => {
 
 const getBundles = async () => {
   try {
-    const res: ApiResponse<Bundle[]> = await fetchBundles()
+    const res: ApiResponse<Bundle[]> = await fetchBundles(showInactiveBundles.value ? null : 1)
     if (res.code === 0 && res.data) {
       bundles.value = res.data
     } else {
@@ -173,7 +179,6 @@ const getBundles = async () => {
     ElMessage.error('获取套餐失败')
   }
 }
-
 
 const closeBundleDrawer = () => {
   bundleDrawerVisible.value = false

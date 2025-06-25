@@ -13,8 +13,8 @@ export interface Bundle {
 }
 
 // 获取所有套餐列表
-export const fetchBundles = (): Promise<ApiResponse<Bundle[]>> => {
-  return instance.get('/mch/bundles/all')
+export const fetchBundles = (isActive: number | null): Promise<ApiResponse<Bundle[]>> => {
+  return instance.get(`/mch/bundles/all?isActive=${isActive ?? ''}`)
 }
 
 // 新增套餐
