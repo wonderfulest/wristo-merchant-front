@@ -6,29 +6,49 @@
     <div class="drawer-body">
       <!-- 套餐信息 -->
       <div class="custom-form">
-        <div
-          v-for="item in inputItems"
-          :key="item.key"
-          class="custom-form-item"
-          :style="item.key === 'price' ? 'display: flex; align-items: center;' : ''"
-        >
+        <div class="custom-form-item">
           <label
-            :class="['custom-label', { active: isActive(item.key) || form[item.key as keyof AddBundleForm] }]"
-          >{{ item.label }}</label>
+            :class="['custom-label', { active: isActive('bundleName') || form.bundleName }]"
+          >Bundle Name</label>
           <input
-            :type="item.type || 'text'"
-            v-model="form[item.key as keyof AddBundleForm]"
-            :placeholder="item.placeholder"
+            type="text"
+            v-model="form.bundleName"
+            placeholder=""
             class="custom-input"
-            @focus="activeInput = item.key"
+            @focus="activeInput = 'bundleName'"
             @blur="activeInput = ''"
             autocomplete="off"
-            :style="item.key === 'price' ? 'flex: 1;' : ''"
           />
-          <span
-            v-if="item.unit"
-            style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
-          >{{ item.unit }}</span>
+        </div>
+        <div class="custom-form-item">
+          <label
+            :class="['custom-label', { active: isActive('bundleDesc') || form.bundleDesc }]"
+          >Bundle Description</label>
+          <input
+            type="text"
+            v-model="form.bundleDesc"
+            placeholder=""
+            class="custom-input"
+            @focus="activeInput = 'bundleDesc'"
+            @blur="activeInput = ''"
+            autocomplete="off"
+          />
+        </div>
+        <div class="custom-form-item" style="display: flex; align-items: center;">
+          <label
+            :class="['custom-label', { active: isActive('price') || form.price }]"
+          >Price</label>
+          <input
+            type="text"
+            v-model="form.price"
+            placeholder=""
+            class="custom-input"
+            @focus="activeInput = 'price'"
+            @blur="activeInput = ''"
+            autocomplete="off"
+            style="flex: 1;"
+          />
+          <span style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;">USD</span>
         </div>
       </div>
       <!-- 产品选择器 -->
@@ -113,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+// 1. 引入依赖
 import { ref, defineExpose, defineProps, watch, computed, onMounted } from 'vue'
 import { createBundle, updateBundle, type Bundle } from '@/api/bundles'
 import { fetchAllProducts, type Product } from '@/api/products'
@@ -120,9 +141,11 @@ import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import draggable from 'vuedraggable'
 
+// 2. props/emit 定义
 const props = defineProps<{ bundle?: Bundle | null }>()
 const emits = defineEmits(['close'])
 
+// 3. ref/reactive/变量定义
 const activeInput = ref('')
 const loading = ref(false)
 
@@ -138,42 +161,23 @@ const form = ref<AddBundleForm>({
   price: '',
 })
 
-// inputItems 配置
-const inputItems = [
-  {
-    key: 'bundleName',
-    label: 'Bundle Name',
-    placeholder: '',
-    type: 'text',
-    tip: '',
-  },
-  {
-    key: 'bundleDesc',
-    label: 'Bundle Description',
-    placeholder: '',
-    type: 'text',
-    tip: '',
-  },
-  {
-    key: 'price',
-    label: 'Price',
-    placeholder: '',
-    type: 'text',
-    tip: '',
-    unit: 'USD',
-  },
-]
-
-// 产品列表
 const products = ref<Product[]>([])
 const selectedProductIds = ref<number[]>([])
 const historySelectedIds = ref<number[]>([])
+const orderDialogVisible = ref(false)
+const orderDialogIds = ref<number[]>([])
 
-const isAllSelected = computed(() => products.value.length > 0 && selectableProducts.value.length > 0 && selectedProductIds.value.length === selectableProducts.value.length)
+// 4. computed 计算属性
+const isAllSelected = computed(() =>
+  products.value.length > 0 &&
+  selectableProducts.value.length > 0 &&
+  selectedProductIds.value.length === selectableProducts.value.length
+)
 
-const selectableProducts = computed(() => products.value.filter(p => !historySelectedIds.value.includes(p.appId)))
+const selectableProducts = computed(() =>
+  products.value.filter(p => !historySelectedIds.value.includes(p.appId))
+)
 
-// 合并所有已选 id，顺序为历史+新选
 const allSelectedIds = computed({
   get() {
     return [...historySelectedIds.value, ...selectedProductIds.value]
@@ -191,42 +195,16 @@ const allSelectedIds = computed({
   }
 })
 
-function toggleProduct(appId: number) {
-  if (!selectedProductIds.value.includes(appId) && !historySelectedIds.value.includes(appId)) {
-    selectedProductIds.value.push(appId)
-  }
-}
+// 5. 生命周期
+onMounted(getAllProducts)
 
-function toggleSelectAll() {
-  if (!isAllSelected.value) {
-    selectedProductIds.value = selectableProducts.value.map(p => p.appId)
-  } else {
-    selectedProductIds.value = []
-  }
-}
+// 6. watch 监听
+watch(() => props.bundle, async (val) => {
+  if (val) setForm(val)
+  else resetForm()
+})
 
-const orderDialogVisible = ref(false)
-const orderDialogIds = ref<number[]>([])
-
-function handleChangeOrder() {
-  // 打开排序弹窗，初始化顺序为当前所有已选
-  orderDialogIds.value = allSelectedIds.value.slice()
-  orderDialogVisible.value = true
-}
-
-function saveOrder() {
-  // 拖拽后保存顺序，拆分历史和新选
-  const newHistory: number[] = []
-  const newSelected: number[] = []
-  for (const id of orderDialogIds.value) {
-    if (historySelectedIds.value.includes(id)) newHistory.push(id)
-    else newSelected.push(id)
-  }
-  historySelectedIds.value = newHistory
-  selectedProductIds.value = newSelected
-  orderDialogVisible.value = false
-}
-
+// 7. 方法函数定义
 function isActive(key: string) {
   return activeInput.value === key
 }
@@ -253,6 +231,39 @@ async function getAllProducts() {
   }
 }
 
+function toggleProduct(appId: number) {
+  if (!selectedProductIds.value.includes(appId) && !historySelectedIds.value.includes(appId)) {
+    selectedProductIds.value.push(appId)
+  }
+}
+
+function toggleSelectAll() {
+  if (!isAllSelected.value) {
+    selectedProductIds.value = selectableProducts.value.map(p => p.appId)
+  } else {
+    selectedProductIds.value = []
+  }
+}
+
+function handleChangeOrder() {
+  // 打开排序弹窗，初始化顺序为当前所有已选
+  orderDialogIds.value = allSelectedIds.value.slice()
+  orderDialogVisible.value = true
+}
+
+function saveOrder() {
+  // 拖拽后保存顺序，拆分历史和新选
+  const newHistory: number[] = []
+  const newSelected: number[] = []
+  for (const id of orderDialogIds.value) {
+    if (historySelectedIds.value.includes(id)) newHistory.push(id)
+    else newSelected.push(id)
+  }
+  historySelectedIds.value = newHistory
+  selectedProductIds.value = newSelected
+  orderDialogVisible.value = false
+}
+
 async function handleCreate() {
   if (!validateForm()) return
   loading.value = true
@@ -276,30 +287,6 @@ async function handleCreate() {
     loading.value = false
   }
 }
-
-function setForm(bundle: Bundle) {
-  form.value.bundleName = bundle.bundleName || ''
-  form.value.bundleDesc = bundle.bundleDesc || ''
-  const ids = Array.isArray(bundle.products) ? bundle.products.map(p => p.appId) : []
-  selectedProductIds.value = ids.filter(id => !historySelectedIds.value.includes(id))
-  historySelectedIds.value = ids.slice()
-}
-
-function resetForm() {
-  form.value.bundleName = ''
-  form.value.bundleDesc = ''
-  selectedProductIds.value = []
-  historySelectedIds.value = []
-}
-
-defineExpose({ setForm, resetForm })
-
-watch(() => props.bundle, async (val) => {
-  if (val) setForm(val)
-  else resetForm()
-})
-
-onMounted(getAllProducts)
 
 async function handleSave() {
   if (!validateForm()) return
@@ -325,11 +312,33 @@ async function handleSave() {
   }
 }
 
+function setForm(bundle: Bundle) {
+  form.value.bundleName = bundle.bundleName || ''
+  form.value.bundleDesc = bundle.bundleDesc || ''
+  form.value.price = bundle.price !== undefined && bundle.price !== null ? String(bundle.price) : ''
+  const ids = Array.isArray(bundle.products) ? bundle.products.map(p => p.appId) : []
+  selectedProductIds.value = ids.filter(id => !historySelectedIds.value.includes(id))
+  historySelectedIds.value = ids.slice()
+}
+
+function resetForm() {
+  form.value.bundleName = ''
+  form.value.bundleDesc = ''
+  form.value.price = ''
+  selectedProductIds.value = []
+  historySelectedIds.value = []
+}
+
 function removeSelected(appId: number) {
   // 只允许移除新选中的
   const idx = selectedProductIds.value.indexOf(appId)
   if (idx !== -1) selectedProductIds.value.splice(idx, 1)
 }
+
+// 8. defineExpose
+
+defineExpose({ setForm, resetForm })
+
 </script>
 
 <style>

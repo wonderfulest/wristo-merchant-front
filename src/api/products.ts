@@ -19,7 +19,6 @@ export interface ProductPageQuery {
   pageSize: number
   orderBy?: string
 }
-
 export interface ProductPageData {
   pageNum: number
   pageSize: number
