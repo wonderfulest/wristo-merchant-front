@@ -34,7 +34,7 @@
       <div class="footer-inner">
         <div class="footer-left">
           <span class="footer-icon">🐦</span>
-          <span>© Wristo 2018</span>
+          <span>© Wristo 2025</span>
         </div>
         <div class="footer-links">
           <a href="#">Terms of Use</a>
