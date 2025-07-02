@@ -51,15 +51,14 @@
 
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
-import { useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
-const router = useRouter()
 const userStore = useUserStore()
+const ssoBaseUrl = import.meta.env.VITE_SSO_LOGIN_URL
+const redirectUri = import.meta.env.VITE_SSO_REDIRECT_URI
 const handleLogout = async () => {
   await userStore.logout()
-  router.push('/login')
+  window.location.href = `${ssoBaseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}`
 }
-
 const hasMerchantRole = computed(() => {
   const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []
   return roles.some((role: any) => role.roleCode === 'ROLE_MERCHANT')
