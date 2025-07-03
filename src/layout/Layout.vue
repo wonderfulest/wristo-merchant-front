@@ -57,7 +57,7 @@ const ssoBaseUrl = import.meta.env.VITE_SSO_LOGIN_URL
 const redirectUri = import.meta.env.VITE_SSO_REDIRECT_URI
 const handleLogout = async () => {
   await userStore.logout()
-  window.location.href = `${ssoBaseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}`
+  window.location.href = `${ssoBaseUrl}?client=merchant&redirect_uri=${encodeURIComponent(redirectUri)}`
 }
 const hasMerchantRole = computed(() => {
   const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []
