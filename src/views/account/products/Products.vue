@@ -207,7 +207,6 @@ const handleSizeChange = (val: number) => {
   padding: 12px 20px !important;
 }
 .account-products-page {
-  padding: 32px 0;
   background: #f5f6f7;
 }
 .drawer-content {
