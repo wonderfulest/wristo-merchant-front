@@ -61,6 +61,7 @@ const handleLogout = async () => {
 }
 const hasMerchantRole = computed(() => {
   const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []
+  console.log(111, roles, userStore.userInfo)
   return roles.some((role: any) => role.roleCode === 'ROLE_MERCHANT')
 })
 

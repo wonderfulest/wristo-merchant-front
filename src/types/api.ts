@@ -17,6 +17,7 @@ export interface UserInfo {
   lastLoginTime: string | null
   lastLoginIp: string | null
   isDeleted: string
+  roles: any[]
 }
 
 export interface LoginResponseData {
