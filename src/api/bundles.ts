@@ -1,5 +1,6 @@
 import instance from '@/config/axios'
 import type { ApiResponse } from '@/types/api'
+import type { Product } from './products'
 
 export interface Bundle {
   bundleId: number
@@ -9,12 +10,12 @@ export interface Bundle {
   isActive: number
   createdAt: string
   updatedAt: string
-  products: any[]
+  products: Product[]
 }
 
 // 获取所有套餐列表
 export const fetchBundles = (isActive: number | null): Promise<ApiResponse<Bundle[]>> => {
-  return instance.get(`/mch/bundles/all?isActive=${isActive ?? ''}`)
+  return instance.get(`/mch/bundles/all?populate=products&isActive=${isActive ?? ''}`)
 }
 
 // 新增套餐
@@ -40,7 +41,7 @@ export const updateBundle = (data: UpdateBundleDto, bundleId: number): Promise<A
 }
 
 export const getBundle = (bundleId: number): Promise<ApiResponse<Bundle>> => {
-  return instance.get(`/mch/bundles/${bundleId}`)
+  return instance.get(`/mch/bundles/${bundleId}?populate=products`)
 }
 
 export const updateBundleActive = (bundleId: number, isActive: number): Promise<ApiResponse<Bundle>> => {
