@@ -24,15 +24,14 @@
           <label
             :class="['custom-label', { active: isActive('bundleDesc') || form.bundleDesc }]"
           >Bundle Description</label>
-          <input
-            type="text"
+          <textarea
             v-model="form.bundleDesc"
             placeholder=""
             class="custom-input"
             @focus="activeInput = 'bundleDesc'"
             @blur="activeInput = ''"
-            autocomplete="off"
-          />
+            rows="3"
+          ></textarea>
         </div>
         <div class="custom-form-item" style="display: flex; align-items: center;">
           <label
