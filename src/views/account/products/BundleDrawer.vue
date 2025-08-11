@@ -49,6 +49,22 @@
           />
           <span style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;">USD</span>
         </div>
+        <div class="custom-form-item" v-if="props.bundle?.bundleId">
+          <label class="custom-label active">Bundle URL</label>
+          <div class="bundle-url-display">
+            <span class="bundle-url-text">https://www.wristo.io/bundle/{{ props.bundle.bundleId }}</span>
+            <button 
+              type="button" 
+              class="copy-url-btn" 
+              @click="copyBundleUrl"
+              title="Copy URL"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
       <!-- 产品选择器 -->
       <div class="product-selector">
@@ -334,6 +350,17 @@ function removeSelected(appId: number) {
   if (idx !== -1) selectedProductIds.value.splice(idx, 1)
 }
 
+function copyBundleUrl() {
+  if (props.bundle?.bundleId) {
+    const url = `https://www.wristo.io/bundle/${props.bundle.bundleId}`
+    navigator.clipboard.writeText(url).then(() => {
+      ElMessage.success('Bundle URL copied to clipboard')
+    }).catch(() => {
+      ElMessage.error('Failed to copy URL')
+    })
+  }
+}
+
 // 8. defineExpose
 
 defineExpose({ setForm, resetForm })
@@ -598,5 +625,43 @@ defineExpose({ setForm, resetForm })
 .cancel-btn:hover {
   color: #c62828;
   background: #fbe9e7;
+}
+.bundle-url-display {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  gap: 12px;
+}
+.bundle-url-text {
+  flex: 1;
+  font-size: 1.1rem;
+  color: #19b36b;
+  font-weight: 500;
+  word-break: break-all;
+}
+.copy-url-btn {
+  background: #19b36b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  min-width: 32px;
+  height: 32px;
+}
+.copy-url-btn:hover {
+  background: #13a05a;
+}
+.copy-url-btn svg {
+  width: 16px;
+  height: 16px;
 }
 </style>
