@@ -149,18 +149,12 @@ const formatCurrency = (amount: number): string => {
   return amount.toFixed(2)
 }
 
-const getProductImage = (record: PurchaseRecordVO): string | null => {
-  if (record.product && record.product.garminImageUrl) {
-    return record.product.garminImageUrl
-  }
-  return null
+const getProductImage = (record: PurchaseRecordVO): string | undefined => {
+  return record.product?.garminImageUrl
 }
 
-const getProductUrl = (record: PurchaseRecordVO): string | null => {
-  if (record.product && record.product.garminStoreUrl) {
-    return record.product.garminStoreUrl
-  }
-  return null
+const getProductUrl = (record: PurchaseRecordVO): string | undefined => {
+  return record.product?.garminStoreUrl
 }
 
 const handleImageError = (event: Event) => {
