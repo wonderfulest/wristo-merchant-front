@@ -56,7 +56,7 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: '/account/products'
+      redirect: '/account/dashboard'
     }
   ]
 })

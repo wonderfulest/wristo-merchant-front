@@ -2,7 +2,7 @@
   <div class="account-layout">
     <div class="header-sub">
       <nav class="header-sub-nav">
-        <router-link to="/" exact-active-class="active">Dashboard</router-link>
+        <router-link to="/account/dashboard" exact-active-class="active">Dashboard</router-link>
         <router-link to="/account/products" exact-active-class="active">Products</router-link>
         <router-link to="/account/history" exact-active-class="active">History</router-link>
         <router-link to="/account/discounts" exact-active-class="active">Discounts</router-link>
