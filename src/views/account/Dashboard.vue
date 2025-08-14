@@ -1,54 +1,67 @@
 <template>
   <!-- Payout Information Cards -->
-  <div class="payout-cards" v-if="payoutData">
-    <div class="payout-card">
-      <div class="card-label">TOTAL INCOME TO DATE</div>
-      <div class="card-value">${{ formatCurrency(payoutData.totalIncomeToDate) }}</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">CURRENT BALANCE</div>
-      <div class="card-value">${{ formatCurrency(payoutData.currentBalance) }}</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">NEXT PAYOUT AMOUNT</div>
-      <div class="card-value">${{ formatCurrency(payoutData.nextPayoutAmount) }}</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">NEXT PAY DAY</div>
-      <div class="card-value">{{ formatDate(payoutData.nextPayDay) }}</div>
-    </div>
-  </div>
+  <el-card>
+    <template #header>
+      <div class="payout-header">
+        <div class="payout-title">
+          <span class="title">Payout Overview</span>
+          <span class="subtitle">Your latest earnings and balances</span>
+        </div>
+        <el-button size="small" @click="fetchPayoutInfo" :loading="loading" type="success" plain>
+          Refresh
+        </el-button>
+      </div>
+    </template>
+    <div class="payout-cards" v-if="payoutData">
+      <div class="payout-card">
+        <div class="card-label">TOTAL INCOME TO DATE</div>
+        <div class="card-value">${{ formatCurrency(payoutData.totalIncomeToDate) }}</div>
+      </div>
 
-  <!-- Loading state -->
-  <div class="payout-cards loading" v-else-if="loading">
-    <div class="payout-card">
-      <div class="card-label">TOTAL INCOME TO DATE</div>
-      <div class="card-value loading-text">Loading...</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">CURRENT BALANCE</div>
-      <div class="card-value loading-text">Loading...</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">NEXT PAYOUT AMOUNT</div>
-      <div class="card-value loading-text">Loading...</div>
-    </div>
-    
-    <div class="payout-card">
-      <div class="card-label">NEXT PAY DAY</div>
-      <div class="card-value loading-text">Loading...</div>
-    </div>
-  </div>
+      <div class="payout-card">
+        <div class="card-label">CURRENT BALANCE</div>
+        <div class="card-value">${{ formatCurrency(payoutData.currentBalance) }}</div>
+      </div>
 
-  <!-- Error state -->
-  <div class="error-message" v-else-if="error">
-    <p>Failed to load payout information: {{ error }}</p>
-  </div>
+      <div class="payout-card">
+        <div class="card-label">NEXT PAYOUT AMOUNT</div>
+        <div class="card-value">${{ formatCurrency(payoutData.nextPayoutAmount) }}</div>
+      </div>
+
+      <div class="payout-card">
+        <div class="card-label">NEXT PAY DAY</div>
+        <div class="card-value">{{ formatDate(payoutData.nextPayDay) }}</div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="payout-cards loading" v-else-if="loading">
+      <div class="payout-card">
+        <div class="card-label">TOTAL INCOME TO DATE</div>
+        <div class="card-value loading-text">Loading...</div>
+      </div>
+
+      <div class="payout-card">
+        <div class="card-label">CURRENT BALANCE</div>
+        <div class="card-value loading-text">Loading...</div>
+      </div>
+
+      <div class="payout-card">
+        <div class="card-label">NEXT PAYOUT AMOUNT</div>
+        <div class="card-value loading-text">Loading...</div>
+      </div>
+
+      <div class="payout-card">
+        <div class="card-label">NEXT PAY DAY</div>
+        <div class="card-value loading-text">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-message" v-else-if="error">
+      <p>Failed to load payout information: {{ error }}</p>
+    </div>
+  </el-card>
 
   <!-- 应用销售总计（分页） -->
   <div class="dashboard-content">
@@ -58,13 +71,7 @@
       <p>获取应用销售总计失败：{{ summaryError }}</p>
     </div>
 
-    <el-table
-      v-loading="summaryLoading"
-      :data="summaryList"
-      border
-      style="width: 100%"
-      empty-text="No data"
-    >
+    <el-table v-loading="summaryLoading" :data="summaryList" border style="width: 100%" empty-text="No data">
       <el-table-column label="应用" min-width="240">
         <template #default="{ row }">
           <div class="app-cell">
@@ -87,16 +94,9 @@
     </el-table>
 
     <div class="table-footer">
-      <el-pagination
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="summaryTotal"
-        :page-size="summaryPageSize"
-        :current-page="summaryPageNum"
-        :page-sizes="[10, 20, 50]"
-        @current-change="handleSummaryCurrentChange"
-        @size-change="handleSummarySizeChange"
-      />
+      <el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="summaryTotal"
+        :page-size="summaryPageSize" :current-page="summaryPageNum" :page-sizes="[10, 20, 50]"
+        @current-change="handleSummaryCurrentChange" @size-change="handleSummarySizeChange" />
     </div>
   </div>
 
@@ -133,7 +133,7 @@ const fetchPayoutInfo = async () => {
     loading.value = true
     error.value = null
     const response = await getPayoutInfo()
-    
+
     if (response.code === 0 && response.data) {
       payoutData.value = response.data
     } else {
@@ -206,35 +206,41 @@ const handleSummarySizeChange = (size: number) => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
-  margin: 24px 0;
 }
 
 .payout-card {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
+  border: 1px solid #e6f4ee;
+  border-radius: 12px;
+  padding: 18px 16px;
   text-align: center;
-  transition: box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 .payout-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .card-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6c757d;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #19b36b;
+  background: #e9f7f1;
+  border: 1px solid #ccefe0;
+  border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  margin-bottom: 10px;
 }
 
 .card-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #212529;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1b4332;
   line-height: 1.2;
 }
 
@@ -257,6 +263,26 @@ const handleSummarySizeChange = (size: number) => {
   margin-top: 32px;
 }
 
+/* Payout card header */
+.payout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.payout-title {
+  display: flex;
+  flex-direction: column;
+}
+.payout-title .title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1b4332;
+}
+.payout-title .subtitle {
+  font-size: 12px;
+  color: #6c757d;
+}
+
 .section-title {
   font-size: 18px;
   font-weight: 700;
@@ -269,6 +295,7 @@ const handleSummarySizeChange = (size: number) => {
   align-items: center;
   gap: 12px;
 }
+
 .app-thumb {
   width: 40px;
   height: 40px;
@@ -276,18 +303,22 @@ const handleSummarySizeChange = (size: number) => {
   object-fit: cover;
   border: 1px solid #e9ecef;
 }
+
 .app-info {
   display: flex;
   flex-direction: column;
 }
+
 .app-name {
   font-weight: 600;
   color: #212529;
 }
+
 .app-sub {
   font-size: 12px;
   color: #6c757d;
 }
+
 .table-footer {
   display: flex;
   justify-content: flex-end;
@@ -300,11 +331,11 @@ const handleSummarySizeChange = (size: number) => {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
   }
-  
+
   .payout-card {
     padding: 16px;
   }
-  
+
   .card-value {
     font-size: 20px;
   }
