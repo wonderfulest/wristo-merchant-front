@@ -130,3 +130,18 @@ export interface PageResponse<T> {
   pages: number
   list: T[]
 }
+
+// ===== App Sales Summary =====
+export interface AppSalesSummaryVO {
+  appId: number
+  salesCount: number
+  totalAmount: number
+  bundleTriggerCount: number
+  app: ProductBaseVO | null
+}
+
+export interface AppSalesSummaryPageQueryDTO {
+  pageNum: number
+  pageSize: number
+  userId?: number
+}
