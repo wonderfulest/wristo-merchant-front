@@ -268,7 +268,6 @@ onMounted(() => {
 .purchase-table th {
   background: #f8f9fa;
   padding: 12px 16px;
-  text-align: left;
   font-weight: 600;
   color: #495057;
   border-bottom: 2px solid #dee2e6;
@@ -284,6 +283,12 @@ onMounted(() => {
 
 .purchase-table tbody tr:hover {
   background: #f8f9fa;
+}
+
+.purchase-table th,
+.purchase-table td {
+  text-align: center;
+  vertical-align: middle;
 }
 
 .status-badge {
