@@ -129,7 +129,7 @@ const applyRangeByType = () => {
   }
 }
 
-const handleRangeTypeChange = () => { applyRangeByType() }
+const handleRangeTypeChange = () => { applyRangeByType(); fetchFunnel() }
 
 const fetchFunnel = async () => {
   try {
@@ -250,6 +250,13 @@ const updateFunnelChart = async () => {
 }
 
 watch(funnel, () => updateFunnelChart())
+
+// Auto-fetch when using custom range and user changes dates
+watch(dateRange, (val) => {
+  if (rangeType.value === 'custom' && val && val[0] && val[1]) {
+    fetchFunnel()
+  }
+})
 
 onMounted(() => { applyRangeByType(); fetchFunnel(); nextTick(() => initFunnelChart()) })
 
