@@ -2,6 +2,9 @@
   <!-- Payout 概览（已迁移为独立组件） -->
   <PayoutOverview />
 
+  <!-- 最近60天销售折线图 -->
+  <SalesLineChart />
+
   <!-- 漏斗统计（已迁移为独立组件） -->
   <FunnelAnalytics />
 
@@ -14,6 +17,7 @@
 import FunnelAnalytics from '@/components/dashboard/FunnelAnalytics.vue'
 import PayoutOverview from '@/components/dashboard/PayoutOverview.vue'
 import AppSalesSummary from '@/components/dashboard/AppSalesSummary.vue'
+import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 </script>
 
 <style scoped>

@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { getFunnel } from '@/api/purchase'
-import type { AppFunnelVO, AppFunnelQueryDTO } from '@/types/api'
+import type { AppFunnelVO, SalesQueryDTO } from '@/types/api'
 
 // ===== Funnel state & methods =====
 const funnel = ref<AppFunnelVO | null>(null)
@@ -139,7 +139,7 @@ const fetchFunnel = async () => {
     if (!dateRange.value) { funnelError.value = '请选择时间范围'; return }
     const appIdVal = appId.value != null && !Number.isNaN(appId.value) ? appId.value : null
     const toDate = (s: string) => s?.split(' ')[0] || s
-    const dto: AppFunnelQueryDTO = {
+    const dto: SalesQueryDTO = {
       startDate: toDate(dateRange.value[0]),
       endDate: toDate(dateRange.value[1]),
       appId: appIdVal

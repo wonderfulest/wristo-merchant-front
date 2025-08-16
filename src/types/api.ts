@@ -20,6 +20,16 @@ export interface UserInfo {
   roles: any[]
 }
 
+// ===== Daily Sales (last 60 days) =====
+export interface DailySalesItemVO {
+  /** yyyy-MM-dd */
+  date: string
+  /** 当日订单数 */
+  orderCount: number
+  /** 当日收益 */
+  earnings: number
+}
+
 export interface LoginResponseData {
   token: string
   userInfo: UserInfo
@@ -147,7 +157,7 @@ export interface AppSalesSummaryPageQueryDTO {
 }
 
 // ===== Funnel (Downloads -> Code Displayed -> Code Entered -> Start Purchase -> Purchases) =====
-export interface AppFunnelQueryDTO {
+export interface SalesQueryDTO {
   /** 可不传，后端会从登录上下文填充 */
   userId?: number
   /** 开始日期，yyyy-MM-dd */
