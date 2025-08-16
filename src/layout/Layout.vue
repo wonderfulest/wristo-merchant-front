@@ -5,7 +5,7 @@
       <div class="header-inner">
         <div class="logo">
           <span class="logo-icon">W</span>
-          <span class="logo-text">pay</span>
+          <span class="logo-text">risto</span>
         </div>
         <div class="header-right">
           <a href="/account">ACCOUNT</a>

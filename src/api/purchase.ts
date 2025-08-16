@@ -5,7 +5,9 @@ import type {
   PageResponse,
   PurchaseRecordVO,
   AppSalesSummaryPageQueryDTO,
-  AppSalesSummaryVO
+  AppSalesSummaryVO,
+  AppFunnelQueryDTO,
+  AppFunnelVO
 } from '@/types/api'
 
 export const getPurchaseRecordPageList = async (dto: PurchaseRecordPageQueryDTO): Promise<ApiResponse<PageResponse<PurchaseRecordVO>>> => {
@@ -16,4 +18,8 @@ export const getAppSalesSummaryPage = async (
   dto: AppSalesSummaryPageQueryDTO
 ): Promise<ApiResponse<PageResponse<AppSalesSummaryVO>>> => {
   return instance.post('/mch/purchases/app/summary/page?populate=product', dto)
+}
+
+export const getFunnel = async (dto: AppFunnelQueryDTO): Promise<ApiResponse<AppFunnelVO>> => {
+  return instance.post('/mch/purchases/funnel', dto)
 }
