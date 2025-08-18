@@ -1,0 +1,140 @@
+---
+trigger: model_decision
+description: 
+globs: 
+---
+
+### 分页查询产品
+
+POST {{baseUrl}}/api/products/page
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "pageNum": 1,
+  "pageSize": 1,
+  "orderBy": "created_at:desc"
+}
+
+返回：
+
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "pageNum": 1,
+    "pageSize": 1,
+    "total": 41,
+    "pages": 41,
+    "list": [
+      {
+        "id": 41,
+        "appId": 100377,
+        "name": "测试产品",
+        "description": "这是一个测试产品",
+        "price": 1.99,
+        "garminImageUrl": "https://example.com/image.png",
+        "garminStoreUrl": "https://example.com/store",
+        "trialLasts": 0.0,
+        "createdAt": "2025-05-27T09:59:10.099+00:00",
+        "updatedAt": "2025-05-27T09:59:10.099+00:00",
+        "isDeleted": 0
+      }
+    ]
+  }
+}
+
+### 新增产品
+
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试产品",
+  "description": "这是一个测试产品",
+  "garminImageUrl": "https://example.com/image.png",
+  "garminStoreUrl": "https://example.com/store",
+  "trialLasts": 0,
+  "price": 1.99
+}
+
+必填项：name、description
+trialLasts、price 默认值为0； garminImageUrl， garminStoreUrl默认值为空字符串
+
+返回值：
+
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "id": null,
+    "appId": 104352,
+    "name": "测试产品",
+    "description": "这是一个测试产品",
+    "price": 1.99,
+    "garminImageUrl": "https://example.com/image.png",
+    "garminStoreUrl": "https://example.com/store",
+    "trialLasts": 0.0,
+    "createdAt": "2025-05-28T09:03:06.573+00:00",
+    "updatedAt": "2025-05-28T09:03:06.573+00:00",
+    "isDeleted": 0
+  }
+}
+
+
+### 查询单个产品
+GET {{baseUrl}}/api/products/{{appId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+返回：
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "appId": 10002,
+    "name": "更新后的产品",
+    "description": "更新描述",
+    "price": 1.99,
+    "garminImageUrl": "https://example.com/image2.png",
+    "garminStoreUrl": "https://example.com/store2",
+    "trialLasts": 0.22,
+    "createdAt": "2025-05-22T13:04:21.126+00:00",
+    "updatedAt": "2025-05-28T11:54:34.311+00:00",
+    "isDeleted": 0
+  }
+}
+
+
+
+### 更新产品
+POST {{baseUrl}}/api/products/update/{{appId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "更新后的产品",
+  "description": "更新描述",
+  "garminImageUrl": "https://example.com/image2.png",
+  "garminStoreUrl": "https://example.com/store2",
+  "trialLasts": 0.22
+}
+
+返回：
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "appId": 10002,
+    "name": "更新后的产品",
+    "description": "更新描述",
+    "price": 1.99,
+    "garminImageUrl": "https://example.com/image2.png",
+    "garminStoreUrl": "https://example.com/store2",
+    "trialLasts": 0.22,
+    "createdAt": "2025-05-22T13:04:21.126+00:00",
+    "updatedAt": "2025-05-28T11:55:35.870+00:00",
+    "isDeleted": 0
+  }
+}
