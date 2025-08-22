@@ -1,6 +1,12 @@
 <template>
   <div class="account-page">
-    <h2>Purchase History</h2>
+    <!-- Filters -->
+    <div class="filters">
+      <input v-model="searchAppId" class="filter-input" placeholder="Search by App ID" />
+      <input v-model="searchEmail" class="filter-input" placeholder="Search by User Email" />
+      <button class="filter-btn primary" @click="fetchPurchaseRecords(1)">Search</button>
+      <button class="filter-btn" @click="resetFilters">Reset</button>
+    </div>
     
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
@@ -19,19 +25,20 @@
         <thead>
           <tr>
             <th>Timestamp</th>
-            <th>User</th>
-            <th>Image</th>
+            <th>User Email</th>
+            <th>App Image</th>
             <th>Product</th>
             <th>Status</th>
             <th>Payment Type</th>
             <th>Tax</th>
-            <th>Your Share</th>
+            <th>Wristo Share</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="record in purchaseRecords" :key="record.id">
             <td>{{ formatTimestamp(record.createdAt) }}</td>
-            <td>{{ formatUser(record.email) }}</td>
+            <td>{{ record.email }}</td>
             <td>
               <img 
                 v-if="getProductImage(record)" 
@@ -59,12 +66,102 @@
                 {{ record.statusDesc }}
               </span>
             </td>
-            <td>{{ formatPaymentMethod(record.paymentMethod) }}</td>
+            <td>
+              <span class="pay-tag" :style="paymentTagStyle(record.paymentMethod)">
+                {{ paymentLabel(record.paymentMethod) }}
+              </span>
+            </td>
             <td>{{ record.tax > 0 ? formatCurrency(record.tax / 100) : 'N/A' }}</td>
             <td>${{ formatCurrency(record.earnings / 100) }}</td>
+            <td>
+              <el-button size="small" @click="openDetail(record)">Details</el-button>
+            </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Details Dialog -->
+      <el-dialog v-model="detailVisible" title="Order Details" width="720px">
+        <template v-if="selectedRecord">
+          <el-descriptions :column="2" size="small" border>
+            <el-descriptions-item label="Order ID">{{ selectedRecord.id }}</el-descriptions-item>
+            <el-descriptions-item label="Timestamp">{{ formatTimestamp(selectedRecord.createdAt) }}</el-descriptions-item>
+            <el-descriptions-item label="Email">{{ selectedRecord.email }}</el-descriptions-item>
+            <el-descriptions-item label="User">{{ selectedRecord.user?.username }} (ID: {{ selectedRecord.userId }})</el-descriptions-item>
+            <el-descriptions-item label="App ID">{{ selectedRecord.appId }}</el-descriptions-item>
+            <el-descriptions-item label="Bundle ID">{{ selectedRecord.bundleId || '—' }}</el-descriptions-item>
+            <el-descriptions-item label="Is Bundle">{{ selectedRecord.isBundle ? 'Yes' : 'No' }}</el-descriptions-item>
+            <el-descriptions-item label="Product">{{ formatProduct(selectedRecord) }}</el-descriptions-item>
+            <el-descriptions-item label="Payment">
+              <el-tag size="small">{{ paymentLabel(selectedRecord.paymentMethod) }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="Status">
+              <el-tag :type="getStatusClass(selectedRecord.status) === 'success' ? 'success' : 'danger'" size="small">
+                {{ selectedRecord.statusDesc }}
+              </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="Subtotal">${{ formatCurrency(selectedRecord.subtotal / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Tax">{{ selectedRecord.tax > 0 ? '$' + formatCurrency(selectedRecord.tax / 100) : 'N/A' }}</el-descriptions-item>
+            <el-descriptions-item label="Fee">${{ formatCurrency(selectedRecord.fee / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Discount">${{ formatCurrency(selectedRecord.discount / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Grand Total">${{ formatCurrency(selectedRecord.grandTotal / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Earnings (Wristo)">${{ formatCurrency(selectedRecord.earnings / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Credit Used">${{ formatCurrency(selectedRecord.credit / 100) }}</el-descriptions-item>
+            <el-descriptions-item label="Currency">{{ selectedRecord.currencyCode }}</el-descriptions-item>
+            <el-descriptions-item label="Country">{{ selectedRecord.countryCode }}</el-descriptions-item>
+            <el-descriptions-item label="Origin">{{ selectedRecord.origin }}</el-descriptions-item>
+            <el-descriptions-item label="Transaction ID">{{ selectedRecord.transactionId }}</el-descriptions-item>
+            <el-descriptions-item label="Customer ID">{{ selectedRecord.customerId }}</el-descriptions-item>
+            <el-descriptions-item label="Address ID">{{ selectedRecord.addressId }}</el-descriptions-item>
+            <el-descriptions-item label="In Payout">{{ selectedRecord.inPayout === 1 ? 'Yes' : 'No' }}</el-descriptions-item>
+            <el-descriptions-item label="Updated At">{{ formatTimestamp(selectedRecord.updatedAt) }}</el-descriptions-item>
+          </el-descriptions>
+
+          <el-divider content-position="left">Product</el-divider>
+          <div v-if="selectedRecord.product" class="nested-content">
+            <img v-if="selectedRecord.product.garminImageUrl" :src="selectedRecord.product.garminImageUrl" alt="Product" class="nested-thumb" />
+            <el-descriptions :column="2" size="small">
+              <el-descriptions-item label="Name">{{ selectedRecord.product.name }}</el-descriptions-item>
+              <el-descriptions-item label="App ID">{{ selectedRecord.product.appId }}</el-descriptions-item>
+              <el-descriptions-item label="Design ID">{{ selectedRecord.product.designId }}</el-descriptions-item>
+              <el-descriptions-item label="Price">${{ formatCurrency(selectedRecord.product.price) }}</el-descriptions-item>
+              <el-descriptions-item v-if="selectedRecord.product.garminStoreUrl" label="Store">
+                <a :href="selectedRecord.product.garminStoreUrl" target="_blank" class="product-link">Open</a>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div v-else class="empty-sub">No product info</div>
+
+          <el-divider content-position="left">Bundle</el-divider>
+          <template v-if="selectedRecord.bundle">
+            <el-descriptions :column="2" size="small">
+              <el-descriptions-item label="Bundle ID">{{ selectedRecord.bundle.bundleId }}</el-descriptions-item>
+              <el-descriptions-item label="Name">{{ selectedRecord.bundle.bundleName }}</el-descriptions-item>
+              <el-descriptions-item label="Desc" :span="2">
+                <div class="multiline">{{ selectedRecord.bundle.bundleDesc }}</div>
+              </el-descriptions-item>
+              <el-descriptions-item label="Price">${{ formatCurrency(selectedRecord.bundle.price) }}</el-descriptions-item>
+              <el-descriptions-item label="Owner">{{ selectedRecord.bundle.user?.username || '—' }}</el-descriptions-item>
+            </el-descriptions>
+            <div v-if="selectedRecord.bundle.products && selectedRecord.bundle.products.length" class="bundle-products">
+              <div class="bp-title">Products in Bundle</div>
+              <ul>
+                <li v-for="(p, idx) in selectedRecord.bundle.products" :key="p.appId + '-' + idx">
+                  <img v-if="p.garminImageUrl" :src="p.garminImageUrl" :alt="p.name" class="bp-thumb" />
+                  <span class="bp-name">{{ p.name }} ({{ p.appId }})</span>
+                  <a v-if="p.garminStoreUrl" :href="p.garminStoreUrl" target="_blank" class="product-link">Open</a>
+                </li>
+              </ul>
+            </div>
+          </template>
+          <div v-else class="empty-sub">No bundle info</div>
+        </template>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button type="primary" @click="detailVisible = false">Close</el-button>
+          </span>
+        </template>
+      </el-dialog>
 
       <!-- Pagination -->
       <div class="pagination-container" v-if="pageData.total > 0">
@@ -103,6 +200,10 @@ import type { PurchaseRecordVO, PurchaseRecordPageQueryDTO, PageResponse } from 
 const purchaseRecords = ref<PurchaseRecordVO[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+const searchAppId = ref<string>('')
+const searchEmail = ref<string>('')
+const detailVisible = ref(false)
+const selectedRecord = ref<PurchaseRecordVO | null>(null)
 const pageData = ref<PageResponse<PurchaseRecordVO>>({
   pageNum: 1,
   pageSize: 10,
@@ -122,11 +223,7 @@ const formatTimestamp = (dateString: string): string => {
   }).replace(/\//g, '-')
 }
 
-const formatUser = (email: string): string => {
-  if (!email) return 'unknown'
-  const namePart = email.split('@')[0]
-  return namePart || 'unknown'
-}
+// removed masked username helper; we display full email per requirement
 
 const formatProduct = (record: PurchaseRecordVO): string => {
   if (record.isBundle && record.bundle) {
@@ -141,8 +238,41 @@ const getStatusClass = (status: number): string => {
   return status === 1 ? 'success' : 'failed'
 }
 
-const formatPaymentMethod = (method: string): string => {
-  return method.toUpperCase()
+// Payment tag helpers
+type PaymentMeta = { label: string; color: string; bg: string; border: string }
+const paymentMeta = (method?: string | null): PaymentMeta => {
+  const key = (method || '').toLowerCase()
+  switch (key) {
+    case 'card':
+    case 'stripe':
+      return { label: 'Card', color: '#635bff', bg: 'rgba(99,91,255,0.1)', border: 'rgba(99,91,255,0.35)' }
+    case 'paypal':
+      return { label: 'PayPal', color: '#003087', bg: 'rgba(0,48,135,0.08)', border: 'rgba(0,48,135,0.3)' }
+    case 'apple_pay':
+    case 'applepay':
+      return { label: 'Apple Pay', color: '#000000', bg: 'rgba(0,0,0,0.08)', border: 'rgba(0,0,0,0.25)' }
+    case 'google_pay':
+    case 'googlepay':
+      return { label: 'Google Pay', color: '#1a73e8', bg: 'rgba(26,115,232,0.08)', border: 'rgba(26,115,232,0.3)' }
+    case 'alipay':
+      return { label: 'Alipay', color: '#1677ff', bg: 'rgba(22,119,255,0.08)', border: 'rgba(22,119,255,0.3)' }
+    case 'wechat':
+    case 'wechat_pay':
+      return { label: 'WeChat Pay', color: '#07c160', bg: 'rgba(7,193,96,0.08)', border: 'rgba(7,193,96,0.3)' }
+    case 'credit':
+      return { label: 'Credit', color: '#6f42c1', bg: 'rgba(111,66,193,0.08)', border: 'rgba(111,66,193,0.3)' }
+    default:
+      return { label: (method || 'Unknown').toUpperCase(), color: '#6c757d', bg: 'rgba(108,117,125,0.08)', border: 'rgba(108,117,125,0.3)' }
+  }
+}
+const paymentLabel = (method?: string | null): string => paymentMeta(method).label
+const paymentTagStyle = (method?: string | null) => {
+  const m = paymentMeta(method)
+  return {
+    color: m.color,
+    backgroundColor: m.bg,
+    borderColor: m.border,
+  } as Record<string, string>
 }
 
 const formatCurrency = (amount: number): string => {
@@ -174,12 +304,10 @@ const fetchPurchaseRecords = async (pageNum: number = 1) => {
     const queryDto: PurchaseRecordPageQueryDTO = {
       pageNum,
       pageSize: 10,
-      email: null,
-      appId: null,
+      email: searchEmail.value || null,
+      appId: searchAppId.value ? Number(searchAppId.value) : null,
       bundleId: null,
-      status: null,
-      paymentMethod: null,
-      inPayout: null
+      status: null
     }
     
     const response = await getPurchaseRecordPageList(queryDto)
@@ -204,6 +332,17 @@ const changePage = (newPage: number) => {
   }
 }
 
+const openDetail = (record: PurchaseRecordVO) => {
+  selectedRecord.value = record
+  detailVisible.value = true
+}
+
+const resetFilters = () => {
+  searchAppId.value = ''
+  searchEmail.value = ''
+  fetchPurchaseRecords(1)
+}
+
 onMounted(() => {
   fetchPurchaseRecords()
 })
@@ -215,6 +354,11 @@ onMounted(() => {
   background: #fff;
   min-height: 300px;
 }
+
+.filters { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-input { padding: 8px 10px; border: 1px solid #dee2e6; border-radius: 6px; width: 220px; }
+.filter-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid #ced4da; background: #f8f9fa; cursor: pointer; }
+.filter-btn.primary { background: #0d6efd; color: #fff; border-color: #0d6efd; }
 
 .loading-container {
   text-align: center;
@@ -301,6 +445,17 @@ onMounted(() => {
 .status-badge.failed {
   background: #f8d7da;
   color: #721c24;
+}
+
+.pay-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .pagination-container {
@@ -393,6 +548,88 @@ onMounted(() => {
 }
 
 /* Responsive design */
+/* Details dialog */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e9ecef;
+}
+.detail-item .k {
+  color: #6c757d;
+}
+.detail-item .v {
+  color: #212529;
+  font-weight: 500;
+  word-break: break-all;
+  text-align: right;
+}
+
+.nested-section {
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 2px solid #f1f3f5;
+}
+.nested-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #495057;
+}
+.nested-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.nested-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+.nested-fields > div { padding: 2px 0; }
+
+.bundle-products {
+  margin-top: 10px;
+}
+.bp-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+.bundle-products ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bundle-products li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e9ecef;
+}
+.bp-thumb {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+.bp-name { color: #212529; }
+
+/* preserve newlines and wrapping for multiline text in descriptions */
+.multiline {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 768px) {
   .purchase-table {
     font-size: 12px;

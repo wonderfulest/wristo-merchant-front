@@ -1,11 +1,11 @@
 <template>
-  <!-- Payout 概览（已迁移为独立组件） -->
+  <!-- Payout 概览 -->
   <PayoutOverview />
 
   <!-- 最近60天销售折线图 -->
   <SalesLineChart />
 
-  <!-- 漏斗统计（已迁移为独立组件） -->
+  <!-- 漏斗统计 -->
   <FunnelAnalytics />
 
   <!-- 应用销售总计（分页） -->

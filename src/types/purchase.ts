@@ -46,7 +46,5 @@ export interface PurchaseRecordPageQueryDTO {
   appId?: number | null
   bundleId?: number | null
   status?: number | null
-  paymentMethod?: string | null
-  inPayout?: number | null
   userId?: number
 }
