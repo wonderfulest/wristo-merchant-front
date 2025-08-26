@@ -75,11 +75,33 @@ const toggleDropdown = () => {
 <style lang="scss" scoped>
 @import '@/assets/styles/variables.scss';
 
+/* Global clamps to prevent horizontal overflow */
+:global(html, body, #app) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+:global(*), :global(*::before), :global(*::after) {
+  box-sizing: border-box;
+}
+:global(img), :global(video) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+:global(.break-anywhere) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .global-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: $color-bg;
+  width: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 .header {
   background: $color-bg;
@@ -133,15 +155,15 @@ const toggleDropdown = () => {
   margin: 0 auto;
   width: 100%;
   padding: 16px 12px 0;
+  min-height: 0; /* allow flex item to shrink to avoid pushing footer */
 }
 .footer {
   background: $color-footer-bg;
   padding: 8px 0;
   width: 100%;
-  position: sticky;
-  bottom: 0;
-  left: 0;
+  position: static; /* rely on flexbox to pin to bottom */
   margin-top: auto;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   font-size: $font-size-xs;
 }
 .footer-inner {
@@ -240,6 +262,14 @@ const toggleDropdown = () => {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  .global-layout {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  .footer {
+    position: static; /* prevent jumping on mobile */
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 </style>
