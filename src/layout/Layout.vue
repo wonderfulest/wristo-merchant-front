@@ -8,9 +8,9 @@
           <span class="logo-text">risto</span>
         </div>
         <div class="header-right">
-          <a href="/account">ACCOUNT</a>
-          <a href="#">DOCUMENTATION</a>
-          <a href="/API" v-if="hasMerchantRole">API</a>
+          <router-link to="/account">ACCOUNT</router-link>
+          <a href="#" class="hide-on-mobile">DOCUMENTATION</a>
+          <router-link to="/api" v-if="hasMerchantRole" class="hide-on-mobile">API</router-link>
         </div>
         <div class="user-profile-dropdown">
           <div class="user-profile-name" @click="toggleDropdown">
@@ -34,7 +34,7 @@
       <div class="footer-inner">
         <div class="footer-left">
           <span class="footer-icon">🐦</span>
-          <span>© Wristo 2025</span>
+          <span> Wristo 2025</span>
         </div>
         <div class="footer-links">
           <a href="#">Terms of Use</a>
@@ -117,14 +117,14 @@ const toggleDropdown = () => {
   gap: 24px;
   align-items: center;
 }
-.header-right a {
+.header-right a, .header-right :deep(a.router-link-active), .header-right :deep(a.router-link-exact-active) {
   color: $color-link;
   font-weight: 500;
   text-decoration: none;
   font-size: 1.1rem;
   transition: color 0.2s;
 }
-.header-right a:hover {
+.header-right a:hover, .header-right :deep(a):hover {
   color: $color-success;
 }
 .main-content {
@@ -132,7 +132,7 @@ const toggleDropdown = () => {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  padding: 32px 0 0 0;
+  padding: 16px 12px 0;
 }
 .footer {
   background: $color-footer-bg;
@@ -209,4 +209,37 @@ const toggleDropdown = () => {
 .user-profile-dropdown {
   position: relative;
 }
-</style> 
+
+/* Mobile responsiveness */
+.hide-on-mobile {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .header-inner {
+    height: 56px;
+    padding: 0 16px;
+  }
+  .logo {
+    font-size: 1.6rem;
+  }
+  .logo-icon, .logo-text {
+    font-size: 1.6rem;
+  }
+  .header-right {
+    gap: 12px;
+  }
+  .header-right a, .header-right :deep(a) {
+    font-size: 0.95rem;
+  }
+  .hide-on-mobile {
+    display: none;
+  }
+  .footer-inner {
+    padding: 0 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+</style>

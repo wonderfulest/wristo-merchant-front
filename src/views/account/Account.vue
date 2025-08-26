@@ -127,4 +127,26 @@
   min-height: 400px;
 }
 
+/* Mobile responsiveness for Account page */
+@media (max-width: 768px) {
+  .header-sub-nav {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 12px;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+  .header-sub-nav a {
+    font-size: $font-size-sm;
+    padding: 6px 0 4px 0;
+  }
+  .main-content {
+    max-width: 100%;
+    margin: 16px auto 0 auto;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+}
 </style>
