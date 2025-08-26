@@ -63,6 +63,10 @@ const router = createRouter({
       path: '/',
       redirect: '/account/dashboard'
     },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
+    },
   ]
 })
 
