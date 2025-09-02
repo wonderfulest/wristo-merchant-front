@@ -35,6 +35,22 @@
       <el-form-item label="注册时间">
         <el-input v-model="form.createdAt" disabled />
       </el-form-item>
+      
+      <el-divider content-position="left">支付信息</el-divider>
+      
+      <el-form-item label="支付方式">
+        <el-select v-model="form.payoutMethod" placeholder="请选择支付方式" style="width: 100%">
+          <el-option label="支付宝 (国内，到账人民币，2.5%汇损)" value="alipay" />
+          <el-option label="PayPal (海外，到账美元，无汇损)" value="paypal" />
+          <!-- <el-option label="微信" value="wechat" /> -->
+          <!-- <el-option label="银行卡" value="bank" /> -->
+        </el-select>
+      </el-form-item>
+      
+      <el-form-item label="支付账户">
+        <el-input v-model="form.payoutAccount" placeholder="请输入支付账户" />
+      </el-form-item>
+      
       <el-form-item>
         <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </el-form-item>
@@ -45,11 +61,11 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { getUserInfo, updateUserInfo, uploadAvatar } from '@/api/user'
-import type { UserInfo, ApiResponse } from '@/types/api'
+import { getMchUserInfo, updateMchInfo, uploadAvatar } from '@/api/user'
+import type { MchUserVO, UserMchUpdateDTO, ApiResponse } from '@/types/api'
 import { ElMessage } from 'element-plus'
 
-const userInfo = ref<UserInfo | null>(null)
+const userInfo = ref<MchUserVO | null>(null)
 const loading = ref(true)
 const saving = ref(false)
 const form = reactive({
@@ -58,7 +74,9 @@ const form = reactive({
   avatar: '',
   email: '',
   phone: '',
-  createdAt: ''
+  createdAt: '',
+  payoutMethod: '',
+  payoutAccount: ''
 })
 
 onMounted(async () => {
@@ -68,7 +86,7 @@ onMounted(async () => {
 async function fetchUserInfo() {
   loading.value = true
   try {
-    const res: ApiResponse<UserInfo> = await getUserInfo()
+    const res: ApiResponse<MchUserVO> = await getMchUserInfo()
     if (res.code === 0 && res.data) {
       userInfo.value = res.data
       Object.assign(form, res.data)
@@ -113,11 +131,14 @@ async function handleAvatarChange(fileObj: any) {
 async function handleSave() {
   saving.value = true
   try {
-    const res: ApiResponse<UserInfo> = await updateUserInfo({
+    const updateData: UserMchUpdateDTO = {
       username: form.username,
       nickname: form.nickname,
-      avatar: form.avatar
-    })
+      avatar: form.avatar,
+      payoutMethod: form.payoutMethod,
+      payoutAccount: form.payoutAccount
+    }
+    const res: ApiResponse<boolean> = await updateMchInfo(updateData)
     if (res.code === 0) {
       ElMessage.success('保存成功')
       await fetchUserInfo()

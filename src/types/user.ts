@@ -25,3 +25,17 @@ export interface UserBaseVO {
   nickname: string | null
   email: string
 }
+
+export interface MchUserVO extends UserInfo {
+  payoutMethod: string | null
+  payoutAccount: string | null
+}
+
+export interface UserMchUpdateDTO {
+  username?: string
+  nickname?: string
+  avatar?: string
+  status?: number
+  payoutMethod?: string
+  payoutAccount?: string
+}
