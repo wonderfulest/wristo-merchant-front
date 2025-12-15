@@ -29,6 +29,15 @@ export interface UserBaseVO {
 export interface MchUserVO extends UserInfo {
   payoutMethod: string | null
   payoutAccount: string | null
+
+  bannerImageId?: number | null
+  bannerImage?: any
+  slogan?: string | null
+  facebookUrl?: string | null
+  instagramUrl?: string | null
+  xUrl?: string | null
+  appCount?: number | null
+  totalDownloads?: number | null
 }
 
 export interface UserMchUpdateDTO {
@@ -38,4 +47,12 @@ export interface UserMchUpdateDTO {
   status?: number
   payoutMethod?: string
   payoutAccount?: string
+
+  bannerImageId?: number
+  slogan?: string
+  facebookUrl?: string
+  instagramUrl?: string
+  xUrl?: string
+  appCount?: number
+  totalDownloads?: number
 }

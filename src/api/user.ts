@@ -5,16 +5,12 @@ export const getUserInfo = (): Promise<ApiResponse<UserInfo>> => {
   return instance.get('/users/info')
 }
 
-export const updateUserInfo = (data: Partial<UserInfo>): Promise<ApiResponse<UserInfo>> => {
-  return instance.post('/users/update/my-info', data)
-}
-
 export const getMchUserInfo = (): Promise<ApiResponse<MchUserVO>> => {
-  return instance.get('/v1/mch/user/info')
+  return instance.get('/mch/user/info?populate=*')
 }
 
 export const updateMchInfo = (data: UserMchUpdateDTO): Promise<ApiResponse<boolean>> => {
-  return instance.post('/v1/mch/user/update/mch-info', data)
+  return instance.post('/mch/user/update', data)
 }
 
 export const uploadAvatar = (file: File): Promise<ApiResponse<string>> => {

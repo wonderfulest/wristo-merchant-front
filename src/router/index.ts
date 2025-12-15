@@ -12,13 +12,13 @@ const router = createRouter({
     },
     {
       path: '/account',
-      name: 'Account',
       redirect: '/account/dashboard',
       component: () => import('@/views/account/Account.vue'),
       meta: { requiresAuth: true },
       children: [
         {
           path: '',
+          name: 'Account',
           redirect: '/account/dashboard'
         },
         {
