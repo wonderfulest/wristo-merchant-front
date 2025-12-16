@@ -8,7 +8,7 @@ export const uploadImage = (file: File, aspectCode?: string): Promise<ApiRespons
   if (aspectCode) {
     form.append('aspect', aspectCode)
   }
-  return instance.post('/admin/image/upload', form, {
+  return instance.post('/mch/image/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
@@ -19,7 +19,7 @@ export const uploadVideo = (file: File, aspectCode?: string): Promise<ApiRespons
   if (aspectCode) {
     form.append('aspect', aspectCode)
   }
-  return instance.post('/admin/image/upload', form, {
+  return instance.post('/mch/image/upload', form, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
