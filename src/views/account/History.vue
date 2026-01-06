@@ -4,6 +4,11 @@
     <div class="filters">
       <input v-model="searchAppId" class="filter-input" placeholder="Search by App ID" />
       <input v-model="searchEmail" class="filter-input" placeholder="Search by User Email" />
+      <select v-model="searchStatus" class="filter-input">
+        <option :value="null">All Status</option>
+        <option :value="1">Success</option>
+        <option :value="3">Refund</option>
+      </select>
       <button class="filter-btn primary" @click="fetchPurchaseRecords(1)">Search</button>
       <button class="filter-btn" @click="resetFilters">Reset</button>
     </div>
@@ -202,6 +207,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const searchAppId = ref<string>('')
 const searchEmail = ref<string>('')
+const searchStatus = ref<number | null>(null)
 const detailVisible = ref(false)
 const selectedRecord = ref<PurchaseRecordVO | null>(null)
 const pageData = ref<PageResponse<PurchaseRecordVO>>({
@@ -307,7 +313,7 @@ const fetchPurchaseRecords = async (pageNum: number = 1) => {
       email: searchEmail.value || null,
       appId: searchAppId.value ? Number(searchAppId.value) : null,
       bundleId: null,
-      status: null
+      status: searchStatus.value
     }
     
     const response = await getPurchaseRecordPageList(queryDto)
@@ -340,6 +346,7 @@ const openDetail = (record: PurchaseRecordVO) => {
 const resetFilters = () => {
   searchAppId.value = ''
   searchEmail.value = ''
+  searchStatus.value = null
   fetchPurchaseRecords(1)
 }
 
