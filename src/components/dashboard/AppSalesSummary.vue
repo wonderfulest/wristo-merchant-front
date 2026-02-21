@@ -18,7 +18,7 @@
           </div>
         </template>
       </el-table-column>
-
+      <el-table-column prop="downloadCount" label="下载次数" width="120" align="right" />
       <el-table-column prop="salesCount" label="销量" width="120" align="right" />
       <el-table-column label="总金额" width="160" align="right">
         <template #default="{ row }">

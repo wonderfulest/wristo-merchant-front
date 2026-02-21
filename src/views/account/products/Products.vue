@@ -8,13 +8,13 @@
     </el-drawer>
     <div class="products-header">
       <div class="products-header-left">
-        <el-button type="success" class="add-new-btn" @click="() => openProductDrawer()">NEW PRODUCT<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
-        <el-button style="margin-left: 12px; background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">NEW BUNDLE<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+        <!-- <el-button type="success" class="add-new-btn" @click="() => openProductDrawer()">NEW PRODUCT<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button> -->
+        <el-button style="background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">NEW BUNDLE<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
       </div>
-      <div class="products-header-actions">
+      <!-- <div class="products-header-actions">
         <el-button type="success" plain>GENERATE SHOP</el-button>
         <el-button type="success" plain>UNLOCK APP</el-button>
-      </div>
+      </div> -->
     </div>
     <div class="products-section">
       <div class="section-title-row">
@@ -44,51 +44,22 @@
       <div class="section-title-row">
         <span class="section-title">APPS/WATCH-FACES</span>
       </div>
-      <div class="product-list">
-        <el-card class="product-card" v-for="item in products" :key="item.appId" shadow="hover" @click="() => openProductDrawer(item)">
-          <div class="product-card-content">
-            <img :src="item.garminImageUrl" class="product-img" />
-            <div class="product-info">
-              <div class="product-title">{{ item.name }}</div>
-              <div class="product-trial">{{ item.description }}</div>
-            </div>
-            <div class="product-price">${{ item.price }}</div>
-            <el-button class="download-btn">DOWNLOAD LIB <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
-          </div>
-        </el-card>
-      </div>
-      <div class="pagination-bar">
-        <el-pagination
-          background
-          layout="sizes, prev, pager, next"
-          :total="total"
-          :page-size="pageSize"
-          :current-page="pageNum"
-          :page-sizes="pageSizes"
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-        />
-      </div>
+      <ProductTable @edit="openProductDrawer" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { fetchProductPage, getProduct, type Product } from '@/api/products'
+import { getProduct, type Product } from '@/api/products'
 import { fetchBundles, type Bundle, getBundle, updateBundleActive } from '@/api/bundles'
 import { ElMessage } from 'element-plus'
 import ProductDrawer from './ProductDrawer.vue'
 import BundleDrawer from './BundleDrawer.vue'
 import type { ApiResponse } from '@/types/api'
+import ProductTable from './ProductTable.vue'
 
 const bundles = ref<Bundle[]>([])
-
-const products = ref<Product[]>([])
-const pageNum = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-const pageSizes = [10, 20, 50]
 
 const drawerVisible = ref(false)
 const addProductDrawerRef = ref()
@@ -150,21 +121,6 @@ const openBundleDrawer = async (bundle?: Bundle) => {
 
 const closeDrawer = () => { 
   drawerVisible.value = false
-  getProducts()
-}
-
-const getProducts = async () => {
-  try {
-    const res = await fetchProductPage({ pageNum: pageNum.value, pageSize: pageSize.value, orderBy: 'created_at:desc' })
-    if (res.code === 0 && res.data) {
-      products.value = res.data.list
-      total.value = res.data.total
-    } else {
-      ElMessage.error(res.msg || '获取产品失败')
-    }
-  } catch (e) {
-    ElMessage.error('获取产品失败')
-  }
 }
 
 const getBundles = async () => {
@@ -186,20 +142,8 @@ const closeBundleDrawer = () => {
 }
 
 onMounted(() => {
-  getProducts()
   getBundles()
 })
-
-const handlePageChange = (val: number) => {
-  pageNum.value = val
-  getProducts()
-}
-
-const handleSizeChange = (val: number) => {
-  pageSize.value = val
-  pageNum.value = 1
-  getProducts()
-}
 </script>
 
 <style scoped>
