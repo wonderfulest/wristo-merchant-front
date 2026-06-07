@@ -2,12 +2,12 @@
   <div class="mch-products-table">
     <el-table :data="products" style="width: 100%" v-loading="loading">
       <el-table-column prop="appId" label="ID" width="80" />
-      <el-table-column label="商品信息" min-width="280">
+      <el-table-column :label="t('products.productInfo')" min-width="280">
         <template #default="{ row }">
           <AppProductInfo :product="row" :thumb-size="56" />
         </template>
       </el-table-column>
-      <el-table-column label="分类" min-width="200">
+      <el-table-column :label="t('products.category')" min-width="200">
         <template #default="{ row }">
           <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px;">
             <el-tag
@@ -20,34 +20,34 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="download" label="下载量" width="90">
+      <el-table-column prop="download" :label="t('products.downloads')" width="90">
         <template #default="{ row }">
           {{ row.download ?? '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="purchase" label="购买量" width="90">
+      <el-table-column prop="purchase" :label="t('products.purchases')" width="90">
         <template #default="{ row }">
           {{ row.purchase ?? '-' }}
         </template>
       </el-table-column>
-      <el-table-column prop="price" label="价格" width="80">
+      <el-table-column prop="price" :label="t('history.price')" width="80">
         <template #default="{ row }">
           ${{ row.price }}
         </template>
       </el-table-column>
-      <el-table-column prop="trialLasts" label="试用时长" width="100">
+      <el-table-column prop="trialLasts" :label="t('products.trialLasts')" width="100">
         <template #default="{ row }">
-          {{ row.trialLasts }} 小时
+          {{ row.trialLasts }} {{ t('products.hours') }}
         </template>
       </el-table-column>
-      <el-table-column prop="createdAt" label="创建时间" width="140">
+      <el-table-column prop="createdAt" :label="t('products.createdAt')" width="140">
         <template #default="{ row }">
           {{ formatDate(row.createdAt) }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column :label="t('products.operation')" width="120" fixed="right">
         <template #default="{ row }">
-          <el-button type="primary" link @click="emit('edit', row)">编辑</el-button>
+          <el-button type="primary" link @click="emit('edit', row)">{{ t('products.edit') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -71,6 +71,7 @@ import { ElMessage } from 'element-plus'
 import AppProductInfo from '@/components/common/AppProductInfo.vue'
 import { fetchProductPage, type Product, type ProductPageData, type ProductPageQuery } from '@/api/products'
 import { useUserStore } from '@/store/user'
+import { useI18n } from '@/i18n'
 
 const products = ref<Product[]>([])
 const loading = ref(false)
@@ -79,6 +80,7 @@ const pageSize = ref(10)
 const total = ref(0)
 const pageSizes = [10, 20, 50, 100]
 const userStore = useUserStore()
+const { t } = useI18n()
 
 const emit = defineEmits<{
   (e: 'edit', product: Product): void
@@ -105,10 +107,10 @@ const loadProducts = async () => {
       products.value = data.list
       total.value = data.total
     } else {
-      ElMessage.error(res.msg || '获取产品失败')
+      ElMessage.error(res.msg || t('products.fetchProductsFailed'))
     }
   } catch (e) {
-    ElMessage.error('获取产品失败')
+    ElMessage.error(t('products.fetchProductsFailed'))
   } finally {
     loading.value = false
   }

@@ -1,97 +1,122 @@
 <template>
-  <div class="account-page">
-    <h2>个人信息</h2>
-    <el-form
-      v-if="userInfo"
-      :model="form"
-      label-width="90px"
-      class="profile-form"
-      @submit.prevent
-    >
-      <el-form-item label="头像">
-        <el-upload
-          class="avatar-uploader"
-          :show-file-list="false"
-          :before-upload="beforeAvatarUpload"
-          :on-change="handleAvatarChange"
-          :auto-upload="false"
-        >
-          <img v-if="form.avatar" :src="form.avatar" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><i class="el-icon-plus" /></el-icon>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="用户名">
-        <el-input v-model="form.username" placeholder="请输入用户名" />
-      </el-form-item>
-      <!-- <el-form-item label="昵称">
-        <el-input v-model="form.nickname" placeholder="请输入昵称" />
-      </el-form-item> -->
-      <el-form-item label="邮箱">
-        <el-input v-model="form.email" disabled />
-      </el-form-item>
-      <el-form-item label="手机号">
-        <el-input v-model="form.phone" disabled />
-      </el-form-item>
-      <el-form-item label="注册时间">
-        <el-input v-model="form.createdAt" disabled />
-      </el-form-item>
+  <div class="profile-page">
+    <div class="profile-container">
+      <div class="profile-hero">
+        <div class="avatar-wrapper" @click="triggerAvatarUpload">
+          <img :src="form.avatar || defaultAvatar" class="avatar-img" alt="user avatar" />
+          <div class="avatar-overlay">{{ t('profile.avatar') }}</div>
+          <input ref="avatarInputRef" type="file" accept="image/*" hidden @change="onAvatarFileChange" />
+        </div>
+        <div class="hero-name">{{ form.nickname || form.username || 'Wristo' }}</div>
+        <div class="hero-email">{{ form.email || '—' }}</div>
+      </div>
 
-      <el-divider content-position="left">商家展示</el-divider>
+      <template v-if="userInfo">
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">{{ t('profile.title') }}</span>
+          </div>
+          <div class="section-card">
+            <div class="row">
+              <div class="row-label">{{ t('profile.username') }}</div>
+              <div class="row-value"><el-input v-model="form.username" :placeholder="t('profile.usernamePlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.email') }}</div>
+              <div class="row-value text-value">{{ form.email || '—' }}</div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.phone') }}</div>
+              <div class="row-value text-value">{{ form.phone || '—' }}</div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.createdAt') }}</div>
+              <div class="row-value text-value">{{ form.createdAt || '—' }}</div>
+            </div>
+          </div>
+        </div>
 
-      <el-form-item label="应用数">
-        <el-input v-model="form.appCount" disabled />
-      </el-form-item>
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">{{ t('profile.merchantDisplay') }}</span>
+          </div>
+          <div class="section-card">
+            <div class="row">
+              <div class="row-label">{{ t('profile.appCount') }}</div>
+              <div class="row-value text-value">{{ form.appCount || 0 }}</div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.totalDownloads') }}</div>
+              <div class="row-value text-value">{{ form.totalDownloads || 0 }}</div>
+            </div>
+            <div class="row-divider" />
+            <div class="row row-tall">
+              <div class="row-label">{{ t('profile.banner') }}</div>
+              <div class="row-value">
+                <ImageUpload
+                  v-model="form.bannerImageId"
+                  :preview-url="bannerPreviewUrl"
+                  aspect-code="banner"
+                  :max-size-mb="4"
+                  @uploaded="handleBannerUploaded"
+                />
+              </div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.slogan') }}</div>
+              <div class="row-value"><el-input v-model="form.slogan" :placeholder="t('profile.sloganPlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">Facebook</div>
+              <div class="row-value"><el-input v-model="form.facebookUrl" :placeholder="t('profile.facebookPlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">Instagram</div>
+              <div class="row-value"><el-input v-model="form.instagramUrl" :placeholder="t('profile.instagramPlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">X</div>
+              <div class="row-value"><el-input v-model="form.xUrl" :placeholder="t('profile.xPlaceholder')" /></div>
+            </div>
+          </div>
+        </div>
 
-      <el-form-item label="总下载量">
-        <el-input v-model="form.totalDownloads" disabled />
-      </el-form-item>
-
-      <el-form-item label="Banner图" prop="bannerImageId">
-        <ImageUpload
-          v-model="form.bannerImageId"
-          :preview-url="bannerPreviewUrl"
-          aspect-code="banner"
-          :max-size-mb="4"
-          @uploaded="handleBannerUploaded"
-        />
-      </el-form-item>
-
-      <el-form-item label="标语">
-        <el-input v-model="form.slogan" placeholder="请输入标语" />
-      </el-form-item>
-
-      <el-form-item label="Facebook">
-        <el-input v-model="form.facebookUrl" placeholder="请输入Facebook链接" />
-      </el-form-item>
-
-      <el-form-item label="Instagram">
-        <el-input v-model="form.instagramUrl" placeholder="请输入Instagram链接" />
-      </el-form-item>
-
-      <el-form-item label="X">
-        <el-input v-model="form.xUrl" placeholder="请输入X链接" />
-      </el-form-item>
-      
-      <el-divider content-position="left">支付信息</el-divider>
-      
-      <el-form-item label="支付方式">
-        <el-select v-model="form.payoutMethod" placeholder="请选择支付方式" style="width: 100%">
-          <el-option label="支付宝 (国内，到账人民币，2.5%汇损)" value="alipay" />
-          <el-option label="PayPal (海外，到账美元，无汇损)" value="paypal" />
-          <!-- <el-option label="微信" value="wechat" /> -->
-          <!-- <el-option label="银行卡" value="bank" /> -->
-        </el-select>
-      </el-form-item>
-      
-      <el-form-item label="支付账户">
-        <el-input v-model="form.payoutAccount" placeholder="请输入支付账户" />
-      </el-form-item>
-      
-      <el-form-item>
-        <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
-      </el-form-item>
-    </el-form>
-    <el-skeleton v-else :rows="6" animated />
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">{{ t('profile.payoutInfo') }}</span>
+          </div>
+          <div class="section-card">
+            <div class="row">
+              <div class="row-label">{{ t('profile.payoutMethod') }}</div>
+              <div class="row-value">
+                <el-select v-model="form.payoutMethod" :placeholder="t('profile.payoutMethodPlaceholder')" style="width: 100%">
+                  <el-option :label="t('profile.alipay')" value="alipay" />
+                  <el-option :label="t('profile.paypal')" value="paypal" />
+                </el-select>
+              </div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
+              <div class="row-label">{{ t('profile.payoutAccount') }}</div>
+              <div class="row-value"><el-input v-model="form.payoutAccount" :placeholder="t('profile.payoutAccountPlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row save-row">
+              <el-button type="primary" :loading="saving" @click="handleSave">{{ t('common.save') }}</el-button>
+            </div>
+          </div>
+        </div>
+      </template>
+      <el-skeleton v-else class="section-card loading-card" :rows="6" animated />
+    </div>
   </div>
 </template>
 
@@ -102,11 +127,15 @@ import type { MchUserVO, UserMchUpdateDTO, ApiResponse } from '@/types/api'
 import type { ImageVO } from '@/types/image'
 import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
+import { useI18n } from '@/i18n'
 
 const userInfo = ref<MchUserVO | null>(null)
 const loading = ref(true)
 const saving = ref(false)
 const bannerPreviewUrl = ref('')
+const { t } = useI18n()
+const defaultAvatar = 'https://cdn.wristo.io/test/avatar/561aae25-41bd-47ab-974e-7231f5a850e8.png'
+const avatarInputRef = ref<HTMLInputElement | null>(null)
 
 const form = reactive({
   username: '',
@@ -171,10 +200,10 @@ async function fetchUserInfo() {
       })
       bannerPreviewUrl.value = getImageUrl((res.data as any)?.bannerImage)
     } else {
-      ElMessage.error(res.msg || '获取用户信息失败')
+      ElMessage.error(res.msg || t('profile.fetchFailed'))
     }
   } catch (e) {
-    ElMessage.error('获取用户信息失败')
+    ElMessage.error(t('profile.fetchFailed'))
   } finally {
     loading.value = false
   }
@@ -183,11 +212,11 @@ async function fetchUserInfo() {
 function beforeAvatarUpload(file: File) {
   const isImage = file.type.startsWith('image/')
   if (!isImage) {
-    ElMessage.error('只能上传图片文件')
+    ElMessage.error(t('profile.imageOnly'))
   }
   const isLt2M = file.size / 1024 / 1024 < 2
   if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB!')
+    ElMessage.error(t('profile.imageTooLarge'))
   }
   return isImage && isLt2M
 }
@@ -199,13 +228,24 @@ async function handleAvatarChange(fileObj: any) {
     const res: ApiResponse<string> = await uploadAvatar(file)
     if (res.code === 0) {
       form.avatar = res.data || ''
-      ElMessage.success('头像上传成功')
+      ElMessage.success(t('profile.avatarUploaded'))
     } else {
-      ElMessage.error(res.msg || '头像上传失败')
+      ElMessage.error(res.msg || t('profile.avatarUploadFailed'))
     }
   } catch (e) {
-    ElMessage.error('头像上传失败')
+    ElMessage.error(t('profile.avatarUploadFailed'))
   }
+}
+
+function triggerAvatarUpload() {
+  avatarInputRef.value?.click()
+}
+
+async function onAvatarFileChange(e: Event) {
+  const files = (e.target as HTMLInputElement).files
+  if (!files || files.length === 0) return
+  await handleAvatarChange({ raw: files[0] })
+  ;(e.target as HTMLInputElement).value = ''
 }
 
 async function handleSave() {
@@ -225,13 +265,13 @@ async function handleSave() {
     }
     const res: ApiResponse<boolean> = await updateMchInfo(updateData)
     if (res.code === 0) {
-      ElMessage.success('保存成功')
+      ElMessage.success(t('profile.saveSuccess'))
       await fetchUserInfo()
     } else {
-      ElMessage.error(res.msg || '保存失败')
+      ElMessage.error(res.msg || t('profile.saveFailed'))
     }
   } catch (e) {
-    ElMessage.error('保存失败')
+    ElMessage.error(t('profile.saveFailed'))
   } finally {
     saving.value = false
   }
@@ -239,38 +279,137 @@ async function handleSave() {
 </script>
 
 <style scoped>
-.account-page {
-  width: 60%;
-  padding: 32px;
-  background: #fff;
-  min-height: 300px;
-  min-width: 480px;
-  margin: 0 auto;
-}
-.profile-form {
-  margin-top: 32px;
-}
-.avatar-uploader {
+.profile-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background: #f2f2f7;
   display: flex;
+  justify-content: center;
+  padding: 0 16px 48px;
+}
+.profile-container {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 40px;
+}
+.profile-hero {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 6px;
 }
-.avatar {
-  width: 80px;
-  height: 80px;
+.avatar-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid #eee;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px #fff, 0 2px 16px rgba(0, 0, 0, 0.08);
 }
-.avatar-uploader-icon {
-  font-size: 32px;
-  color: #bbb;
-  width: 80px;
-  height: 80px;
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px dashed #eee;
-  border-radius: 50%;
-  background: #fafbfc;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+.hero-name {
+  margin-top: 8px;
+  color: #1d1d1f;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+.hero-email {
+  color: #86868b;
+  font-size: 0.9375rem;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.section-header {
+  padding: 0 4px;
+}
+.section-title {
+  color: #86868b;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.section-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.04);
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 50px;
+  padding: 13px 18px;
+}
+.row-tall {
+  align-items: flex-start;
+}
+.row-divider {
+  height: 1px;
+  margin-left: 18px;
+  background: #e5e5ea;
+}
+.row-label {
+  flex: 0 0 140px;
+  color: #1d1d1f;
+  font-size: 0.9375rem;
+}
+.row-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+}
+.text-value {
+  color: #6e6e73;
+  overflow-wrap: anywhere;
+}
+.save-row {
+  justify-content: flex-end;
+}
+.loading-card {
+  padding: 18px;
+}
+@media (max-width: 640px) {
+  .row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .row-label {
+    flex-basis: auto;
+  }
+  .row-value {
+    width: 100%;
+    text-align: left;
+  }
 }
 </style> 

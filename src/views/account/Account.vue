@@ -2,11 +2,11 @@
   <div class="account-layout">
     <div class="header-sub">
       <nav class="header-sub-nav">
-        <router-link to="/account/dashboard" exact-active-class="active">Dashboard</router-link>
-        <router-link to="/account/products" exact-active-class="active">Products</router-link>
-        <router-link to="/account/history" exact-active-class="active">History</router-link>
-        <router-link to="/account/discounts" exact-active-class="active">Discounts</router-link>
-        <router-link to="/account/profile" exact-active-class="active">Profile</router-link>
+        <router-link :to="localizedPath('/account/dashboard')" exact-active-class="active">{{ t('nav.dashboard') }}</router-link>
+        <router-link :to="localizedPath('/account/products')" exact-active-class="active">{{ t('nav.products') }}</router-link>
+        <router-link :to="localizedPath('/account/history')" exact-active-class="active">{{ t('nav.history') }}</router-link>
+        <router-link :to="localizedPath('/account/discounts')" exact-active-class="active">{{ t('nav.discounts') }}</router-link>
+        <router-link :to="localizedPath('/account/profile')" exact-active-class="active">{{ t('nav.profile') }}</router-link>
       </nav>
     </div>
     <!-- Main Content -->
@@ -17,6 +17,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from '@/i18n'
+import { addLocaleToPath, useLocaleStore } from '@/store/locale'
+
+const { t } = useI18n()
+const localeStore = useLocaleStore()
+const localizedPath = (path: string) => addLocaleToPath(path, localeStore.currentLocale)
 </script>
 
 <style lang="scss" scoped>

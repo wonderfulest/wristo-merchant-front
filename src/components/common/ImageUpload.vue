@@ -23,7 +23,7 @@
 
         <div v-if="ratioTip" class="ratio-tip" :title="ratioTip">{{ ratioTip }}</div>
 
-        <div v-if="uploading" class="mask">上传中...</div>
+        <div v-if="uploading" class="mask">{{ t('image.uploading') }}</div>
         <button v-if="modelValue" type="button" class="clear" :disabled="uploading" @click.stop="clear">×</button>
       </div>
     </el-upload>
@@ -36,6 +36,7 @@ import { ElMessage } from 'element-plus'
 import { uploadImage } from '@/api/image'
 import { IMAGE_ASPECT_ENUM_NAME, useEnumStore } from '@/store/common'
 import type { ImageVO } from '@/types/image'
+import { useI18n } from '@/i18n'
 
 const extractRatio = (it: any): string => {
   const candidates = [it?.props?.ratio, it?.ratio, it?.category, it?.description, it?.name, it?.value]
@@ -66,6 +67,7 @@ const emit = defineEmits<{
 const uploading = ref(false)
 const preview = ref<string>('')
 const dragOver = ref(false)
+const { t } = useI18n()
 
 const previewUrl = computed(() => preview.value)
 
@@ -88,7 +90,7 @@ const ensureAspectCodeValid = async () => {
       validAspectCodes: validAspectCodes.value,
       ratioMap: aspectRatioMap.value
     })
-    ElMessage.error(`图片尺寸类型不合法：${code}`)
+    ElMessage.error(t('image.invalidAspect', { code }))
   }
   return ok
 }
@@ -174,13 +176,13 @@ watch(
 const beforeUpload = (file: File) => {
   const isImage = file.type.startsWith('image/')
   if (!isImage) {
-    ElMessage.error('仅支持上传图片文件')
+    ElMessage.error(t('image.imageOnly'))
     return false
   }
   const max = props.maxSizeMB || 10
   const sizeOk = file.size / 1024 / 1024 <= max
   if (!sizeOk) {
-    ElMessage.error(`图片大小不能超过 ${max}MB`)
+    ElMessage.error(t('image.tooLarge', { max }))
     return false
   }
   return true
@@ -197,14 +199,14 @@ const uploadRawFile = async (raw: File) => {
     const res = await uploadImage(raw, props.aspectCode)
     const img = (res as any)?.data as ImageVO | undefined
     if (!img?.id) {
-      throw new Error('上传失败')
+      throw new Error(t('image.uploadFailed'))
     }
     emit('update:modelValue', img.id)
     preview.value = img.previewUrl || (img as any)?.formats?.thumbnail?.url || img.url || ''
     emit('uploaded', img)
-    ElMessage.success('图片已上传')
+    ElMessage.success(t('image.uploaded'))
   } catch (e: any) {
-    ElMessage.error(e?.msg || '上传失败')
+    ElMessage.error(e?.msg || t('image.uploadFailed'))
   } finally {
     uploading.value = false
   }

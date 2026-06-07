@@ -1,7 +1,7 @@
 <template>
   <div class="add-bundle-drawer">
     <div class="drawer-header">
-      <h2>{{ props.bundle ? 'Edit Bundle' : 'Add New Bundle' }}</h2>
+      <h2>{{ props.bundle ? t('bundle.edit') : t('bundle.add') }}</h2>
     </div>
     <div class="drawer-body">
       <!-- 套餐信息 -->
@@ -9,7 +9,7 @@
         <div class="custom-form-item">
           <label
             :class="['custom-label', { active: isActive('bundleName') || form.bundleName }]"
-          >Bundle Name</label>
+          >{{ t('bundle.name') }}</label>
           <input
             type="text"
             v-model="form.bundleName"
@@ -23,7 +23,7 @@
         <div class="custom-form-item">
           <label
             :class="['custom-label', { active: isActive('bundleDesc') || form.bundleDesc }]"
-          >Bundle Description</label>
+          >{{ t('bundle.description') }}</label>
           <textarea
             v-model="form.bundleDesc"
             placeholder=""
@@ -36,7 +36,7 @@
         <div class="custom-form-item" style="display: flex; align-items: center;">
           <label
             :class="['custom-label', { active: isActive('price') || form.price }]"
-          >Price</label>
+          >{{ t('bundle.price') }}</label>
           <input
             type="text"
             v-model="form.price"
@@ -50,14 +50,14 @@
           <span style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;">USD</span>
         </div>
         <div class="custom-form-item" v-if="props.bundle?.bundleId">
-          <label class="custom-label active">Bundle URL</label>
+          <label class="custom-label active">{{ t('bundle.url') }}</label>
           <div class="bundle-url-display">
             <span class="bundle-url-text">https://www.wristo.io/bundle/{{ props.bundle.bundleId }}</span>
             <button 
               type="button" 
               class="copy-url-btn" 
               @click="copyBundleUrl"
-              title="Copy URL"
+              :title="t('bundle.copyUrl')"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
@@ -69,13 +69,13 @@
       <!-- 产品选择器 -->
       <div class="product-selector">
         <div class="selector-header">
-          <span>Select Products Included</span>
-          <a class="change-order" @click="handleChangeOrder">Change Order</a>
+          <span>{{ t('bundle.selectProducts') }}</span>
+          <a class="change-order" @click="handleChangeOrder">{{ t('bundle.changeOrder') }}</a>
         </div>
         <div class="selector-list">
           <div class="selector-item" @click="toggleSelectAll">
             <span :class="['selector-checkbox', isAllSelected ? 'checked' : '']"></span>
-            <span class="selector-label">Select All</span>
+            <span class="selector-label">{{ t('bundle.selectAll') }}</span>
           </div>
           <div
             class="selector-item"
@@ -110,17 +110,17 @@
         :disabled="loading"
         @click="props.bundle ? handleSave() : handleCreate()"
       >
-        {{ props.bundle ? 'Save' : 'CREATE BUNDLE' }}
+        {{ props.bundle ? t('common.save') : t('bundle.create') }}
       </el-button>
     </div>
     <el-dialog v-model="orderDialogVisible" width="700px" append-to-body class="sort-order-dialog" :show-close="true" :close-on-click-modal="false">
       <template #header>
         <div class="sort-dialog-header">
-          <div class="sort-dialog-title">Manage App Sort Order</div>
+          <div class="sort-dialog-title">{{ t('bundle.manageOrder') }}</div>
         </div>
       </template>
       <div class="sort-dialog-desc">
-        Change the order in which apps will be shown to your customers in the bundle overviews during purchase.
+        {{ t('bundle.orderDesc') }}
       </div>
       <draggable
         v-model="orderDialogIds"
@@ -139,8 +139,8 @@
       </draggable>
       <template #footer>
         <div class="sort-dialog-footer">
-          <el-button class="save-btn" type="success" @click="saveOrder">SAVE</el-button>
-          <el-button class="cancel-btn" @click="orderDialogVisible = false">CANCEL</el-button>
+          <el-button class="save-btn" type="success" @click="saveOrder">{{ t('common.save') }}</el-button>
+          <el-button class="cancel-btn" @click="orderDialogVisible = false">{{ t('common.cancel') }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -155,10 +155,12 @@ import { fetchAllProducts, type Product } from '@/api/products'
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import draggable from 'vuedraggable'
+import { useI18n } from '@/i18n'
 
 // 2. props/emit 定义
 const props = defineProps<{ bundle?: Bundle | null }>()
 const emits = defineEmits(['close'])
+const { t } = useI18n()
 
 // 3. ref/reactive/变量定义
 const activeInput = ref('')
@@ -226,11 +228,11 @@ function isActive(key: string) {
 
 function validateForm() {
   if (!form.value.bundleName.trim()) {
-    ElMessage.error('Bundle name is required')
+    ElMessage.error(t('bundle.nameRequired'))
     return false
   }
   if (!form.value.bundleDesc.trim()) {
-    ElMessage.error('Bundle description is required')
+    ElMessage.error(t('bundle.descRequired'))
     return false
   }
   return true
@@ -291,13 +293,13 @@ async function handleCreate() {
     }
     const res = await createBundle(payload)
     if (res.code === 0) {
-      ElMessage.success('Bundle created successfully')
+      ElMessage.success(t('bundle.created'))
       emits('close')
     } else {
-      ElMessage.error(res.msg || 'Create failed')
+      ElMessage.error(res.msg || t('drawer.createFailed'))
     }
   } catch (e: any) {
-    ElMessage.error(e?.msg || 'Create failed')
+    ElMessage.error(e?.msg || t('drawer.createFailed'))
   } finally {
     loading.value = false
   }
@@ -315,13 +317,13 @@ async function handleSave() {
     }
     const res = await updateBundle(payload, props.bundle?.bundleId || 0)
     if (res.code === 0) {
-      ElMessage.success('Bundle updated successfully')
+      ElMessage.success(t('bundle.updated'))
       emits('close')
     } else {
-      ElMessage.error(res.msg || 'Update failed')
+      ElMessage.error(res.msg || t('drawer.updateFailed'))
     }
   } catch (e: any) {
-    ElMessage.error(e?.msg || 'Update failed')
+    ElMessage.error(e?.msg || t('drawer.updateFailed'))
   } finally {
     loading.value = false
   }
@@ -354,9 +356,9 @@ function copyBundleUrl() {
   if (props.bundle?.bundleId) {
     const url = `https://www.wristo.io/bundle/${props.bundle.bundleId}`
     navigator.clipboard.writeText(url).then(() => {
-      ElMessage.success('Bundle URL copied to clipboard')
+      ElMessage.success(t('bundle.copySuccess'))
     }).catch(() => {
-      ElMessage.error('Failed to copy URL')
+      ElMessage.error(t('bundle.copyFailed'))
     })
   }
 }

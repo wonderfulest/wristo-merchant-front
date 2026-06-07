@@ -9,7 +9,7 @@
     <div class="products-header">
       <div class="products-header-left">
         <!-- <el-button type="success" class="add-new-btn" @click="() => openProductDrawer()">NEW PRODUCT<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button> -->
-        <el-button style="background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">NEW BUNDLE<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+        <el-button style="background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">{{ t('products.newBundle') }}<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
       </div>
       <!-- <div class="products-header-actions">
         <el-button type="success" plain>GENERATE SHOP</el-button>
@@ -18,8 +18,8 @@
     </div>
     <div class="products-section">
       <div class="section-title-row">
-        <span class="section-title">BUNDLES</span>
-        <el-checkbox v-model="showInactiveBundles" @change="handleShowInactiveBundlesChange">SHOW INACTIVE BUNDLES</el-checkbox>
+        <span class="section-title">{{ t('products.bundles') }}</span>
+        <el-checkbox v-model="showInactiveBundles" @change="handleShowInactiveBundlesChange">{{ t('products.showInactiveBundles') }}</el-checkbox>
       </div>
       <div class="bundle-list">
         <el-card class="bundle-card" v-for="item in bundles" :key="item.bundleId" shadow="hover" @click="() => openBundleDrawer(item)">
@@ -32,17 +32,17 @@
                 plain
                 @click.stop="toggleBundleActive(item)"
                 style="width: 72px; min-width: 72px; text-align: center;"
-              >{{ item.isActive === 1 ? 'ACTIVE' : 'INACTIVE' }}</el-button>
+              >{{ item.isActive === 1 ? t('products.active') : t('products.inactive') }}</el-button>
             </div>
-            <div class="bundle-meta">{{ item.products.length }} products</div>
-            <el-button class="view-content-btn">VIEW CONTENT <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+            <div class="bundle-meta">{{ t('products.productCount', { count: item.products.length }) }}</div>
+            <el-button class="view-content-btn">{{ t('products.viewContent') }} <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
           </div>
         </el-card>
       </div>
     </div>
     <div class="products-section">
       <div class="section-title-row">
-        <span class="section-title">APPS/WATCH-FACES</span>
+        <span class="section-title">{{ t('products.apps') }}</span>
       </div>
       <ProductTable @edit="openProductDrawer" />
     </div>
@@ -58,8 +58,10 @@ import ProductDrawer from './ProductDrawer.vue'
 import BundleDrawer from './BundleDrawer.vue'
 import type { ApiResponse } from '@/types/api'
 import ProductTable from './ProductTable.vue'
+import { useI18n } from '@/i18n'
 
 const bundles = ref<Bundle[]>([])
+const { t } = useI18n()
 
 const drawerVisible = ref(false)
 const addProductDrawerRef = ref()
@@ -73,9 +75,9 @@ const showInactiveBundles = ref(false)
 const toggleBundleActive = async (bundle: Bundle) => {
   const res = await updateBundleActive(bundle.bundleId, bundle.isActive === 1 ? 0 : 1)
   if (res.code === 0) {
-    ElMessage.success('更新成功')
+    ElMessage.success(t('products.updateSuccess'))
   } else {
-    ElMessage.error(res.msg || '更新失败')
+    ElMessage.error(res.msg || t('products.updateFailed'))
   }
   getBundles()
 }
@@ -129,10 +131,10 @@ const getBundles = async () => {
     if (res.code === 0 && res.data) {
       bundles.value = res.data
     } else {
-      ElMessage.error(res.msg || '获取套餐失败')
+      ElMessage.error(res.msg || t('products.fetchBundlesFailed'))
     }
   } catch (e) {
-    ElMessage.error('获取套餐失败')
+    ElMessage.error(t('products.fetchBundlesFailed'))
   }
 }
 

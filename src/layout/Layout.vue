@@ -4,23 +4,32 @@
     <header class="header">
       <div class="header-inner">
         <div class="logo">
-          <span class="logo-icon">W</span>
-          <span class="logo-text">risto</span>
+          <img class="logo-image" src="https://cdn.wristo.io/brands/wristo-logo/svg/wristo-logo-horizontal.svg" alt="Wristo" />
         </div>
         <div class="header-right">
-          <router-link to="/account">ACCOUNT</router-link>
-          <a href="#" class="hide-on-mobile">DOCUMENTATION</a>
-          <router-link to="/api" v-if="hasMerchantRole" class="hide-on-mobile">API</router-link>
+          <router-link :to="localizedPath('/account')">{{ t('nav.account') }}</router-link>
+          <a href="#" class="hide-on-mobile">{{ t('nav.documentation') }}</a>
+          <router-link :to="localizedPath('/api')" v-if="hasMerchantRole" class="hide-on-mobile">{{ t('nav.api') }}</router-link>
+          <select
+            class="language-select"
+            :aria-label="t('language.selector')"
+            :value="localeStore.currentLocale"
+            @change="handleLocaleChange"
+          >
+            <option v-for="locale in locales" :key="locale" :value="locale">
+              {{ t(`language.${locale}`) }}
+            </option>
+          </select>
         </div>
         <div class="user-profile-dropdown">
-          <div class="user-profile-name" @click="toggleDropdown">
-            {{ userStore.userInfo?.username }}
-            <span class="dropdown-arrow">▼</span>
+          <div class="user-avatar-container" @click="toggleDropdown">
+            <img :src="userAvatar" class="user-avatar" alt="user avatar" />
+            <span class="user-profile-name">{{ displayName }}</span>
           </div>
           <div class="dropdown-content" v-if="isDropdownOpen">
-            <a href="/account/profile">Edit Profile</a>
-            <a href="/account/password">Change Password</a>
-            <a href="#" @click.prevent="handleLogout">Log Out</a>
+            <router-link :to="localizedPath('/account/profile')">{{ t('user.editProfile') }}</router-link>
+            <router-link :to="localizedPath('/account/password')">{{ t('user.changePassword') }}</router-link>
+            <a href="#" @click.prevent="handleLogout">{{ t('user.logout') }}</a>
           </div>
         </div>
       </div>
@@ -33,12 +42,12 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-left">
-          <span class="footer-icon">🐦</span>
+          <img class="footer-mark" src="https://cdn.wristo.io/brands/wristo-logo/svg/wristo-mark.svg" alt="" aria-hidden="true" />
           <span> Wristo 2025</span>
         </div>
         <div class="footer-links">
-          <a href="#">Terms of Use</a>
-          <a href="#">Privacy Policy</a>
+          <a href="#">{{ t('footer.terms') }}</a>
+          <a href="#">{{ t('footer.privacy') }}</a>
           <a href="mailto:support@wristo.io">support@wristo.io</a>
         </div>
         <div class="footer-right">
@@ -52,7 +61,19 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from '@/i18n'
+import { addLocaleToPath, SUPPORTED_LOCALES, stripLocaleFromPath, useLocaleStore, type SupportedLocale } from '@/store/locale'
+
 const userStore = useUserStore()
+const route = useRoute()
+const router = useRouter()
+const localeStore = useLocaleStore()
+const { t } = useI18n()
+const locales = SUPPORTED_LOCALES
+const defaultAvatar = 'https://cdn.wristo.io/test/avatar/561aae25-41bd-47ab-974e-7231f5a850e8.png'
+const userAvatar = computed(() => userStore.userInfo?.avatar || defaultAvatar)
+const displayName = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || 'Wristo')
 const ssoBaseUrl = import.meta.env.VITE_SSO_LOGIN_URL
 const redirectUri = import.meta.env.VITE_SSO_REDIRECT_URI
 const handleLogout = async () => {
@@ -69,6 +90,15 @@ const hasMerchantRole = computed(() => {
 const isDropdownOpen = ref(false)
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const localizedPath = (path: string) => addLocaleToPath(path, localeStore.currentLocale)
+
+const handleLocaleChange = (event: Event) => {
+  const select = event.target as HTMLSelectElement
+  const nextLocale = select.value as SupportedLocale
+  localeStore.setLocale(nextLocale)
+  router.push(addLocaleToPath(stripLocaleFromPath(route.fullPath), nextLocale))
 }
 </script>
 
@@ -120,24 +150,25 @@ const toggleDropdown = () => {
 .logo {
   display: flex;
   align-items: center;
-  font-size: 2.2rem;
-  font-weight: bold;
+  flex: 0 0 auto;
 }
-.logo-icon {
-  color: $color-success;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-right: 6px;
-}
-.logo-text {
-  color: $color-link;
-  font-weight: 700;
-  font-size: 2.2rem;
+.logo-image {
+  display: block;
+  width: 132px;
+  height: auto;
 }
 .header-right {
   display: flex;
   gap: 24px;
   align-items: center;
+}
+.language-select {
+  border: 1px solid rgba(25, 179, 107, 0.28);
+  border-radius: 8px;
+  background: #fff;
+  color: $color-link;
+  font-size: 0.95rem;
+  padding: 7px 28px 7px 10px;
 }
 .header-right a, .header-right :deep(a.router-link-active), .header-right :deep(a.router-link-exact-active) {
   color: $color-link;
@@ -181,8 +212,9 @@ const toggleDropdown = () => {
   align-items: center;
   gap: 8px;
 }
-.footer-icon {
-  font-size: $font-size-sm;
+.footer-mark {
+  width: 18px;
+  height: 18px;
 }
 .footer-links {
   display: flex;
@@ -231,6 +263,37 @@ const toggleDropdown = () => {
 .user-profile-dropdown {
   position: relative;
 }
+.user-avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.user-avatar-container:hover {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+.user-profile-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $color-link;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
 
 /* Mobile responsiveness */
 .hide-on-mobile {
@@ -243,13 +306,16 @@ const toggleDropdown = () => {
     padding: 0 16px;
   }
   .logo {
-    font-size: 1.6rem;
+    width: 104px;
   }
-  .logo-icon, .logo-text {
-    font-size: 1.6rem;
+  .logo-image {
+    width: 104px;
   }
   .header-right {
     gap: 12px;
+  }
+  .user-profile-name {
+    display: none;
   }
   .header-right a, .header-right :deep(a) {
     font-size: 0.95rem;

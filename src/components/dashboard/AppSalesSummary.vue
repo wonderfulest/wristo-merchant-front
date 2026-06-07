@@ -1,13 +1,13 @@
 <template>
   <div class="dashboard-content">
-    <h3 class="section-title">应用销售总计</h3>
+    <h3 class="section-title">{{ t('dashboard.appSalesSummary') }}</h3>
 
     <div v-if="summaryError" class="error-message">
-      <p>获取应用销售总计失败：{{ summaryError }}</p>
+      <p>{{ t('dashboard.appSalesSummaryFailed') }}: {{ summaryError }}</p>
     </div>
 
-    <el-table v-loading="summaryLoading" :data="summaryList" border style="width: 100%" empty-text="No data">
-      <el-table-column label="应用" min-width="240">
+    <el-table v-loading="summaryLoading" :data="summaryList" border style="width: 100%" :empty-text="t('common.noData')">
+      <el-table-column :label="t('dashboard.app')" min-width="240">
         <template #default="{ row }">
           <div class="app-cell">
             <img v-if="row.app?.garminImageUrl" :src="row.app.garminImageUrl" alt="" class="app-thumb" />
@@ -18,14 +18,14 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="downloadCount" label="下载次数" width="120" align="right" />
-      <el-table-column prop="salesCount" label="销量" width="120" align="right" />
-      <el-table-column label="总金额" width="160" align="right">
+      <el-table-column prop="downloadCount" :label="t('dashboard.downloadCount')" width="120" align="right" />
+      <el-table-column prop="salesCount" :label="t('dashboard.salesCount')" width="120" align="right" />
+      <el-table-column :label="t('dashboard.totalAmount')" width="160" align="right">
         <template #default="{ row }">
           ${{ formatCurrency(row.totalAmount) }}
         </template>
       </el-table-column>
-      <el-table-column prop="bundleTriggerCount" label="触发套餐次数" width="160" align="right" />
+      <el-table-column prop="bundleTriggerCount" :label="t('dashboard.bundleTriggerCount')" width="160" align="right" />
     </el-table>
 
     <div class="table-footer">
@@ -47,6 +47,7 @@
 import { ref, onMounted } from 'vue'
 import { getAppSalesSummaryPage } from '@/api/purchase'
 import type { AppSalesSummaryVO, AppSalesSummaryPageQueryDTO } from '@/types/api'
+import { useI18n } from '@/i18n'
 
 const summaryList = ref<AppSalesSummaryVO[]>([])
 const summaryLoading = ref(false)
@@ -54,9 +55,10 @@ const summaryError = ref<string | null>(null)
 const summaryPageNum = ref(1)
 const summaryPageSize = ref(10)
 const summaryTotal = ref(0)
+const { t, locale } = useI18n()
 
 const formatCurrency = (amount: number): string => {
-  return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return amount.toLocaleString(locale.value === 'zh' ? 'zh-CN' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const fetchSummaryPage = async () => {
@@ -72,10 +74,10 @@ const fetchSummaryPage = async () => {
       summaryList.value = res.data.list || []
       summaryTotal.value = res.data.total || 0
     } else {
-      summaryError.value = res.msg || 'Failed to fetch app sales summary'
+      summaryError.value = res.msg || t('dashboard.summaryFetchFailed')
     }
   } catch (e) {
-    summaryError.value = 'Network error occurred'
+    summaryError.value = t('common.networkError')
     console.error('Error fetching app sales summary:', e)
   } finally {
     summaryLoading.value = false

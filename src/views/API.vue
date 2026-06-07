@@ -1,23 +1,23 @@
 <template>
   <div class="api-page">
     <div class="api-header">
-      <h1>Merchant API</h1>
+      <h1>{{ t('api.title') }}</h1>
     </div>
     <div class="api-content">
       <p class="api-tip">
-        Use the Merchant API to get your sales results in JSON format to use in an app or clockface and keep constant track of your sales!
+        {{ t('api.tip.results') }}
       </p>
       <p class="api-tip">
-        Your API key is displayed below, keep this key secret because that key will give anyone access to your sales data. If the key ever gets compromised, use the "Generate new key" button to get a new key and make the old one invalid. This cannot be undone!
+        {{ t('api.tip.secret') }}
       </p>
       <p class="api-tip">
-        For more information, check out the <a href="#" target="_blank">documentation</a> of the Merchant API.
+        {{ t('api.tip.docs.prefix') }} <a href="#" target="_blank">{{ t('api.tip.docs.link') }}</a> {{ t('api.tip.docs.suffix') }}
       </p>
       <div class="api-key-card">
         <el-card>
-          <div class="api-key-label">API Key:</div>
+          <div class="api-key-label">{{ t('api.key') }}</div>
           <el-input v-model="apiKey" readonly class="api-key-input" />
-          <el-button type="success" class="generate-btn" :loading="loading" @click="generateKey">GENERATE NEW KEY</el-button>
+          <el-button type="success" class="generate-btn" :loading="loading" @click="generateKey">{{ t('api.generate') }}</el-button>
         </el-card>
       </div>
     </div>
@@ -30,9 +30,11 @@ import { ElMessage } from 'element-plus'
 import { getToken, createOrUpdateToken, TOKEN_NAME } from '@/api/merchant-api'
 import type { ApiResponse } from '@/types/api'
 import type {  TokenData } from '@/api/merchant-api'
+import { useI18n } from '@/i18n'
 
 const apiKey = ref('')
 const loading = ref(false)
+const { t } = useI18n()
 
 onMounted(async () => {
   const res: ApiResponse<TokenData> = await getToken()
@@ -42,7 +44,7 @@ onMounted(async () => {
       generateKey()
     }
   } else {
-    ElMessage.error(res.msg || 'Failed to get API Key')
+    ElMessage.error(res.msg || t('api.fetchFailed'))
   }
 })
 async function generateKey() {
@@ -51,12 +53,12 @@ async function generateKey() {
     const res: ApiResponse<TokenData> = await createOrUpdateToken(TOKEN_NAME)
     if (res.code === 0) {
       apiKey.value = res.data?.token || ''
-      ElMessage.success('New API Key generated!')
+      ElMessage.success(t('api.generateSuccess'))
     } else {
-      ElMessage.error(res.msg || 'Failed to generate API Key')
+      ElMessage.error(res.msg || t('api.generateFailed'))
     }
   } catch (e: any) {
-    ElMessage.error(e?.msg || 'Failed to generate API Key')
+    ElMessage.error(e?.msg || t('api.generateFailed'))
   } finally {
     loading.value = false
   }

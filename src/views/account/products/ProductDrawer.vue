@@ -1,11 +1,11 @@
 <template>
   <div class="add-product-drawer">
     <div class="drawer-header">
-      <h2>Add New Product</h2>
+      <h2>{{ t('drawer.addProduct') }}</h2>
     </div>
     <div class="drawer-body">
       <div class="section-title-row">
-        <span class="section-title">Product Image</span>
+        <span class="section-title">{{ t('drawer.productImage') }}</span>
         <el-button
           class="help-btn"
           type="info"
@@ -27,9 +27,7 @@
       >
         <template #content>
           <div class="section-desc">
-            Upload an image for the platform that this product is available for.<br>
-            Leave blank if your product doesn't support that platform. Customers will view this before purchasing.<br>
-            We recommend using the same preview you used in the Garmin store.
+            {{ t('drawer.imageTip') }}
           </div>
         </template>
         <span></span>
@@ -51,7 +49,7 @@
           >
             <div v-if="!form[platform.imgField]" class="img-upload-placeholder">
               <el-icon><i class="el-icon-picture" /></el-icon>
-              <div>Add Preview</div>
+              <div>{{ t('drawer.addPreview') }}</div>
             </div>
             <img v-else :src="form[platform.imgField]" class="img-preview" />
           </el-upload>
@@ -66,7 +64,7 @@
         >
           <label
             :class="['custom-label', { active: isActive(item.key) || form[item.key] }]"
-            >{{ item.label }}</label
+            >{{ t(item.labelKey) }}</label
           >
           <input
             :type="item.type || 'text'"
@@ -82,7 +80,7 @@
           <span
             v-if="item.key === 'trialLasts'"
             style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
-            >Hours</span
+            >{{ t('products.hours') }}</span
           >
           <span
             v-if="item.key === 'price'"
@@ -90,10 +88,10 @@
             >USD</span
           >
           <div
-            v-if="item.tip && activeInput === item.key"
+            v-if="item.tipKey && activeInput === item.key"
             class="custom-tip-right"
           >
-            {{ item.tip }}
+            {{ t(item.tipKey) }}
           </div>
         </div>
       </div>
@@ -103,13 +101,13 @@
         <el-tooltip
           effect="dark"
           placement="top"
-          :content="fullAgreement"
+          :content="t('drawer.agreement')"
           :show-after="200"
           :hide-after="100"
           :popper-style="{maxWidth: '400px', whiteSpace: 'normal', lineHeight: '1.2'}"
         >
           <span class="footer-checkbox-text" style="cursor: pointer;">
-            Agree to the terms
+            {{ t('drawer.agree') }}
           </span>
         </el-tooltip>
       </el-checkbox>
@@ -120,7 +118,7 @@
         :disabled="!checked || loading"
         @click="props.product ? handleSave() : handleCreate()"
       >
-        {{ props.product ? 'Save' : 'CREATE PRODUCT' }}
+        {{ props.product ? t('common.save') : t('drawer.createProduct') }}
       </el-button>
     </div>
   </div>
@@ -132,6 +130,7 @@ import { createProduct, updateProduct, type Product, uploadProductImage } from '
 import { ElMessage } from 'element-plus'
 import { defineEmits } from 'vue'
 import type { ApiResponse } from '@/types/api';
+import { useI18n, type MessageKey } from '@/i18n'
 
 const props = defineProps<{ product?: Product | null }>()
 
@@ -163,42 +162,47 @@ const checked = ref(false);
 
 const loading = ref(false);
 const emits = defineEmits(['close'])
+const { t } = useI18n()
 
-const fullAgreement = `By clicking this box, you represent and warrant that you have all necessary rights, including all patent, trademark, trade secret, copyright or other intellectual property, publicity, or other proprietary rights, in and to this product. Do not check this box unless you own all such rights or have sufficient permission from their rightful owner(s) to use the material for commercial purposes.\n\nIf you check this box and it turns out you do not have all necessary rights, any and all damages coming from this violation will be charged to you in full.`;
-
-const inputItems = [
+const inputItems: Array<{
+  key: string
+  labelKey: MessageKey
+  placeholder: string
+  type?: string
+  tipKey?: MessageKey
+}> = [
   {
     key: "name",
-    label: "Name of Product",
+    labelKey: "drawer.nameOfProduct",
     placeholder: "",
     type: "text",
-    tip: "Enter the name of the product.",
+    tipKey: "drawer.nameTip",
   },
-  { key: "description", label: "Description for Product", placeholder: "" },
+  { key: "description", labelKey: "drawer.productDescription", placeholder: "" },
   {
     key: "price",
-    label: "Price of Product",
+    labelKey: "drawer.productPrice",
     placeholder: "",
     type: "text",
-    tip: "Enter the price of the product.",
+    tipKey: "drawer.priceTip",
   },
   {
     key: "garminUrl",
-    label: "Garmin Appstore Url",
+    labelKey: "drawer.garminUrl",
     placeholder: "",
     type: "text",
-    tip: "If this product is available for Garmin smartwatches, enter the Garmin appstore URL which allows customers to install the app here.",
+    tipKey: "drawer.garminUrlTip",
   },
   {
     key: "trialLasts",
-    label: "Trial Lasts",
+    labelKey: "drawer.trialLasts",
     placeholder: "",
     type: "text",
-    tip: "Enter the number of hours the trial will last. Leave blank if you do not want to offer a trial. support 0 means no trial, 0.5 means 0.5 hours.",
+    tipKey: "drawer.trialTip",
   },
   {
     key: "contactUrl",
-    label: "Product FAQ & Contact Page",
+    labelKey: "drawer.contactPage",
     placeholder: "",
     type: "text",
   },
@@ -211,13 +215,13 @@ function handleImageChange(file: any, key: string) {
     .then((res: any) => {
       if (res.code === 0 && res.data) {
         form.value[`${key}Img`] = res.data;
-        ElMessage.success('图片上传成功');
+        ElMessage.success(t('drawer.uploadSuccess'));
       } else {
-        ElMessage.error(res.msg || '图片上传失败');
+        ElMessage.error(res.msg || t('drawer.uploadFailed'));
       }
     })
     .catch(() => {
-      ElMessage.error('图片上传失败');
+      ElMessage.error(t('drawer.uploadFailed'));
     })
     .finally(() => {
       loading.value = false;
@@ -230,19 +234,19 @@ function isActive(key: string) {
 
 function validateForm() {
   if (!form.value.name.trim()) {
-    ElMessage.error('Product name is required');
+    ElMessage.error(t('drawer.productNameRequired'));
     return false;
   }
   if (!form.value.description.trim()) {
-    ElMessage.error('Product description is required');
+    ElMessage.error(t('drawer.productDescRequired'));
     return false;
   }
   if (form.value.price && isNaN(Number(form.value.price))) {
-    ElMessage.error('Price must be a number');
+    ElMessage.error(t('drawer.priceNumber'));
     return false;
   }
   if (form.value.trialLasts && isNaN(Number(form.value.trialLasts))) {
-    ElMessage.error('Trial Lasts must be a number');
+    ElMessage.error(t('drawer.trialNumber'));
     return false;
   }
   return true;
@@ -250,7 +254,7 @@ function validateForm() {
 
 async function handleCreate() {
   if (!checked.value) {
-    ElMessage.error('You must agree to the terms');
+    ElMessage.error(t('drawer.mustAgree'));
     return;
   }
   if (!validateForm()) return;
@@ -266,13 +270,13 @@ async function handleCreate() {
     };
     const res: ApiResponse<Product> = await createProduct(payload);
     if (res.code === 0) {
-      ElMessage.success('Product created successfully');
+      ElMessage.success(t('drawer.productCreated'));
       emits('close');
     } else {
-      ElMessage.error(res.msg || 'Create failed');
+      ElMessage.error(res.msg || t('drawer.createFailed'));
     }
   } catch (e: any) {
-    ElMessage.error(e?.msg || 'Create failed');
+    ElMessage.error(e?.msg || t('drawer.createFailed'));
   } finally {
     loading.value = false;
   }
@@ -338,13 +342,13 @@ async function handleSave() {
     }
     const res = await updateProduct(props.product.appId, payload)
     if (res.code === 0) {
-      ElMessage.success('Product updated successfully')
+      ElMessage.success(t('drawer.productUpdated'))
       emits('close')
     } else {
-      ElMessage.error(res.msg || 'Update failed')
+      ElMessage.error(res.msg || t('drawer.updateFailed'))
     }
   } catch (e: any) {
-    ElMessage.error(e?.msg || 'Update failed')
+    ElMessage.error(e?.msg || t('drawer.updateFailed'))
   } finally {
     loading.value = false
   }

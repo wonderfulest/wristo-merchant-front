@@ -28,7 +28,7 @@
       </div>
       <div class="product-details">
         <span>appId: {{ displayAppId }}</span>
-        <span v-if="designId">设计ID: {{ designId }}</span>
+        <span v-if="designId">{{ t('productInfo.designId') }}: {{ designId }}</span>
       </div>
     </div>
   </div>
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
+import { useI18n } from '@/i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -52,6 +53,7 @@ const props = withDefaults(
     thumbSize: 56
   }
 )
+const { t } = useI18n()
 
 const thumbPx = computed(() => props.thumbSize || 56)
 

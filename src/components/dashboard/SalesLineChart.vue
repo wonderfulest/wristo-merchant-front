@@ -1,18 +1,18 @@
 <template>
   <div class="dashboard-content">
-    <h3 class="section-title">销售趋势</h3>
+    <h3 class="section-title">{{ t('dashboard.salesTrend') }}</h3>
 
     <div v-if="error" class="error-message">
-      <p>获取销售折线图失败：{{ error }}</p>
+      <p>{{ t('dashboard.salesTrendFailed') }}: {{ error }}</p>
     </div>
 
     <div class="filters">
       <el-radio-group v-model="rangeType" size="small" @change="handleRangeTypeChange">
-        <el-radio-button label="7d">近一周</el-radio-button>
-        <el-radio-button label="15d">近半月</el-radio-button>
-        <el-radio-button label="30d">近一月</el-radio-button>
-        <el-radio-button label="60d">近两月</el-radio-button>
-        <el-radio-button label="custom">自定义</el-radio-button>
+        <el-radio-button label="7d">{{ t('dashboard.last7d') }}</el-radio-button>
+        <el-radio-button label="15d">{{ t('dashboard.last15d') }}</el-radio-button>
+        <el-radio-button label="30d">{{ t('dashboard.last30d') }}</el-radio-button>
+        <el-radio-button label="60d">{{ t('dashboard.last60d') }}</el-radio-button>
+        <el-radio-button label="custom">{{ t('dashboard.custom') }}</el-radio-button>
       </el-radio-group>
 
       <el-date-picker
@@ -20,29 +20,29 @@
         v-model="dateRange"
         type="daterange"
         range-separator="-"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
+        :start-placeholder="t('dashboard.startDate')"
+        :end-placeholder="t('dashboard.endDate')"
         size="small"
         :disabled="loading"
       />
 
       <el-input
         v-model.number="appId"
-        placeholder="应用ID(可选)"
+        :placeholder="t('dashboard.appIdOptional')"
         clearable
         size="small"
         style="width: 180px"
         :disabled="loading"
       />
 
-      <el-button type="primary" size="small" :loading="loading" @click="handleQuery">查询</el-button>
+      <el-button type="primary" size="small" :loading="loading" @click="handleQuery">{{ t('dashboard.query') }}</el-button>
     </div>
 
     <el-card shadow="never" :body-style="{ padding: '12px 12px 4px 12px' }" v-loading="loading">
       <div ref="chartRef" class="line-chart"></div>
       <div class="chart-legend">
-        <span class="legend orders">订单数</span>
-        <span class="legend earnings">当日收益</span>
+        <span class="legend orders">{{ t('dashboard.orders') }}</span>
+        <span class="legend earnings">{{ t('dashboard.dailyEarnings') }}</span>
       </div>
     </el-card>
   </div>
@@ -52,10 +52,12 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { getSales } from '@/api/purchase'
 import type { DailySalesItemVO, SalesQueryDTO } from '@/types/api'
+import { useI18n } from '@/i18n'
 
 const loading = ref(false)
 const error = ref<string | null>(null)
 const items = ref<DailySalesItemVO[]>([])
+const { t, locale } = useI18n()
 
 // date range and quick ranges
 type Range = [Date, Date]
@@ -117,10 +119,10 @@ const fetchSales = async (dto?: SalesQueryDTO) => {
     if (res.code === 0 && Array.isArray(res.data)) {
       items.value = res.data
     } else {
-      error.value = res.msg || 'Failed to fetch sales data'
+      error.value = res.msg || t('dashboard.salesFetchFailed')
     }
   } catch (e) {
-    error.value = 'Network error occurred'
+    error.value = t('common.networkError')
     console.error('Error fetching sales:', e)
   } finally {
     loading.value = false
@@ -168,9 +170,11 @@ const updateChart = () => {
       axisPointer: { type: 'cross' },
       formatter: (params: any[]) => {
         const d = params?.[0]?.axisValue || ''
-        const oc = params.find(p => p.seriesName === '订单数')?.data ?? '-'
-        const er = params.find(p => p.seriesName === '当日收益')?.data ?? '-'
-        return `${d}<br/>订单数：${oc}<br/>当日收益：$${Number(er).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        const orderName = t('dashboard.orders')
+        const earningsName = t('dashboard.dailyEarnings')
+        const oc = params.find(p => p.seriesName === orderName)?.data ?? '-'
+        const er = params.find(p => p.seriesName === earningsName)?.data ?? '-'
+        return `${d}<br/>${orderName}: ${oc}<br/>${earningsName}: $${Number(er).toLocaleString(locale.value === 'zh' ? 'zh-CN' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
       }
     },
     grid: { left: 40, right: 60, top: 20, bottom: 30 },
@@ -178,7 +182,7 @@ const updateChart = () => {
     yAxis: [
       {
         type: 'value',
-        name: '订单数',
+        name: t('dashboard.orders'),
         position: 'left',
         min: yMin,
         max: yMax,
@@ -187,7 +191,7 @@ const updateChart = () => {
       },
       {
         type: 'value',
-        name: '当日收益',
+        name: t('dashboard.dailyEarnings'),
         position: 'right',
         min: yMin,
         max: yMax,
@@ -237,6 +241,7 @@ onMounted(async () => {
 })
 
 watch(items, () => updateChart())
+watch(locale, () => updateChart())
 // only fetch when clicking the query button
 
 onBeforeUnmount(() => {

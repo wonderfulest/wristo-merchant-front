@@ -2,26 +2,26 @@
   <div class="account-page">
     <!-- Filters -->
     <div class="filters">
-      <input v-model="searchAppId" class="filter-input" placeholder="Search by App ID" />
-      <input v-model="searchEmail" class="filter-input" placeholder="Search by User Email" />
+      <input v-model="searchAppId" class="filter-input" :placeholder="t('history.searchAppId')" />
+      <input v-model="searchEmail" class="filter-input" :placeholder="t('history.searchEmail')" />
       <select v-model="searchStatus" class="filter-input">
-        <option :value="null">All Status</option>
-        <option :value="1">Success</option>
-        <option :value="3">Refund</option>
+        <option :value="null">{{ t('history.allStatus') }}</option>
+        <option :value="1">{{ t('history.success') }}</option>
+        <option :value="3">{{ t('history.refund') }}</option>
       </select>
-      <button class="filter-btn primary" @click="fetchPurchaseRecords(1)">Search</button>
-      <button class="filter-btn" @click="resetFilters">Reset</button>
+      <button class="filter-btn primary" @click="fetchPurchaseRecords(1)">{{ t('common.search') }}</button>
+      <button class="filter-btn" @click="resetFilters">{{ t('common.reset') }}</button>
     </div>
     
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
-      <p>Loading purchase records...</p>
+      <p>{{ t('history.loading') }}</p>
     </div>
 
     <!-- Error state -->
     <div v-else-if="error" class="error-message">
-      <p>Failed to load purchase records: {{ error }}</p>
-      <el-button @click="fetchPurchaseRecords" class="retry-btn">Retry</el-button>
+      <p>{{ t('history.loadFailed') }}: {{ error }}</p>
+      <el-button @click="fetchPurchaseRecords" class="retry-btn">{{ t('common.retry') }}</el-button>
     </div>
 
     <!-- Purchase Records Table -->
@@ -29,15 +29,15 @@
       <table class="purchase-table">
         <thead>
           <tr>
-            <th>Timestamp</th>
-            <th>User Email</th>
-            <th>App Image</th>
-            <th>Product</th>
-            <th>Status</th>
-            <th>Payment Type</th>
-            <th>Tax</th>
-            <th>Wristo Share</th>
-            <th>Actions</th>
+            <th>{{ t('history.timestamp') }}</th>
+            <th>{{ t('history.userEmail') }}</th>
+            <th>{{ t('history.appImage') }}</th>
+            <th>{{ t('history.product') }}</th>
+            <th>{{ t('history.status') }}</th>
+            <th>{{ t('history.paymentType') }}</th>
+            <th>{{ t('history.tax') }}</th>
+            <th>{{ t('history.wristoShare') }}</th>
+            <th>{{ t('history.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -52,7 +52,7 @@
                 class="product-image"
                 @error="handleImageError"
               />
-              <div v-else class="no-image-placeholder">No Image</div>
+              <div v-else class="no-image-placeholder">{{ t('common.noImage') }}</div>
             </td>
             <td>
               <a 
@@ -76,94 +76,94 @@
                 {{ paymentLabel(record.paymentMethod) }}
               </span>
             </td>
-            <td>{{ record.tax > 0 ? formatCurrency(record.tax / 100) : 'N/A' }}</td>
+            <td>{{ record.tax > 0 ? formatCurrency(record.tax / 100) : t('common.na') }}</td>
             <td>${{ formatCurrency(record.earnings / 100) }}</td>
             <td>
-              <el-button size="small" @click="openDetail(record)">Details</el-button>
+              <el-button size="small" @click="openDetail(record)">{{ t('common.details') }}</el-button>
             </td>
           </tr>
         </tbody>
       </table>
 
       <!-- Details Dialog -->
-      <el-dialog v-model="detailVisible" title="Order Details" width="720px">
+      <el-dialog v-model="detailVisible" :title="t('history.orderDetails')" width="720px">
         <template v-if="selectedRecord">
           <el-descriptions :column="2" size="small" border>
-            <el-descriptions-item label="Order ID">{{ selectedRecord.id }}</el-descriptions-item>
-            <el-descriptions-item label="Timestamp">{{ formatTimestamp(selectedRecord.createdAt) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.orderId')">{{ selectedRecord.id }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.timestamp')">{{ formatTimestamp(selectedRecord.createdAt) }}</el-descriptions-item>
             <el-descriptions-item label="Email">{{ selectedRecord.email }}</el-descriptions-item>
-            <el-descriptions-item label="User">{{ selectedRecord.user?.username }} (ID: {{ selectedRecord.userId }})</el-descriptions-item>
-            <el-descriptions-item label="App ID">{{ selectedRecord.appId }}</el-descriptions-item>
-            <el-descriptions-item label="Bundle ID">{{ selectedRecord.bundleId || '—' }}</el-descriptions-item>
-            <el-descriptions-item label="Is Bundle">{{ selectedRecord.isBundle ? 'Yes' : 'No' }}</el-descriptions-item>
-            <el-descriptions-item label="Product">{{ formatProduct(selectedRecord) }}</el-descriptions-item>
-            <el-descriptions-item label="Payment">
+            <el-descriptions-item :label="t('history.user')">{{ selectedRecord.user?.username }} (ID: {{ selectedRecord.userId }})</el-descriptions-item>
+            <el-descriptions-item :label="t('history.appId')">{{ selectedRecord.appId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.bundleId')">{{ selectedRecord.bundleId || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.isBundle')">{{ selectedRecord.isBundle ? t('common.yes') : t('common.no') }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.product')">{{ formatProduct(selectedRecord) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.payment')">
               <el-tag size="small">{{ paymentLabel(selectedRecord.paymentMethod) }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="Status">
+            <el-descriptions-item :label="t('history.status')">
               <el-tag :type="getStatusClass(selectedRecord.status) === 'success' ? 'success' : 'danger'" size="small">
                 {{ selectedRecord.statusDesc }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="Subtotal">${{ formatCurrency(selectedRecord.subtotal / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Tax">{{ selectedRecord.tax > 0 ? '$' + formatCurrency(selectedRecord.tax / 100) : 'N/A' }}</el-descriptions-item>
-            <el-descriptions-item label="Fee">${{ formatCurrency(selectedRecord.fee / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Discount">${{ formatCurrency(selectedRecord.discount / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Grand Total">${{ formatCurrency(selectedRecord.grandTotal / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Earnings (Wristo)">${{ formatCurrency(selectedRecord.earnings / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Credit Used">${{ formatCurrency(selectedRecord.credit / 100) }}</el-descriptions-item>
-            <el-descriptions-item label="Currency">{{ selectedRecord.currencyCode }}</el-descriptions-item>
-            <el-descriptions-item label="Country">{{ selectedRecord.countryCode }}</el-descriptions-item>
-            <el-descriptions-item label="Origin">{{ selectedRecord.origin }}</el-descriptions-item>
-            <el-descriptions-item label="Transaction ID">{{ selectedRecord.transactionId }}</el-descriptions-item>
-            <el-descriptions-item label="Customer ID">{{ selectedRecord.customerId }}</el-descriptions-item>
-            <el-descriptions-item label="Address ID">{{ selectedRecord.addressId }}</el-descriptions-item>
-            <el-descriptions-item label="In Payout">{{ selectedRecord.inPayout === 1 ? 'Yes' : 'No' }}</el-descriptions-item>
-            <el-descriptions-item label="Updated At">{{ formatTimestamp(selectedRecord.updatedAt) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.subtotal')">${{ formatCurrency(selectedRecord.subtotal / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.tax')">{{ selectedRecord.tax > 0 ? '$' + formatCurrency(selectedRecord.tax / 100) : t('common.na') }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.fee')">${{ formatCurrency(selectedRecord.fee / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.discount')">${{ formatCurrency(selectedRecord.discount / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.grandTotal')">${{ formatCurrency(selectedRecord.grandTotal / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.earnings')">${{ formatCurrency(selectedRecord.earnings / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.creditUsed')">${{ formatCurrency(selectedRecord.credit / 100) }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.currency')">{{ selectedRecord.currencyCode }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.country')">{{ selectedRecord.countryCode }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.origin')">{{ selectedRecord.origin }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.transactionId')">{{ selectedRecord.transactionId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.customerId')">{{ selectedRecord.customerId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.addressId')">{{ selectedRecord.addressId }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.inPayout')">{{ selectedRecord.inPayout === 1 ? t('common.yes') : t('common.no') }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.updatedAt')">{{ formatTimestamp(selectedRecord.updatedAt) }}</el-descriptions-item>
           </el-descriptions>
 
-          <el-divider content-position="left">Product</el-divider>
+          <el-divider content-position="left">{{ t('history.product') }}</el-divider>
           <div v-if="selectedRecord.product" class="nested-content">
             <img v-if="selectedRecord.product.garminImageUrl" :src="selectedRecord.product.garminImageUrl" alt="Product" class="nested-thumb" />
             <el-descriptions :column="2" size="small">
-              <el-descriptions-item label="Name">{{ selectedRecord.product.name }}</el-descriptions-item>
-              <el-descriptions-item label="App ID">{{ selectedRecord.product.appId }}</el-descriptions-item>
-              <el-descriptions-item label="Design ID">{{ selectedRecord.product.designId }}</el-descriptions-item>
-              <el-descriptions-item label="Price">${{ formatCurrency(selectedRecord.product.price) }}</el-descriptions-item>
-              <el-descriptions-item v-if="selectedRecord.product.garminStoreUrl" label="Store">
-                <a :href="selectedRecord.product.garminStoreUrl" target="_blank" class="product-link">Open</a>
+              <el-descriptions-item :label="t('history.name')">{{ selectedRecord.product.name }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.appId')">{{ selectedRecord.product.appId }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.designId')">{{ selectedRecord.product.designId }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.price')">${{ formatCurrency(selectedRecord.product.price) }}</el-descriptions-item>
+              <el-descriptions-item v-if="selectedRecord.product.garminStoreUrl" :label="t('history.store')">
+                <a :href="selectedRecord.product.garminStoreUrl" target="_blank" class="product-link">{{ t('common.open') }}</a>
               </el-descriptions-item>
             </el-descriptions>
           </div>
-          <div v-else class="empty-sub">No product info</div>
+          <div v-else class="empty-sub">{{ t('history.noProductInfo') }}</div>
 
-          <el-divider content-position="left">Bundle</el-divider>
+          <el-divider content-position="left">{{ t('history.bundle') }}</el-divider>
           <template v-if="selectedRecord.bundle">
             <el-descriptions :column="2" size="small">
-              <el-descriptions-item label="Bundle ID">{{ selectedRecord.bundle.bundleId }}</el-descriptions-item>
-              <el-descriptions-item label="Name">{{ selectedRecord.bundle.bundleName }}</el-descriptions-item>
-              <el-descriptions-item label="Desc" :span="2">
+              <el-descriptions-item :label="t('history.bundleId')">{{ selectedRecord.bundle.bundleId }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.name')">{{ selectedRecord.bundle.bundleName }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.desc')" :span="2">
                 <div class="multiline">{{ selectedRecord.bundle.bundleDesc }}</div>
               </el-descriptions-item>
-              <el-descriptions-item label="Price">${{ formatCurrency(selectedRecord.bundle.price) }}</el-descriptions-item>
-              <el-descriptions-item label="Owner">{{ selectedRecord.bundle.user?.username || '—' }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.price')">${{ formatCurrency(selectedRecord.bundle.price) }}</el-descriptions-item>
+              <el-descriptions-item :label="t('history.owner')">{{ selectedRecord.bundle.user?.username || '-' }}</el-descriptions-item>
             </el-descriptions>
             <div v-if="selectedRecord.bundle.products && selectedRecord.bundle.products.length" class="bundle-products">
-              <div class="bp-title">Products in Bundle</div>
+              <div class="bp-title">{{ t('history.productsInBundle') }}</div>
               <ul>
                 <li v-for="(p, idx) in selectedRecord.bundle.products" :key="p.appId + '-' + idx">
                   <img v-if="p.garminImageUrl" :src="p.garminImageUrl" :alt="p.name" class="bp-thumb" />
                   <span class="bp-name">{{ p.name }} ({{ p.appId }})</span>
-                  <a v-if="p.garminStoreUrl" :href="p.garminStoreUrl" target="_blank" class="product-link">Open</a>
+                  <a v-if="p.garminStoreUrl" :href="p.garminStoreUrl" target="_blank" class="product-link">{{ t('common.open') }}</a>
                 </li>
               </ul>
             </div>
           </template>
-          <div v-else class="empty-sub">No bundle info</div>
+          <div v-else class="empty-sub">{{ t('history.noBundleInfo') }}</div>
         </template>
         <template #footer>
           <span class="dialog-footer">
-            <el-button type="primary" @click="detailVisible = false">Close</el-button>
+            <el-button type="primary" @click="detailVisible = false">{{ t('common.close') }}</el-button>
           </span>
         </template>
       </el-dialog>
@@ -171,9 +171,11 @@
       <!-- Pagination -->
       <div class="pagination-container" v-if="pageData.total > 0">
         <div class="pagination-info">
-          Showing {{ (pageData.pageNum - 1) * pageData.pageSize + 1 }} to 
-          {{ Math.min(pageData.pageNum * pageData.pageSize, pageData.total) }} of 
-          {{ pageData.total }} results
+          {{ t('history.showing', {
+            from: (pageData.pageNum - 1) * pageData.pageSize + 1,
+            to: Math.min(pageData.pageNum * pageData.pageSize, pageData.total),
+            total: pageData.total
+          }) }}
         </div>
         <div class="pagination-controls">
           <button 
@@ -181,15 +183,15 @@
             :disabled="pageData.pageNum <= 1"
             class="page-btn"
           >
-            Previous
+            {{ t('history.previous') }}
           </button>
-          <span class="page-info">Page {{ pageData.pageNum }} of {{ pageData.pages }}</span>
+          <span class="page-info">{{ t('history.pageOf', { page: pageData.pageNum, pages: pageData.pages }) }}</span>
           <button 
             @click="changePage(pageData.pageNum + 1)" 
             :disabled="pageData.pageNum >= pageData.pages"
             class="page-btn"
           >
-            Next
+            {{ t('history.next') }}
           </button>
         </div>
       </div>
@@ -201,6 +203,7 @@
 import { ref, onMounted } from 'vue'
 import { getPurchaseRecordPageList } from '@/api/purchase'
 import type { PurchaseRecordVO, PurchaseRecordPageQueryDTO, PageResponse } from '@/types/api'
+import { useI18n } from '@/i18n'
 
 const purchaseRecords = ref<PurchaseRecordVO[]>([])
 const loading = ref(true)
@@ -210,6 +213,7 @@ const searchEmail = ref<string>('')
 const searchStatus = ref<number | null>(null)
 const detailVisible = ref(false)
 const selectedRecord = ref<PurchaseRecordVO | null>(null)
+const { t, locale } = useI18n()
 const pageData = ref<PageResponse<PurchaseRecordVO>>({
   pageNum: 1,
   pageSize: 10,
@@ -220,7 +224,7 @@ const pageData = ref<PageResponse<PurchaseRecordVO>>({
 
 const formatTimestamp = (dateString: string): string => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('zh-CN', {
+  return date.toLocaleDateString(locale.value === 'zh' ? 'zh-CN' : 'en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -237,7 +241,7 @@ const formatProduct = (record: PurchaseRecordVO): string => {
   } else if (record.product) {
     return record.product.name
   }
-  return 'Unknown Product'
+  return t('history.unknownProduct')
 }
 
 const getStatusClass = (status: number): string => {
@@ -268,7 +272,7 @@ const paymentMeta = (method?: string | null): PaymentMeta => {
     case 'credit':
       return { label: 'Credit', color: '#6f42c1', bg: 'rgba(111,66,193,0.08)', border: 'rgba(111,66,193,0.3)' }
     default:
-      return { label: (method || 'Unknown').toUpperCase(), color: '#6c757d', bg: 'rgba(108,117,125,0.08)', border: 'rgba(108,117,125,0.3)' }
+      return { label: (method || t('common.unknown')).toUpperCase(), color: '#6c757d', bg: 'rgba(108,117,125,0.08)', border: 'rgba(108,117,125,0.3)' }
   }
 }
 const paymentLabel = (method?: string | null): string => paymentMeta(method).label
@@ -322,10 +326,10 @@ const fetchPurchaseRecords = async (pageNum: number = 1) => {
       pageData.value = response.data
       purchaseRecords.value = response.data.list
     } else {
-      error.value = response.msg || 'Failed to fetch purchase records'
+      error.value = response.msg || t('history.fetchFailed')
     }
   } catch (err) {
-    error.value = 'Network error occurred'
+    error.value = t('common.networkError')
     console.error('Error fetching purchase records:', err)
   } finally {
     loading.value = false
