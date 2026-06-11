@@ -74,8 +74,8 @@ const locales = SUPPORTED_LOCALES
 const defaultAvatar = 'https://cdn.wristo.io/test/avatar/561aae25-41bd-47ab-974e-7231f5a850e8.png'
 const userAvatar = computed(() => userStore.userInfo?.avatar || defaultAvatar)
 const displayName = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || 'Wristo')
-const ssoBaseUrl = import.meta.env.VITE_SSO_LOGIN_URL
-const redirectUri = import.meta.env.VITE_SSO_REDIRECT_URI
+const ssoBaseUrl = import.meta.env.VITE_WRISTO_SSO_LOGIN_URL
+const redirectUri = import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI
 const handleLogout = async () => {
   await userStore.logout()
   window.location.href = `${ssoBaseUrl}?client=merchant&redirect_uri=${encodeURIComponent(redirectUri)}`
