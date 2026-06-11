@@ -64,6 +64,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '@/i18n'
 import { addLocaleToPath, SUPPORTED_LOCALES, stripLocaleFromPath, useLocaleStore, type SupportedLocale } from '@/store/locale'
+import { redirectToSsoLogin } from '@/utils/ssoRedirect'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -74,11 +75,9 @@ const locales = SUPPORTED_LOCALES
 const defaultAvatar = 'https://cdn.wristo.io/test/avatar/561aae25-41bd-47ab-974e-7231f5a850e8.png'
 const userAvatar = computed(() => userStore.userInfo?.avatar || defaultAvatar)
 const displayName = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || 'Wristo')
-const ssoBaseUrl = import.meta.env.VITE_WRISTO_SSO_LOGIN_URL
-const redirectUri = import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI
 const handleLogout = async () => {
   await userStore.logout()
-  window.location.href = `${ssoBaseUrl}?client=merchant&redirect_uri=${encodeURIComponent(redirectUri)}`
+  redirectToSsoLogin('merchant')
 }
 const hasMerchantRole = computed(() => {
   const roles: any[] = (userStore.userInfo && Array.isArray((userStore.userInfo as any).roles)) ? (userStore.userInfo as any).roles : []

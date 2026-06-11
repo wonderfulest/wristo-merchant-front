@@ -12,6 +12,7 @@ import { fetchSsoToken, SsoTokenResponseData } from '@/api/sso'
 import { getUserInfo } from '@/api/auth'
 import type { ApiResponse } from '@/types/api'
 import { useUserStore } from '@/store/user'
+import { getSsoRedirectUri, redirectToSsoLogin } from '@/utils/ssoRedirect'
 
 const loading = ref(true)
 const error = ref('')
@@ -20,7 +21,7 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const clientId = 'merchant'
-const redirectUri = import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI
+const redirectUri = getSsoRedirectUri()
 
 onMounted(async () => {
   const code = route.query.code as string
@@ -50,15 +51,11 @@ onMounted(async () => {
       router.replace('/')
     } else {
       error.value = res.msg || '登录失败'
-      const ssoBaseUrl = import.meta.env.VITE_WRISTO_SSO_LOGIN_URL
-      const redirectUri = import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI
-      window.location.href = `${ssoBaseUrl}?client=merchant&redirect_uri=${encodeURIComponent(redirectUri)}`
+      redirectToSsoLogin('merchant')
     }
   } catch (e: any) {
     error.value = e?.response?.data?.msg || e.message || '请求失败'
-    const ssoBaseUrl = import.meta.env.VITE_WRISTO_SSO_LOGIN_URL
-    const redirectUri = import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI
-    window.location.href = `${ssoBaseUrl}?client=merchant&redirect_uri=${encodeURIComponent(redirectUri)}`
+    redirectToSsoLogin('merchant')
   } finally {
     loading.value = false
   }
