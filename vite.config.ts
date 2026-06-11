@@ -14,7 +14,6 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_WRISTO_SSO_REDIRECT_URI': JSON.stringify(env.VITE_WRISTO_MERCHANT_SSO_REDIRECT_URI || ''),
       'import.meta.env.VITE_WRISTO_SSO_LOGIN_URL': JSON.stringify(joinUrl(env.VITE_WRISTO_SSO_URL, 'login')),
-      'import.meta.env.VITE_WRISTO_PAYPAL_CLIENT_ID': JSON.stringify(env.VITE_WRISTO_PAYPAL_CLIENT_ID || ''),
     },
     plugins: [
       vue()
