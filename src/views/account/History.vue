@@ -35,6 +35,7 @@
             <th>{{ t('history.product') }}</th>
             <th>{{ t('history.status') }}</th>
             <th>{{ t('history.paymentType') }}</th>
+            <th>{{ t('history.orderSource') }}</th>
             <th>{{ t('history.tax') }}</th>
             <th>{{ t('history.wristoShare') }}</th>
             <th>{{ t('history.actions') }}</th>
@@ -75,6 +76,10 @@
               <span class="pay-tag" :style="paymentTagStyle(record.paymentMethod)">
                 {{ paymentLabel(record.paymentMethod) }}
               </span>
+            </td>
+            <td>
+              <span v-if="record.origin" class="origin-badge" :style="originBadgeStyle(record.origin)">{{ record.origin }}</span>
+              <span v-else>-</span>
             </td>
             <td>{{ record.tax > 0 ? formatCurrency(record.tax / 100) : t('common.na') }}</td>
             <td>${{ formatCurrency(record.earnings / 100) }}</td>
@@ -285,6 +290,25 @@ const paymentTagStyle = (method?: string | null) => {
   } as Record<string, string>
 }
 
+const originBadgeStyle = (origin?: string | null) => {
+  const key = (origin || '').toLowerCase()
+  const styles: Record<string, { color: string; bg: string; border: string }> = {
+    store: { color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
+    store_cart: { color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
+    shop_code: { color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
+    promotion: { color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
+    webhook: { color: '#be123c', bg: '#fff1f2', border: '#fecdd3' },
+    crontab: { color: '#0f766e', bg: '#f0fdfa', border: '#99f6e4' },
+    studio: { color: '#4338ca', bg: '#eef2ff', border: '#c7d2fe' },
+  }
+  const style = styles[key] || { color: '#4b5563', bg: '#f9fafb', border: '#d1d5db' }
+  return {
+    color: style.color,
+    backgroundColor: style.bg,
+    borderColor: style.border,
+  } as Record<string, string>
+}
+
 const formatCurrency = (amount: number): string => {
   return amount.toFixed(2)
 }
@@ -467,6 +491,20 @@ onMounted(() => {
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
+}
+
+.origin-badge {
+  display: inline-block;
+  max-width: 112px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pagination-container {
