@@ -33,7 +33,6 @@
             <th>{{ t('history.userEmail') }}</th>
             <th>{{ t('history.appImage') }}</th>
             <th>{{ t('history.product') }}</th>
-            <th>{{ t('history.bundle') }}</th>
             <th>{{ t('history.status') }}</th>
             <th>{{ t('history.paymentType') }}</th>
             <th>{{ t('history.orderSource') }}</th>
@@ -70,7 +69,6 @@
               </a>
               <span v-else class="product-name">{{ formatProduct(record) }}</span>
             </td>
-            <td>{{ formatBundleNames(record) || '-' }}</td>
             <td>
               <span :class="['status-badge', getStatusClass(record.status)]">
                 {{ record.statusDesc }}
@@ -259,17 +257,7 @@ const formatProduct = (record: PurchaseRecordVO): string => {
 
 const recordBundles = (record: PurchaseRecordVO | null) => {
   if (!record) return []
-  if (record.bundles && record.bundles.length) return record.bundles
   return record.bundle ? [record.bundle] : []
-}
-
-const formatBundleNames = (record: PurchaseRecordVO): string => {
-  const bundles = recordBundles(record)
-  if (!bundles.length) return ''
-  if (bundles.length <= 2) {
-    return bundles.map((bundle) => bundle.bundleName).join(', ')
-  }
-  return `${bundles.slice(0, 2).map((bundle) => bundle.bundleName).join(', ')} +${bundles.length - 2}`
 }
 
 const getStatusClass = (status: number): string => {
