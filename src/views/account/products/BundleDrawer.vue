@@ -186,7 +186,7 @@ import { useI18n } from '@/i18n'
 const props = defineProps<{ bundle?: Bundle | null }>()
 const emits = defineEmits(['close'])
 const { t } = useI18n()
-const CUSTOM_BUNDLE_DEFAULT_PRICE = '5'
+const CUSTOM_BUNDLE_DEFAULT_PRICE = '6.99'
 
 // 3. ref/reactive/变量定义
 const activeInput = ref('')
