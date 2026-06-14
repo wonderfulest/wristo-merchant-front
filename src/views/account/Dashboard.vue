@@ -23,7 +23,7 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 <style scoped>
 .account-page {
   padding: 32px;
-  background: #fff;
+  background: var(--color-surface);
   min-height: 300px;
 }
 
@@ -34,17 +34,17 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 }
 
 .payout-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
-  border: 1px solid #e6f4ee;
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-canvas-top) 100%);
+  border: 1px solid var(--color-line);
   border-radius: 12px;
   padding: 18px 16px;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 .payout-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -52,9 +52,9 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
   display: inline-block;
   font-size: 11px;
   font-weight: 700;
-  color: #19b36b;
-  background: #e9f7f1;
-  border: 1px solid #ccefe0;
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
+  border: 1px solid var(--color-line);
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -65,23 +65,23 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 .card-value {
   font-size: 26px;
   font-weight: 800;
-  color: #1b4332;
+  color: var(--color-brand-strong);
   line-height: 1.2;
 }
 
 .loading-text {
-  color: #6c757d;
+  color: var(--color-muted);
   font-size: 16px;
   font-weight: 400;
 }
 
 .error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-soft);
   border-radius: 8px;
   padding: 16px;
   margin: 24px 0;
-  color: #721c24;
+  color: var(--color-danger);
 }
 
 .dashboard-content {
@@ -101,17 +101,17 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 .payout-title .title {
   font-size: 24px;
   font-weight: 700;
-  color: #1b4332;
+  color: var(--color-brand-strong);
 }
 .payout-title .subtitle {
   font-size: 12px;
-  color: #6c757d;
+  color: var(--color-muted);
 }
 
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  color: #212529;
+  color: var(--color-ink);
   margin: 16px 0;
 }
 
@@ -126,7 +126,7 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
   height: 40px;
   border-radius: 6px;
   object-fit: cover;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-line);
 }
 
 .app-info {
@@ -136,12 +136,12 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 
 .app-name {
   font-weight: 600;
-  color: #212529;
+  color: var(--color-ink);
 }
 
 .app-sub {
   font-size: 12px;
-  color: #6c757d;
+  color: var(--color-muted);
 }
 
 .table-footer {
@@ -162,7 +162,7 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #6c757d;
+  color: var(--color-muted);
 }
 
 .funnel-steps {
@@ -178,8 +178,8 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 }
 
 .funnel-step {
-  background: #fff;
-  border: 1px solid #e9ecef;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
   border-radius: 10px;
   padding: 12px;
   text-align: center;
@@ -187,19 +187,19 @@ import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
 
 .funnel-step .step-title {
   font-size: 12px;
-  color: #6c757d;
+  color: var(--color-muted);
 }
 
 .funnel-step .step-value {
   font-size: 22px;
   font-weight: 700;
-  color: #1b4332;
+  color: var(--color-brand-strong);
 }
 
 .funnel-step .step-rate {
   margin-top: 6px;
   font-size: 12px;
-  color: #495057;
+  color: var(--color-muted);
 }
 
 /* Responsive design */

@@ -9,7 +9,10 @@
     <div class="products-header">
       <div class="products-header-left">
         <!-- <el-button type="success" class="add-new-btn" @click="() => openProductDrawer()">NEW PRODUCT<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button> -->
-        <el-button style="background: #19b36b; border-color: #19b36b;" type="success" class="add-new-btn" @click="() => openBundleDrawer()">{{ t('products.newBundle') }}<el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+        <el-button type="success" class="add-new-btn" @click="() => openBundleDrawer()">
+          <el-icon><Plus /></el-icon>
+          {{ t('products.newBundle') }}
+        </el-button>
       </div>
       <!-- <div class="products-header-actions">
         <el-button type="success" plain>GENERATE SHOP</el-button>
@@ -18,31 +21,73 @@
     </div>
     <div class="products-section">
       <div class="section-title-row">
-        <span class="section-title">{{ t('products.bundles') }}</span>
+        <div class="section-heading">
+          <h2 class="section-title">{{ t('products.bundles') }}</h2>
+          <div class="section-subtitle">{{ t('products.bundleListSubtitle') }}</div>
+        </div>
         <el-checkbox v-model="showInactiveBundles" @change="handleShowInactiveBundlesChange">{{ t('products.showInactiveBundles') }}</el-checkbox>
       </div>
       <div class="bundle-list">
-        <el-card class="bundle-card" v-for="item in bundles" :key="item.bundleId" shadow="hover" @click="() => openBundleDrawer(item)">
+        <el-card class="bundle-card" v-for="item in bundles" :key="item.bundleId" shadow="never" @click="() => openBundleDrawer(item)">
           <div class="bundle-card-content">
             <div class="bundle-info">
-              <div class="bundle-title">{{ item.bundleName }}</div>
-              <el-button
-                size="small"
-                :class="item.isActive === 1 ? 'active-btn' : 'inactive-btn'"
-                plain
-                @click.stop="toggleBundleActive(item)"
-                style="width: 72px; min-width: 72px; text-align: center;"
-              >{{ item.isActive === 1 ? t('products.active') : t('products.inactive') }}</el-button>
+              <div class="bundle-title-row">
+                <div class="bundle-title">{{ item.bundleName }}</div>
+                <el-tag
+                  class="bundle-type-tag"
+                  :type="bundleTypeTag(item.bundleType)"
+                  effect="light"
+                  round
+                >
+                  {{ bundleTypeLabel(item.bundleType) }}
+                </el-tag>
+              </div>
+              <div class="bundle-desc">{{ item.bundleDesc || t('products.noBundleDesc') }}</div>
+              <div class="bundle-footnote">
+                <span>ID {{ item.bundleId }}</span>
+                <span>{{ t('products.createdAt') }} {{ formatDate(item.createdAt) }}</span>
+                <span v-if="item.parentBundleId">{{ t('products.parentBundle') }} #{{ item.parentBundleId }}</span>
+              </div>
             </div>
-            <div class="bundle-meta">{{ t('products.productCount', { count: item.products.length }) }}</div>
-            <el-button class="view-content-btn">{{ t('products.viewContent') }} <el-icon><i class="el-icon-arrow-down" /></el-icon></el-button>
+            <div class="bundle-metrics">
+              <div class="bundle-metric">
+                <span class="metric-label">{{ t('products.bundleType') }}</span>
+                <span class="metric-value">{{ bundleTypeLabel(item.bundleType) }}</span>
+              </div>
+              <div class="bundle-metric">
+                <span class="metric-label">{{ t('products.bundleApps') }}</span>
+                <span class="metric-value">{{ t('products.productCount', { count: item.products?.length || 0 }) }}</span>
+              </div>
+              <div class="bundle-metric">
+                <span class="metric-label">{{ t('bundle.price') }}</span>
+                <span class="metric-value">${{ formatPrice(item.price) }}</span>
+              </div>
+            </div>
+            <div class="bundle-actions">
+              <div class="bundle-status-switch" @click.stop>
+                <el-switch
+                  :model-value="item.isActive === 1"
+                  :loading="updatingBundleIds.has(item.bundleId)"
+                  inline-prompt
+                  :active-text="t('products.active')"
+                  :inactive-text="t('products.inactive')"
+                  @change="(value: string | number | boolean) => handleBundleActiveChange(item, value)"
+                />
+              </div>
+              <el-button class="view-content-btn" @click.stop="openBundleDrawer(item)">
+                <el-icon><View /></el-icon>
+                {{ t('products.viewContent') }}
+              </el-button>
+            </div>
           </div>
         </el-card>
       </div>
     </div>
     <div class="products-section">
       <div class="section-title-row">
-        <span class="section-title">{{ t('products.apps') }}</span>
+        <div class="section-heading">
+          <h2 class="section-title">{{ t('products.apps') }}</h2>
+        </div>
       </div>
       <ProductTable @edit="openProductDrawer" />
     </div>
@@ -51,6 +96,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { Plus, View } from '@element-plus/icons-vue'
 import { getProduct, type Product } from '@/api/products'
 import { fetchBundles, type Bundle, getBundle, updateBundleActive } from '@/api/bundles'
 import { ElMessage } from 'element-plus'
@@ -71,15 +117,58 @@ const bundleDrawerVisible = ref(false)
 const bundleDrawerRef = ref()
 const editBundle = ref<Bundle | null>(null)
 const showInactiveBundles = ref(false)
+const updatingBundleIds = ref(new Set<number>())
 
-const toggleBundleActive = async (bundle: Bundle) => {
-  const res = await updateBundleActive(bundle.bundleId, bundle.isActive === 1 ? 0 : 1)
-  if (res.code === 0) {
-    ElMessage.success(t('products.updateSuccess'))
+const bundleTypeLabel = (type?: string) => {
+  if (type === 'account') return t('products.bundleTypeAccount')
+  if (type === 'global') return t('products.bundleTypeGlobal')
+  return t('products.bundleTypeCustom')
+}
+
+const bundleTypeTag = (type?: string) => {
+  if (type === 'account') return 'warning'
+  if (type === 'global') return 'danger'
+  return 'info'
+}
+
+const formatPrice = (value?: number) => {
+  if (value === undefined || value === null) return '0.00'
+  return Number(value).toFixed(2)
+}
+
+const formatDate = (value?: string) => {
+  if (!value) return '-'
+  return value.substring(0, 10)
+}
+
+const setBundleUpdating = (bundleId: number, updating: boolean) => {
+  const next = new Set(updatingBundleIds.value)
+  if (updating) {
+    next.add(bundleId)
   } else {
-    ElMessage.error(res.msg || t('products.updateFailed'))
+    next.delete(bundleId)
   }
-  getBundles()
+  updatingBundleIds.value = next
+}
+
+const handleBundleActiveChange = async (bundle: Bundle, value: string | number | boolean) => {
+  if (updatingBundleIds.value.has(bundle.bundleId)) return
+  const isActive = value === true || value === 1 || value === '1'
+  setBundleUpdating(bundle.bundleId, true)
+  try {
+    const res = await updateBundleActive(bundle.bundleId, isActive ? 1 : 0)
+    if (res.code === 0) {
+      bundle.isActive = isActive ? 1 : 0
+      ElMessage.success(t('products.updateSuccess'))
+    } else {
+      ElMessage.error(res.msg || t('products.updateFailed'))
+    }
+  } catch (e) {
+    ElMessage.error(t('products.updateFailed'))
+  } finally {
+    setBundleUpdating(bundle.bundleId, false)
+    getBundles()
+  }
 }
 
 const handleShowInactiveBundlesChange = () => {
@@ -150,10 +239,12 @@ onMounted(() => {
 
 <style scoped>
 :deep(.el-card__body) {
-  padding: 12px 20px !important;
+  padding: 0 !important;
 }
 .account-products-page {
-  background: #f5f6f7;
+  min-height: 100%;
+  background: transparent;
+  padding: 8px 0 40px;
 }
 .drawer-content {
   padding: 32px 32px 0 32px;
@@ -162,7 +253,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   width: 90%;
   margin-left: auto;
   margin-right: auto;
@@ -173,7 +264,11 @@ onMounted(() => {
 }
 .add-new-btn {
   min-width: 140px;
-  font-weight: bold;
+  min-height: 40px;
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  font-weight: 700;
+  letter-spacing: 0;
 }
 .products-header-actions {
   display: flex;
@@ -181,19 +276,33 @@ onMounted(() => {
 }
 .products-section {
   width: 90%;
-  margin: 0 auto 32px auto;
+  margin: 0 auto 28px auto;
 }
 .section-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.section-heading {
+  min-width: 0;
+  text-align: left;
 }
 .section-title {
-  font-size: 15px;
-  font-weight: bold;
-  color: #888;
-  letter-spacing: 1px;
+  display: block;
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: left;
+}
+.section-subtitle {
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.45;
 }
 .bundle-list, .product-list {
   display: flex;
@@ -201,63 +310,132 @@ onMounted(() => {
   gap: 12px;
 }
 .bundle-card, .product-card {
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  border: none;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.bundle-card {
+  cursor: pointer;
+}
+.bundle-card:hover {
+  border-color: rgba(15, 107, 104, 0.28);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .bundle-card-content, .product-card-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 0.9fr) auto;
   align-items: center;
-  gap: 4px;
-  padding: 0px 24px;
+  gap: 24px;
+  min-height: 92px;
+  padding: 16px 20px;
 }
 .bundle-img, .product-img {
   width: 56px;
   height: 56px;
   border-radius: 8px;
   object-fit: cover;
-  background: #eee;
+  background: var(--color-surface-soft);
 }
 .bundle-info, .product-info {
-  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+}
+.bundle-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 .bundle-title, .product-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #222;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 17px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: left;
 }
+.bundle-type-tag {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
 .bundle-desc {
-  color: #888;
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.bundle-footnote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--color-subtle);
+  font-size: 12px;
+}
+.bundle-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  gap: 10px;
+}
+.bundle-metric {
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+}
+.metric-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.metric-value {
+  display: block;
+  overflow: hidden;
+  color: var(--color-ink);
   font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.bundle-meta {
-  flex: 1 1 120px;
-  color: #888;
-  font-size: 15px;
-  text-align: right;
+.bundle-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
 }
-.bundle-price, .product-price {
-  flex: 1 1 80px;
-  color: #222;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: right;
+.bundle-status-switch {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+.bundle-status-switch :deep(.el-switch) {
+  --el-switch-on-color: var(--color-brand);
+  --el-switch-off-color: var(--color-subtle);
+}
+.bundle-status-switch :deep(.el-switch__core) {
+  min-width: 78px;
 }
 .view-content-btn, .download-btn {
-  min-width: 150px;
-  font-weight: 500;
-  margin-left: 16px;
+  min-width: 132px;
+  min-height: 36px;
+  font-weight: 600;
 }
 .product-trial {
-  color: #888;
+  color: var(--color-muted);
   font-size: 14px;
 }
 .product-trial-lasts {
-  color: #888;
+  color: var(--color-muted);
   font-size: 12px;
 }
 .pagination-bar {
@@ -265,18 +443,35 @@ onMounted(() => {
   display: flex;
   justify-content: center;
 }
-.active-btn {
-  background: #19b36b !important;
-  border-color: #19b36b !important;
-  color: #fff !important;
-  font-size: 13px;
-  font-weight: 600;
+@media (max-width: 1100px) {
+  .bundle-card-content, .product-card-content {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .bundle-actions {
+    justify-content: flex-start;
+  }
 }
-.inactive-btn {
-  background: #e0e0e0 !important;
-  border-color: #e0e0e0 !important;
-  color: #888 !important;
-  font-size: 13px;
-  font-weight: 600;
+
+@media (max-width: 640px) {
+  .products-header,
+  .products-section {
+    width: calc(100% - 24px);
+  }
+
+  .section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bundle-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .bundle-actions {
+    flex-wrap: wrap;
+  }
 }
 </style> 

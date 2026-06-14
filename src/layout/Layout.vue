@@ -43,7 +43,7 @@
       <div class="footer-inner">
         <div class="footer-left">
           <img class="footer-mark" src="https://cdn.wristo.io/brands/wristo-logo/svg/wristo-mark.svg" alt="" aria-hidden="true" />
-          <span> Wristo 2025</span>
+          <span> Wristo 2026</span>
         </div>
         <div class="footer-links">
           <a href="#">{{ t('footer.terms') }}</a>
@@ -127,7 +127,7 @@ const handleLocaleChange = (event: Event) => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: $color-bg;
+  background: transparent;
   width: 100%;
   overflow-x: hidden;
   max-width: 100vw;
@@ -162,9 +162,9 @@ const handleLocaleChange = (event: Event) => {
   align-items: center;
 }
 .language-select {
-  border: 1px solid rgba(25, 179, 107, 0.28);
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid rgba(15, 107, 104, 0.28);
+  border-radius: $radius-sm;
+  background: $color-surface;
   color: $color-link;
   font-size: 0.95rem;
   padding: 7px 28px 7px 10px;
@@ -177,7 +177,7 @@ const handleLocaleChange = (event: Event) => {
   transition: color 0.2s;
 }
 .header-right a:hover, .header-right :deep(a):hover {
-  color: $color-success;
+  color: $color-brand;
 }
 .main-content {
   flex: 1;
@@ -235,9 +235,10 @@ const handleLocaleChange = (event: Event) => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  border-radius: 8px;
+  background: $color-surface;
+  box-shadow: $shadow-md;
+  border: 1px solid $color-line;
+  border-radius: $radius-sm;
   padding: 10px 0;
   position: absolute;
   right: 0;
@@ -248,7 +249,7 @@ const handleLocaleChange = (event: Event) => {
 .dropdown-content a {
   width: 100%;
   padding: 10px 24px;
-  color: #222;
+  color: $color-ink;
   text-decoration: none;
   font-size: 1rem;
   transition: background 0.2s, color 0.2s;
@@ -256,8 +257,8 @@ const handleLocaleChange = (event: Event) => {
   display: block;
 }
 .dropdown-content a:hover {
-  background: #f5f5f5;
-  color: #19b36b;
+  background: $color-surface-soft;
+  color: $color-brand;
 }
 .user-profile-dropdown {
   position: relative;
@@ -273,16 +274,16 @@ const handleLocaleChange = (event: Event) => {
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 .user-avatar-container:hover {
-  background: #fff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background: $color-surface;
+  box-shadow: $shadow-sm;
 }
 .user-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  border: 2px solid $color-surface;
+  box-shadow: $shadow-sm;
 }
 .user-profile-name {
   max-width: 140px;

@@ -257,17 +257,17 @@ const clear = () => {
   position: relative;
   width: auto;
   height: 120px;
-  border: 1px dashed #dcdfe6;
+  border: 1px dashed var(--color-line);
   border-radius: 8px;
-  background: #fafafa;
+  background: var(--color-surface-soft);
   overflow: hidden;
   cursor: pointer;
   aspect-ratio: v-bind(aspectRatioCss);
 }
 
 .box.is-drag-over {
-  border-color: #19b36b;
-  background: rgba(25, 179, 107, 0.08);
+  border-color: var(--color-brand);
+  background: rgba(15, 107, 104, 0.08);
 }
 
 .placeholder {
@@ -277,7 +277,7 @@ const clear = () => {
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  color: #c0c4cc;
+  color: var(--color-subtle);
   user-select: none;
 }
 
@@ -293,7 +293,7 @@ const clear = () => {
   padding: 2px 6px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 12px;
   line-height: 16px;
   z-index: 2;
@@ -304,7 +304,7 @@ const clear = () => {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+  color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,7 +320,7 @@ const clear = () => {
   border-radius: 999px;
   border: 0;
   background: rgba(0, 0, 0, 0.45);
-  color: #fff;
+  color: var(--color-surface);
   cursor: pointer;
   padding: 0;
   display: inline-flex;

@@ -282,7 +282,7 @@ async function handleSave() {
 .profile-page {
   width: 100%;
   min-height: calc(100vh - 80px);
-  background: #f2f2f7;
+  background: transparent;
   display: flex;
   justify-content: center;
   padding: 0 16px 48px;
@@ -307,9 +307,9 @@ async function handleSave() {
   height: 100px;
   border-radius: 50%;
   overflow: hidden;
-  background: #fff;
+  background: var(--color-surface);
   cursor: pointer;
-  box-shadow: 0 0 0 3px #fff, 0 2px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 0 3px var(--color-surface), var(--shadow-md);
 }
 .avatar-img {
   width: 100%;
@@ -323,7 +323,7 @@ async function handleSave() {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.35);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 0.8rem;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -333,13 +333,13 @@ async function handleSave() {
 }
 .hero-name {
   margin-top: 8px;
-  color: #1d1d1f;
+  color: var(--color-ink);
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
 }
 .hero-email {
-  color: #86868b;
+  color: var(--color-muted);
   font-size: 0.9375rem;
 }
 .section {
@@ -351,17 +351,17 @@ async function handleSave() {
   padding: 0 4px;
 }
 .section-title {
-  color: #86868b;
+  color: var(--color-muted);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .section-card {
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 .row {
   display: flex;
@@ -377,11 +377,11 @@ async function handleSave() {
 .row-divider {
   height: 1px;
   margin-left: 18px;
-  background: #e5e5ea;
+  background: var(--color-line);
 }
 .row-label {
   flex: 0 0 140px;
-  color: #1d1d1f;
+  color: var(--color-ink);
   font-size: 0.9375rem;
 }
 .row-value {
@@ -390,7 +390,7 @@ async function handleSave() {
   text-align: right;
 }
 .text-value {
-  color: #6e6e73;
+  color: var(--color-muted);
   overflow-wrap: anywhere;
 }
 .save-row {

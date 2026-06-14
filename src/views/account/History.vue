@@ -33,6 +33,7 @@
             <th>{{ t('history.userEmail') }}</th>
             <th>{{ t('history.appImage') }}</th>
             <th>{{ t('history.product') }}</th>
+            <th>{{ t('history.bundle') }}</th>
             <th>{{ t('history.status') }}</th>
             <th>{{ t('history.paymentType') }}</th>
             <th>{{ t('history.orderSource') }}</th>
@@ -44,7 +45,9 @@
         <tbody>
           <tr v-for="record in purchaseRecords" :key="record.id">
             <td>{{ formatTimestamp(record.createdAt) }}</td>
-            <td>{{ record.email }}</td>
+            <td>
+              <span class="email-mask" :title="maskEmail(record.email)">{{ maskEmail(record.email) }}</span>
+            </td>
             <td>
               <img 
                 v-if="getProductImage(record)" 
@@ -67,6 +70,7 @@
               </a>
               <span v-else class="product-name">{{ formatProduct(record) }}</span>
             </td>
+            <td>{{ formatBundleNames(record) || '-' }}</td>
             <td>
               <span :class="['status-badge', getStatusClass(record.status)]">
                 {{ record.statusDesc }}
@@ -96,7 +100,7 @@
           <el-descriptions :column="2" size="small" border>
             <el-descriptions-item :label="t('history.orderId')">{{ selectedRecord.id }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.timestamp')">{{ formatTimestamp(selectedRecord.createdAt) }}</el-descriptions-item>
-            <el-descriptions-item label="Email">{{ selectedRecord.email }}</el-descriptions-item>
+            <el-descriptions-item label="Email">{{ maskEmail(selectedRecord.email) }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.user')">{{ selectedRecord.user?.username }} (ID: {{ selectedRecord.userId }})</el-descriptions-item>
             <el-descriptions-item :label="t('history.appId')">{{ selectedRecord.appId }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.bundleId')">{{ selectedRecord.bundleId || '-' }}</el-descriptions-item>
@@ -143,27 +147,21 @@
           <div v-else class="empty-sub">{{ t('history.noProductInfo') }}</div>
 
           <el-divider content-position="left">{{ t('history.bundle') }}</el-divider>
-          <template v-if="selectedRecord.bundle">
-            <el-descriptions :column="2" size="small">
-              <el-descriptions-item :label="t('history.bundleId')">{{ selectedRecord.bundle.bundleId }}</el-descriptions-item>
-              <el-descriptions-item :label="t('history.name')">{{ selectedRecord.bundle.bundleName }}</el-descriptions-item>
-              <el-descriptions-item :label="t('history.desc')" :span="2">
-                <div class="multiline">{{ selectedRecord.bundle.bundleDesc }}</div>
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('history.price')">${{ formatCurrency(selectedRecord.bundle.price) }}</el-descriptions-item>
-              <el-descriptions-item :label="t('history.owner')">{{ selectedRecord.bundle.user?.username || '-' }}</el-descriptions-item>
-            </el-descriptions>
-            <div v-if="selectedRecord.bundle.products && selectedRecord.bundle.products.length" class="bundle-products">
-              <div class="bp-title">{{ t('history.productsInBundle') }}</div>
-              <ul>
-                <li v-for="(p, idx) in selectedRecord.bundle.products" :key="p.appId + '-' + idx">
-                  <img v-if="p.garminImageUrl" :src="p.garminImageUrl" :alt="p.name" class="bp-thumb" />
-                  <span class="bp-name">{{ p.name }} ({{ p.appId }})</span>
-                  <a v-if="p.garminStoreUrl" :href="p.garminStoreUrl" target="_blank" class="product-link">{{ t('common.open') }}</a>
-                </li>
-              </ul>
+          <div v-if="recordBundles(selectedRecord).length" class="bundle-list-detail">
+            <div v-for="bundle in recordBundles(selectedRecord)" :key="bundle.bundleId" class="bundle-detail-item">
+              <el-descriptions :column="2" size="small">
+                <el-descriptions-item :label="t('history.bundleId')">{{ bundle.bundleId }}</el-descriptions-item>
+                <el-descriptions-item :label="t('history.name')">{{ bundle.bundleName }}</el-descriptions-item>
+                <el-descriptions-item label="Type">{{ bundle.bundleType || 'custom' }}</el-descriptions-item>
+                <el-descriptions-item label="Status">{{ bundle.isActive === 1 ? t('history.success') : '-' }}</el-descriptions-item>
+                <el-descriptions-item :label="t('history.desc')" :span="2">
+                  <div class="multiline">{{ bundle.bundleDesc }}</div>
+                </el-descriptions-item>
+                <el-descriptions-item :label="t('history.price')">${{ formatCurrency(bundle.price) }}</el-descriptions-item>
+                <el-descriptions-item :label="t('history.owner')">{{ bundle.user?.username || '-' }}</el-descriptions-item>
+              </el-descriptions>
             </div>
-          </template>
+          </div>
           <div v-else class="empty-sub">{{ t('history.noBundleInfo') }}</div>
         </template>
         <template #footer>
@@ -238,7 +236,17 @@ const formatTimestamp = (dateString: string): string => {
   }).replace(/\//g, '-')
 }
 
-// removed masked username helper; we display full email per requirement
+const maskEmail = (email?: string | null): string => {
+  if (!email) return '-'
+  const [localPart, domain] = email.split('@')
+  if (!domain) {
+    if (email.length <= 4) return `${email.charAt(0)}***`
+    return `${email.slice(0, 2)}***${email.slice(-2)}`
+  }
+  const visibleStart = localPart.slice(0, Math.min(2, localPart.length))
+  const visibleEnd = localPart.length > 4 ? localPart.slice(-2) : ''
+  return `${visibleStart}***${visibleEnd}@${domain}`
+}
 
 const formatProduct = (record: PurchaseRecordVO): string => {
   if (record.isBundle && record.bundle) {
@@ -247,6 +255,21 @@ const formatProduct = (record: PurchaseRecordVO): string => {
     return record.product.name
   }
   return t('history.unknownProduct')
+}
+
+const recordBundles = (record: PurchaseRecordVO | null) => {
+  if (!record) return []
+  if (record.bundles && record.bundles.length) return record.bundles
+  return record.bundle ? [record.bundle] : []
+}
+
+const formatBundleNames = (record: PurchaseRecordVO): string => {
+  const bundles = recordBundles(record)
+  if (!bundles.length) return ''
+  if (bundles.length <= 2) {
+    return bundles.map((bundle) => bundle.bundleName).join(', ')
+  }
+  return `${bundles.slice(0, 2).map((bundle) => bundle.bundleName).join(', ')} +${bundles.length - 2}`
 }
 
 const getStatusClass = (status: number): string => {
@@ -277,7 +300,7 @@ const paymentMeta = (method?: string | null): PaymentMeta => {
     case 'credit':
       return { label: 'Credit', color: '#6f42c1', bg: 'rgba(111,66,193,0.08)', border: 'rgba(111,66,193,0.3)' }
     default:
-      return { label: (method || t('common.unknown')).toUpperCase(), color: '#6c757d', bg: 'rgba(108,117,125,0.08)', border: 'rgba(108,117,125,0.3)' }
+      return { label: (method || t('common.unknown')).toUpperCase(), color: 'var(--color-muted)', bg: 'rgba(108,117,125,0.08)', border: 'rgba(108,117,125,0.3)' }
   }
 }
 const paymentLabel = (method?: string | null): string => paymentMeta(method).label
@@ -386,33 +409,33 @@ onMounted(() => {
 <style scoped>
 .account-page {
   padding: 32px;
-  background: #fff;
+  background: var(--color-surface);
   min-height: 300px;
 }
 
 .filters { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-.filter-input { padding: 8px 10px; border: 1px solid #dee2e6; border-radius: 6px; width: 220px; }
-.filter-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid #ced4da; background: #f8f9fa; cursor: pointer; }
-.filter-btn.primary { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+.filter-input { padding: 8px 10px; border: 1px solid var(--color-line); border-radius: 6px; width: 220px; }
+.filter-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--color-line); background: var(--color-surface-soft); cursor: pointer; }
+.filter-btn.primary { background: var(--color-brand); color: var(--color-surface); border-color: var(--color-brand); }
 
 .loading-container {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-muted);
 }
 
 .error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-soft);
   border-radius: 8px;
   padding: 16px;
   margin: 24px 0;
-  color: #721c24;
+  color: var(--color-danger);
 }
 
 .retry-btn {
-  background: #007bff;
-  color: white;
+  background: var(--color-brand);
+  color: var(--color-surface);
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -421,7 +444,7 @@ onMounted(() => {
 }
 
 .retry-btn:hover {
-  background: #0056b3;
+  background: var(--color-brand-strong);
 }
 
 .table-container {
@@ -432,30 +455,30 @@ onMounted(() => {
 .purchase-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .purchase-table th {
-  background: #f8f9fa;
+  background: var(--color-surface-soft);
   padding: 12px 16px;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  color: var(--color-muted);
+  border-bottom: 2px solid var(--color-line);
   font-size: 14px;
 }
 
 .purchase-table td {
   padding: 12px 16px;
-  border-bottom: 1px solid #dee2e6;
-  color: #212529;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
   font-size: 14px;
 }
 
 .purchase-table tbody tr:hover {
-  background: #f8f9fa;
+  background: var(--color-surface-soft);
 }
 
 .purchase-table th,
@@ -473,13 +496,13 @@ onMounted(() => {
 }
 
 .status-badge.success {
-  background: #d4edda;
-  color: #155724;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
 }
 
 .status-badge.failed {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .pay-tag {
@@ -507,6 +530,16 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.email-mask {
+  display: inline-block;
+  max-width: 180px;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
 .pagination-container {
   display: flex;
   justify-content: space-between;
@@ -516,7 +549,7 @@ onMounted(() => {
 }
 
 .pagination-info {
-  color: #6c757d;
+  color: var(--color-muted);
   font-size: 14px;
 }
 
@@ -527,8 +560,8 @@ onMounted(() => {
 }
 
 .page-btn {
-  background: #007bff;
-  color: white;
+  background: var(--color-brand);
+  color: var(--color-surface);
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -537,16 +570,16 @@ onMounted(() => {
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #0056b3;
+  background: var(--color-brand-strong);
 }
 
 .page-btn:disabled {
-  background: #6c757d;
+  background: var(--color-muted);
   cursor: not-allowed;
 }
 
 .page-info {
-  color: #495057;
+  color: var(--color-muted);
   font-size: 14px;
   font-weight: 500;
 }
@@ -556,7 +589,7 @@ onMounted(() => {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--color-line);
   transition: transform 0.2s ease;
 }
 
@@ -568,31 +601,31 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: var(--color-surface-soft);
+  border: 2px solid var(--color-line);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: #6c757d;
+  color: var(--color-muted);
   text-align: center;
   line-height: 1;
 }
 
 .product-link {
-  color: #007bff;
+  color: var(--color-brand);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .product-link:hover {
-  color: #0056b3;
+  color: var(--color-brand-strong);
   text-decoration: underline;
 }
 
 .product-name {
-  color: #212529;
+  color: var(--color-ink);
   font-weight: 500;
 }
 
@@ -608,13 +641,13 @@ onMounted(() => {
   justify-content: space-between;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px dashed #e9ecef;
+  border-bottom: 1px dashed var(--color-line);
 }
 .detail-item .k {
-  color: #6c757d;
+  color: var(--color-muted);
 }
 .detail-item .v {
-  color: #212529;
+  color: var(--color-ink);
   font-weight: 500;
   word-break: break-all;
   text-align: right;
@@ -623,12 +656,12 @@ onMounted(() => {
 .nested-section {
   margin-top: 16px;
   padding-top: 8px;
-  border-top: 2px solid #f1f3f5;
+  border-top: 2px solid var(--color-line);
 }
 .nested-title {
   margin: 0 0 8px 0;
   font-size: 14px;
-  color: #495057;
+  color: var(--color-muted);
 }
 .nested-content {
   display: flex;
@@ -639,17 +672,28 @@ onMounted(() => {
   width: 64px;
   height: 64px;
   object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
 }
 .nested-fields > div { padding: 2px 0; }
 
 .bundle-products {
   margin-top: 10px;
 }
+.bundle-list-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bundle-detail-item {
+  padding: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  background: var(--color-surface-soft);
+}
 .bp-title {
   font-weight: 600;
-  color: #495057;
+  color: var(--color-muted);
   margin-bottom: 6px;
 }
 .bundle-products ul {
@@ -662,16 +706,16 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px dashed #e9ecef;
+  border-bottom: 1px dashed var(--color-line);
 }
 .bp-thumb {
   width: 28px;
   height: 28px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-line);
 }
-.bp-name { color: #212529; }
+.bp-name { color: var(--color-ink); }
 
 /* preserve newlines and wrapping for multiline text in descriptions */
 .multiline {

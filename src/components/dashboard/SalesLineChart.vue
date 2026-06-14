@@ -178,7 +178,7 @@ const updateChart = () => {
       }
     },
     grid: { left: 40, right: 60, top: 20, bottom: 30 },
-    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel: { color: '#6c757d' } },
+    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel: { color: '#667085' } },
     yAxis: [
       {
         type: 'value',
@@ -186,7 +186,7 @@ const updateChart = () => {
         position: 'left',
         min: yMin,
         max: yMax,
-        axisLabel: { color: '#6c757d' },
+        axisLabel: { color: '#667085' },
         splitLine: { lineStyle: { color: '#edf2f7' } }
       },
       {
@@ -196,7 +196,7 @@ const updateChart = () => {
         min: yMin,
         max: yMax,
         axisLabel: {
-          color: '#6c757d',
+          color: '#667085',
           formatter: (val: number) => `$${Number(val).toLocaleString('en-US', { maximumFractionDigits: 2 })}`
         },
         splitLine: { show: false }
@@ -255,12 +255,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: #212529; margin: 16px 0; }
-.error-message { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 16px; margin: 24px 0; color: #721c24; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
+.error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 .filters { margin: 8px 0 12px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .app-id-input { width: 180px; }
 .line-chart { width: 100%; height: 320px; }
-.chart-legend { display: flex; gap: 12px; padding: 6px 8px 10px 8px; color: #6c757d; font-size: 12px; }
+.chart-legend { display: flex; gap: 12px; padding: 6px 8px 10px 8px; color: var(--color-muted); font-size: 12px; }
 .legend.orders::before { content: ''; display: inline-block; width: 10px; height: 10px; background: #1e88e5; margin-right: 6px; border-radius: 2px; }
 .legend.earnings::before { content: ''; display: inline-block; width: 10px; height: 10px; background: #2f9e6e; margin-right: 6px; border-radius: 2px; }
 </style>

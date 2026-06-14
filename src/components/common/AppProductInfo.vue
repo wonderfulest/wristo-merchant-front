@@ -126,7 +126,7 @@ const imgUrl = computed(() => {
   display: flex;
   gap: 12px;
   margin-top: 4px;
-  color: #909399;
+  color: var(--color-muted);
   font-size: 12px;
 }
 </style>

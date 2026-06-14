@@ -91,13 +91,13 @@ onMounted(fetchPayoutInfo)
 <style scoped>
 .payout-header { display: flex; align-items: center; justify-content: space-between; }
 .payout-title { display: flex; flex-direction: column; }
-.payout-title .title { font-size: 24px; font-weight: 700; color: #1b4332; }
-.payout-title .subtitle { font-size: 12px; color: #6c757d; }
+.payout-title .title { font-size: 24px; font-weight: 700; color: var(--color-brand-strong); }
+.payout-title .subtitle { font-size: 12px; color: var(--color-muted); }
 
 .payout-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.payout-card { background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%); border: 1px solid #e6f4ee; border-radius: 12px; padding: 18px 16px; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.card-label { display: inline-block; font-size: 11px; font-weight: 700; color: #19b36b; background: #e9f7f1; border: 1px solid #ccefe0; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 10px; margin-bottom: 10px; }
-.card-value { font-size: 26px; font-weight: 800; color: #1b4332; line-height: 1.2; }
-.loading-text { color: #6c757d; font-size: 16px; }
-.error-message { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 16px; margin: 24px 0; color: #721c24; }
+.payout-card { background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-canvas-top) 100%); border: 1px solid var(--color-line); border-radius: 12px; padding: 18px 16px; text-align: center; box-shadow: var(--shadow-sm); }
+.card-label { display: inline-block; font-size: 11px; font-weight: 700; color: var(--color-brand); background: var(--color-brand-soft); border: 1px solid var(--color-line); border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 10px; margin-bottom: 10px; }
+.card-value { font-size: 26px; font-weight: 800; color: var(--color-brand-strong); line-height: 1.2; }
+.loading-text { color: var(--color-muted); font-size: 16px; }
+.error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 </style>

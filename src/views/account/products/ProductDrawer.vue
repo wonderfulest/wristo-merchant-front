@@ -79,12 +79,12 @@
           />
           <span
             v-if="item.key === 'trialLasts'"
-            style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
+            style="margin-left: 8px; color: var(--color-muted); font-size: 1.1rem; margin-top: 10px;"
             >{{ t('products.hours') }}</span
           >
           <span
             v-if="item.key === 'price'"
-            style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;"
+            style="margin-left: 8px; color: var(--color-muted); font-size: 1.1rem; margin-top: 10px;"
             >USD</span
           >
           <div
@@ -358,19 +358,19 @@ async function handleSave() {
 
 <style scoped>
 .add-product-drawer {
-  background: #fff;
+  background: var(--color-surface);
   min-height: 100vh;
   padding: 0;
   display: flex;
   flex-direction: column;
   height: 100vh;
   border-radius: 12px 0 0 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .drawer-header {
-  background: #19b36b;
-  color: #fff;
+  background: var(--color-brand);
+  color: var(--color-surface);
   padding: 36px 0 24px 0;
   text-align: center;
 }
@@ -399,11 +399,11 @@ async function handleSave() {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0;
-  color: #222;
+  color: var(--color-ink);
 }
 
 .section-desc {
-  color: #444;
+  color: var(--color-muted);
   font-size: 1rem;
   margin-bottom: 12px;
   line-height: 1.2;
@@ -425,15 +425,15 @@ async function handleSave() {
   font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #222;
+  color: var(--color-ink);
 }
 
 .img-uploader {
   width: 120px;
   height: 120px;
-  border: 2px dashed #b2b2b2;
+  border: 2px dashed var(--color-subtle);
   border-radius: 10px;
-  background: #fafbfc;
+  background: var(--color-surface-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,11 +445,11 @@ async function handleSave() {
 }
 
 .img-uploader:hover {
-  border-color: #19b36b;
+  border-color: var(--color-brand);
 }
 
 .img-upload-placeholder {
-  color: #bbb;
+  color: var(--color-subtle);
   font-size: 1rem;
   display: flex;
   flex-direction: column;
@@ -480,7 +480,7 @@ async function handleSave() {
   left: 0px;
   top: 18px;
   font-size: 1.1rem;
-  color: #bbb;
+  color: var(--color-subtle);
   pointer-events: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
@@ -490,8 +490,8 @@ async function handleSave() {
   top: -14px;
   left: -4px;
   font-size: 0.98rem;
-  color: #19b36b;
-  background: #fff;
+  color: var(--color-brand);
+  background: var(--color-surface);
   padding: 0 4px;
   font-weight: 600;
 }
@@ -499,17 +499,17 @@ async function handleSave() {
 .custom-input {
   width: 100%;
   border: none;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--color-line);
   outline: none;
   font-size: 1.15rem;
   padding: 18px 0 6px 0;
   background: transparent;
-  color: #222;
+  color: var(--color-ink);
   transition: border-color 0.2s, border-width 0.2s;
 }
 
 .custom-input:focus {
-  border-bottom: 3px solid #19b36b;
+  border-bottom: 3px solid var(--color-brand);
 }
 
 .custom-textarea {
@@ -522,8 +522,8 @@ async function handleSave() {
   top: 0;
   right: 0;
   transform: translateY(-110%);
-  background: #5c5a5a;
-  color: #fff;
+  background: var(--color-ink);
+  color: var(--color-surface);
   font-size: 1.05rem;
   border-radius: 8px;
   padding: 12px 18px;
@@ -531,7 +531,7 @@ async function handleSave() {
   max-width: 340px;
   z-index: 10;
   text-align: left;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
+  box-shadow: var(--shadow-md);
   line-height: 1.5;
   font-weight: 500;
   pointer-events: none;
@@ -540,8 +540,8 @@ async function handleSave() {
 
 .drawer-footer {
   padding: 12px 32px 24px 32px;
-  background: #fff;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -557,7 +557,7 @@ async function handleSave() {
 
 .footer-checkbox-text {
   font-size: 1.15rem;
-  color: #222;
+  color: var(--color-ink);
   line-height: 1.2;
   word-break: break-word;
   white-space: normal;
@@ -570,17 +570,17 @@ async function handleSave() {
   font-size: 1.3rem;
   font-weight: bold;
   letter-spacing: 1px;
-  background: #19b36b;
+  background: var(--color-brand);
   border: none;
   border-radius: 6px;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   transition: background 0.2s;
 }
 
 .create-btn:disabled {
-  background: #b2dfc7;
-  color: #fff;
+  background: var(--color-brand-soft);
+  color: var(--color-surface);
   cursor: not-allowed;
 }
 
@@ -593,16 +593,16 @@ async function handleSave() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e9ecef;
+  background: var(--color-surface-soft);
   border-radius: 50%;
   border: none;
-  color: #19b36b;
+  color: var(--color-brand);
   transition: background 0.2s;
 }
 
 .help-btn:hover {
-  background: #d2f4e3;
-  color: #19b36b;
+  background: var(--color-brand-soft);
+  color: var(--color-brand);
 }
 
 :deep(.el-upload-dragger) {

@@ -8,6 +8,8 @@ export interface Bundle {
   bundleDesc: string
   price: number
   isActive: number
+  bundleType?: string
+  parentBundleId?: number | null
   createdAt: string
   updatedAt: string
   products: Product[]

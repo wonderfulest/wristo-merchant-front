@@ -1,17 +1,32 @@
-// 颜色变量
-$color-primary: #19b36b;
-$color-success: #1abc5b;
-$color-warning: #ffb300;
-$color-danger: #ff4d4f;
-$color-info: #888;
-$color-bg: #f5f6f7;
-$color-header-bg: #f5f6f7;
-$color-header-text: #fff;
-$color-footer-bg: #fff;
-$color-footer-text: #888;
-$color-link: #222;
-$color-link-hover: #19b36b;
-$color-border: #e5e5e5;
+// Store-aligned color system
+$color-canvas: #f4f7f6;
+$color-canvas-top: #fbfdfc;
+$color-surface: #ffffff;
+$color-surface-soft: #eef5f3;
+$color-ink: #111827;
+$color-muted: #667085;
+$color-subtle: #98a2b3;
+$color-line: rgba(17, 24, 39, 0.1);
+$color-brand: #0f6b68;
+$color-brand-strong: #064e4b;
+$color-brand-soft: #dff5f1;
+$color-accent: #f59e0b;
+$color-danger: #dc2626;
+$color-danger-soft: #fee2e2;
+
+// Backward-compatible aliases for existing merchant styles.
+$color-primary: $color-brand;
+$color-success: $color-brand;
+$color-warning: $color-accent;
+$color-info: $color-muted;
+$color-bg: $color-canvas;
+$color-header-bg: $color-canvas;
+$color-header-text: $color-ink;
+$color-footer-bg: $color-surface;
+$color-footer-text: $color-muted;
+$color-link: $color-ink;
+$color-link-hover: $color-brand;
+$color-border: $color-line;
 
 // 字体大小变量
 $font-size-xs: 12px;
@@ -24,4 +39,10 @@ $font-size-title: 64px;
 
 // 其他变量
 $border-radius: 8px;
-$box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+$radius-sm: 8px;
+$radius-md: 16px;
+$radius-lg: 24px;
+$shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
+$shadow-md: 0 14px 34px rgba(17, 24, 39, 0.1);
+$shadow-lg: 0 24px 70px rgba(17, 24, 39, 0.14);
+$box-shadow: $shadow-sm;

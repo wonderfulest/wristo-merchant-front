@@ -228,7 +228,7 @@ const updateFunnelChart = async () => {
         label: { show: true, position: 'left', formatter: (p: any) => `${p.name}: ${p.value}` },
         labelLine: { show: true, length: 10, lineStyle: { color: '#9aa39f' } },
         itemStyle: {
-          borderColor: '#fff', borderWidth: 1,
+          borderColor: '#ffffff', borderWidth: 1,
           color: (params: any) => {
             const idx = Math.min(params.dataIndex, gradients.length - 1)
             const [start, end] = gradients[idx]
@@ -271,16 +271,16 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: #212529; margin: 16px 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
 .funnel-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-.funnel-header { display: flex; justify-content: space-between; font-size: 12px; color: #6c757d; }
+.funnel-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-muted); }
 .funnel-chart { width: 100%; height: 360px; margin-bottom: 12px; }
 .funnel-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
-.funnel-step { background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px; text-align: center; }
-.funnel-step .step-title { font-size: 12px; color: #6c757d; }
-.funnel-step .step-value { font-size: 22px; font-weight: 700; color: #1b4332; }
-.funnel-step .step-rate { margin-top: 6px; font-size: 12px; color: #495057; }
-.error-message { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 16px; margin: 24px 0; color: #721c24; }
+.funnel-step { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px; text-align: center; }
+.funnel-step .step-title { font-size: 12px; color: var(--color-muted); }
+.funnel-step .step-value { font-size: 22px; font-weight: 700; color: var(--color-brand-strong); }
+.funnel-step .step-rate { margin-top: 6px; font-size: 12px; color: var(--color-muted); }
+.error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 .step-toggle { display: inline-flex; align-items: center; gap: 8px; }
-.toggle-label { color: #6c757d; font-size: 12px; }
+.toggle-label { color: var(--color-muted); font-size: 12px; }
 </style>

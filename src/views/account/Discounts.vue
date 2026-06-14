@@ -14,7 +14,10 @@ const { t } = useI18n()
 <style scoped>
 .account-page {
   padding: 32px;
-  background: #fff;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
   min-height: 300px;
 }
 </style> 

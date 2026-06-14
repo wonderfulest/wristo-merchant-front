@@ -1,5 +1,16 @@
 <template>
   <div class="mch-products-table">
+    <div class="product-table-toolbar">
+      <el-input
+        v-model="searchKeyword"
+        class="product-search-input"
+        :placeholder="t('products.searchPlaceholder')"
+        clearable
+        @keyup.enter="handleSearch"
+        @clear="handleSearch"
+      />
+      <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
+    </div>
     <el-table :data="products" style="width: 100%" v-loading="loading">
       <el-table-column prop="appId" label="ID" width="80" />
       <el-table-column :label="t('products.productInfo')" min-width="280">
@@ -78,6 +89,7 @@ const loading = ref(false)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const searchKeyword = ref('')
 const pageSizes = [10, 20, 50, 100]
 const userStore = useUserStore()
 const { t } = useI18n()
@@ -99,7 +111,8 @@ const loadProducts = async () => {
       pageNum: pageNum.value,
       pageSize: pageSize.value,
       orderBy: 'created_at:desc',
-      userId: userStore.userInfo?.id
+      userId: userStore.userInfo?.id,
+      name: searchKeyword.value.trim() || undefined
     }
     const res = await fetchProductPage(params)
     if (res.code === 0 && res.data) {
@@ -127,6 +140,11 @@ const handleSizeChange = (val: number) => {
   loadProducts()
 }
 
+const handleSearch = () => {
+  pageNum.value = 1
+  loadProducts()
+}
+
 onMounted(() => {
   loadProducts()
 })
@@ -134,14 +152,38 @@ onMounted(() => {
 
 <style scoped>
 .mch-products-table {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 12px;
+}
+
+.product-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.product-search-input {
+  width: 280px;
 }
 
 .pagination-bar {
   margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .product-table-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .product-search-input {
+    width: 100%;
+  }
 }
 </style>

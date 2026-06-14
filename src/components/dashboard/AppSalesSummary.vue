@@ -100,12 +100,12 @@ onMounted(fetchSummaryPage)
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: #212529; margin: 16px 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
 .app-cell { display: flex; align-items: center; gap: 12px; }
-.app-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid #e9ecef; }
+.app-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid var(--color-line); }
 .app-info { display: flex; flex-direction: column; }
-.app-name { font-weight: 600; color: #212529; }
-.app-sub { font-size: 12px; color: #6c757d; }
+.app-name { font-weight: 600; color: var(--color-ink); }
+.app-sub { font-size: 12px; color: var(--color-muted); }
 .table-footer { display: flex; justify-content: flex-end; padding: 12px 0; }
-.error-message { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 16px; margin: 24px 0; color: #721c24; }
+.error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 </style>

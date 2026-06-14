@@ -120,7 +120,7 @@ async function generateKey() {
   margin-bottom: 24px;
   font-size: $font-size-lg;
   letter-spacing: 1px;
-  background: #f8f8f8;
+  background: $color-surface-soft;
   border-radius: $border-radius;
 }
 .generate-btn {

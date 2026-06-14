@@ -47,7 +47,7 @@
             autocomplete="off"
             style="flex: 1;"
           />
-          <span style="margin-left: 8px; color: #888; font-size: 1.1rem; margin-top: 10px;">USD</span>
+          <span style="margin-left: 8px; color: var(--color-muted); font-size: 1.1rem; margin-top: 10px;">USD</span>
         </div>
         <div class="custom-form-item" v-if="props.bundle?.bundleId">
           <label class="custom-label active">{{ t('bundle.url') }}</label>
@@ -69,17 +69,34 @@
       <!-- 产品选择器 -->
       <div class="product-selector">
         <div class="selector-header">
-          <span>{{ t('bundle.selectProducts') }}</span>
+          <div>
+            <div class="selector-title">{{ t('bundle.selectProducts') }}</div>
+            <div class="selector-summary">
+              已选 {{ allSelectedIds.length }} / {{ products.length }}
+            </div>
+          </div>
           <a class="change-order" @click="handleChangeOrder">{{ t('bundle.changeOrder') }}</a>
+        </div>
+        <div class="selector-search">
+          <input
+            v-model="productSearchKeyword"
+            class="selector-search-input"
+            type="search"
+            placeholder="按商品名称或 appId 搜索"
+            autocomplete="off"
+          />
         </div>
         <div class="selector-list">
           <div class="selector-item" @click="toggleSelectAll">
             <span :class="['selector-checkbox', isAllSelected ? 'checked' : '']"></span>
-            <span class="selector-label">{{ t('bundle.selectAll') }}</span>
+            <span class="selector-product-main">
+              <span class="selector-label">{{ t('bundle.selectAll') }}</span>
+              <span class="selector-meta">当前筛选可选 {{ selectableFilteredProducts.length }} 个</span>
+            </span>
           </div>
           <div
             class="selector-item"
-            v-for="product in products"
+            v-for="product in filteredProducts"
             :key="product.appId"
             :class="historySelectedIds.includes(product.appId) ? 'selector-item-disabled' : ''"
             @click="
@@ -97,7 +114,15 @@
             ></span>
             <span
               :class="['selector-label', historySelectedIds.includes(product.appId) ? 'selector-label-disabled' : '']"
-            >{{ product.name }}</span>
+            >
+              <span class="selector-product-main">
+                <span class="selector-product-name">{{ product.name }}</span>
+              </span>
+              <span class="selector-app-id">#{{ product.appId }}</span>
+            </span>
+          </div>
+          <div v-if="filteredProducts.length === 0" class="selector-empty">
+            没有匹配的商品
           </div>
         </div>
       </div>
@@ -161,6 +186,7 @@ import { useI18n } from '@/i18n'
 const props = defineProps<{ bundle?: Bundle | null }>()
 const emits = defineEmits(['close'])
 const { t } = useI18n()
+const CUSTOM_BUNDLE_DEFAULT_PRICE = '5'
 
 // 3. ref/reactive/变量定义
 const activeInput = ref('')
@@ -175,7 +201,7 @@ interface AddBundleForm {
 const form = ref<AddBundleForm>({
   bundleName: '',
   bundleDesc: '',
-  price: '',
+  price: CUSTOM_BUNDLE_DEFAULT_PRICE,
 })
 
 const products = ref<Product[]>([])
@@ -183,16 +209,26 @@ const selectedProductIds = ref<number[]>([])
 const historySelectedIds = ref<number[]>([])
 const orderDialogVisible = ref(false)
 const orderDialogIds = ref<number[]>([])
+const productSearchKeyword = ref('')
 
 // 4. computed 计算属性
 const isAllSelected = computed(() =>
   products.value.length > 0 &&
-  selectableProducts.value.length > 0 &&
-  selectedProductIds.value.length === selectableProducts.value.length
+  selectableFilteredProducts.value.length > 0 &&
+  selectableFilteredProducts.value.every(p => selectedProductIds.value.includes(p.appId))
 )
 
-const selectableProducts = computed(() =>
-  products.value.filter(p => !historySelectedIds.value.includes(p.appId))
+const filteredProducts = computed(() => {
+  const keyword = productSearchKeyword.value.trim().toLowerCase()
+  if (!keyword) return products.value
+  return products.value.filter(product => {
+    const name = product.name?.toLowerCase() || ''
+    return name.includes(keyword) || String(product.appId).includes(keyword)
+  })
+})
+
+const selectableFilteredProducts = computed(() =>
+  filteredProducts.value.filter(p => !historySelectedIds.value.includes(p.appId))
 )
 
 const allSelectedIds = computed({
@@ -256,9 +292,11 @@ function toggleProduct(appId: number) {
 
 function toggleSelectAll() {
   if (!isAllSelected.value) {
-    selectedProductIds.value = selectableProducts.value.map(p => p.appId)
+    const filteredIds = selectableFilteredProducts.value.map(p => p.appId)
+    selectedProductIds.value = Array.from(new Set([...selectedProductIds.value, ...filteredIds]))
   } else {
-    selectedProductIds.value = []
+    const filteredIdSet = new Set(selectableFilteredProducts.value.map(p => p.appId))
+    selectedProductIds.value = selectedProductIds.value.filter(id => !filteredIdSet.has(id))
   }
 }
 
@@ -334,16 +372,18 @@ function setForm(bundle: Bundle) {
   form.value.bundleDesc = bundle.bundleDesc || ''
   form.value.price = bundle.price !== undefined && bundle.price !== null ? String(bundle.price) : ''
   const ids = Array.isArray(bundle.products) ? bundle.products.map(p => p.appId) : []
-  selectedProductIds.value = ids.filter(id => !historySelectedIds.value.includes(id))
   historySelectedIds.value = ids.slice()
+  selectedProductIds.value = []
+  productSearchKeyword.value = ''
 }
 
 function resetForm() {
   form.value.bundleName = ''
   form.value.bundleDesc = ''
-  form.value.price = ''
+  form.value.price = CUSTOM_BUNDLE_DEFAULT_PRICE
   selectedProductIds.value = []
   historySelectedIds.value = []
+  productSearchKeyword.value = ''
 }
 
 function removeSelected(appId: number) {
@@ -376,34 +416,38 @@ defineExpose({ setForm, resetForm })
 </style>
 <style scoped>
 .add-bundle-drawer {
-  background: #fff;
+  background: var(--color-canvas);
   min-height: 100vh;
   padding: 0;
   display: flex;
   flex-direction: column;
   height: 100vh;
   border-radius: 12px 0 0 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 .drawer-header {
-  background: #434a4f;
-  color: #fff;
-  padding: 24px 0 12px 0;
-  text-align: center;
+  background: linear-gradient(135deg, var(--color-brand-strong) 0%, var(--color-brand) 100%);
+  color: var(--color-surface);
+  padding: 28px 32px 18px;
+  text-align: left;
 }
 .drawer-header h2 {
-  font-size: 2.4rem;
-  font-weight: 400;
+  font-size: 28px;
+  font-weight: 700;
   margin: 0;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 .drawer-body {
-  padding: 36px 32px 0 32px;
+  padding: 28px 28px 0;
   flex: 1 1 auto;
   overflow-y: auto;
 }
 .custom-form {
-  margin-top: 18px;
+  margin-top: 10px;
+  padding: 24px 24px 4px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-surface);
 }
 .custom-form-item {
   position: relative;
@@ -414,7 +458,7 @@ defineExpose({ setForm, resetForm })
   left: 0px;
   top: 18px;
   font-size: 1.1rem;
-  color: #bbb;
+  color: var(--color-subtle);
   pointer-events: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
@@ -423,29 +467,29 @@ defineExpose({ setForm, resetForm })
   top: -14px;
   left: -4px;
   font-size: 0.98rem;
-  color: #19b36b;
-  background: #fff;
+  color: var(--color-brand);
+  background: var(--color-surface);
   padding: 0 4px;
   font-weight: 600;
 }
 .custom-input {
   width: 100%;
   border: none;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--color-line);
   outline: none;
   font-size: 1.15rem;
   padding: 18px 0 6px 0;
   background: transparent;
-  color: #222;
+  color: var(--color-ink);
   transition: border-color 0.2s, border-width 0.2s;
 }
 .custom-input:focus {
-  border-bottom: 3px solid #19b36b;
+  border-bottom: 3px solid var(--color-brand);
 }
 .drawer-footer {
-  padding: 32px 32px 24px 32px;
-  background: #fff;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  padding: 20px 28px 24px;
+  background: var(--color-surface) !important;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -457,115 +501,226 @@ defineExpose({ setForm, resetForm })
   font-size: 1.3rem;
   font-weight: bold;
   letter-spacing: 1px;
-  background: #19b36b;
-  border: none;
+  background: var(--color-brand) !important;
+  border: none !important;
   border-radius: 6px;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: var(--color-surface) !important;
+  box-shadow: var(--shadow-sm);
   transition: background 0.2s;
 }
+.create-btn:hover,
+.create-btn:focus {
+  background: var(--color-brand-strong) !important;
+  color: var(--color-surface) !important;
+}
 .create-btn:disabled {
-  background: #b2dfc7;
-  color: #fff;
+  background: var(--color-brand-soft) !important;
+  color: var(--color-surface) !important;
   cursor: not-allowed;
 }
 .product-selector {
-  margin: 32px 0;
+  margin: 20px 0 28px;
+  padding: 20px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-surface);
 }
 .selector-header {
-  font-size: 20px;
-  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
   text-align: left;
 }
+.selector-title {
+  color: var(--color-ink);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.selector-summary {
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
 .change-order {
-  color: #19b36b;
-  margin-left: 8px;
+  color: var(--color-brand);
   cursor: pointer;
-  font-size: 16px;
-  text-decoration: underline;
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 32px;
+  text-decoration: none;
+}
+.change-order:hover {
+  color: var(--color-brand-strong);
+}
+.selector-search {
+  margin-bottom: 12px;
+}
+.selector-search-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-surface-soft);
+  color: var(--color-ink);
+  font-size: 15px;
+  outline: none;
+  padding: 0 14px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.selector-search-input:focus {
+  border-color: var(--color-brand);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(15, 107, 104, 0.14);
 }
 .selector-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 .selector-item {
   display: flex;
   align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-surface);
   cursor: pointer;
   font-size: 14px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+.selector-item:hover {
+  border-color: rgba(15, 107, 104, 0.28);
+  background: var(--color-surface-soft);
+  box-shadow: var(--shadow-sm);
 }
 .selector-checkbox {
-  width: 24px;
-  height: 24px;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 3px solid #bbb;
-  margin-right: 12px;
+  border: 2px solid var(--color-subtle);
+  margin-right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: var(--color-surface);
   transition: border-color 0.2s;
   position: relative;
 }
 .selector-checkbox.checked {
-  background: #19b36b;
-  border-color: #19b36b;
+  background: var(--color-brand);
+  border-color: var(--color-brand);
 }
 .selector-checkbox.checked::after {
   content: '';
   display: block;
-  width: 14px;
-  height: 8px;
-  border-left: 3px solid #fff;
-  border-bottom: 3px solid #fff;
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid var(--color-surface);
+  border-bottom: 2px solid var(--color-surface);
   transform: rotate(-45deg);
   position: absolute;
   left: 4px;
-  top: 4px;
+  top: 5px;
 }
 .selector-label {
-  font-size: 18px;
-  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  color: var(--color-ink);
+}
+.selector-product-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
+.selector-product-name {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selector-meta {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+.selector-app-id {
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-strong);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
 }
 .selector-item-disabled {
   opacity: 0.5;
   pointer-events: none;
 }
 .selector-checkbox-disabled {
-  background: #19b36b !important;
-  border-color: #19b36b !important;
+  background: var(--color-brand) !important;
+  border-color: var(--color-brand) !important;
 }
 .selector-label-disabled {
-  color: #aaa !important;
+  color: var(--color-subtle) !important;
+}
+.selector-empty {
+  padding: 18px 12px;
+  border: 1px dashed var(--color-line);
+  border-radius: 8px;
+  color: var(--color-muted);
+  font-size: 14px;
+  text-align: center;
 }
 .selector-history-title {
   font-size: 16px;
-  color: #888;
+  color: var(--color-muted);
   margin: 18px 0 8px 0;
   font-weight: 500;
 }
 .drag-ghost {
   opacity: 0.5;
-  background: #f5f6f7;
+  background: var(--color-canvas);
 }
 .drag-chosen {
-  background: #e0f7ef;
+  background: var(--color-brand-soft);
 }
 
 .sort-order-dialog >>> .el-dialog__header {
   padding: 0;
-  background: #19b36b;
+  background: var(--color-brand);
   border-radius: 8px 8px 0 0;
 }
 .sort-dialog-header {
-  background: #19b36b;
+  background: var(--color-brand);
   padding: 24px 32px 16px 32px;
   border-radius: 8px 8px 0 0;
 }
 .sort-dialog-title {
-  color: #fff;
+  color: var(--color-surface);
   font-size: 2rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -573,7 +728,7 @@ defineExpose({ setForm, resetForm })
 }
 .sort-dialog-desc {
   font-size: 1.15rem;
-  color: #555;
+  color: var(--color-muted);
   margin: 32px 0 32px 0;
   padding: 0 16px;
   text-align: left;
@@ -588,25 +743,25 @@ defineExpose({ setForm, resetForm })
   padding: 0 32px;
 }
 .order-item {
-  background: #f3f3f3;
+  background: var(--color-surface-soft);
   border-radius: 4px;
   margin-bottom: 8px;
   padding: 8px 24px;
   font-size: 1.18rem;
   font-weight: 500;
-  color: #222;
+  color: var(--color-ink);
   cursor: grab;
   transition: box-shadow 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: var(--shadow-sm);
 }
 .order-label {
   flex: 1;
-  color: #222;
+  color: var(--color-ink);
   font-weight: 500;
 }
 .save-btn {
-  background: #19b36b;
-  color: #fff;
+  background: var(--color-brand);
+  color: var(--color-surface);
   font-weight: 600;
   min-width: 120px;
   font-size: 1.1rem;
@@ -614,10 +769,10 @@ defineExpose({ setForm, resetForm })
   border: none;
 }
 .save-btn:hover {
-  background: #13a05a;
+  background: var(--color-brand-strong);
 }
 .cancel-btn {
-  color: #f44336;
+  color: var(--color-danger);
   background: transparent;
   border: none;
   font-weight: 600;
@@ -625,14 +780,14 @@ defineExpose({ setForm, resetForm })
   font-size: 1.1rem;
 }
 .cancel-btn:hover {
-  color: #c62828;
-  background: #fbe9e7;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
 }
 .bundle-url-display {
   display: flex;
   align-items: center;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-line);
   border-radius: 6px;
   padding: 12px 16px;
   margin-top: 8px;
@@ -641,13 +796,13 @@ defineExpose({ setForm, resetForm })
 .bundle-url-text {
   flex: 1;
   font-size: 1.1rem;
-  color: #19b36b;
+  color: var(--color-brand);
   font-weight: 500;
   word-break: break-all;
 }
 .copy-url-btn {
-  background: #19b36b;
-  color: #fff;
+  background: var(--color-brand);
+  color: var(--color-surface);
   border: none;
   border-radius: 4px;
   padding: 8px;
@@ -660,7 +815,7 @@ defineExpose({ setForm, resetForm })
   height: 32px;
 }
 .copy-url-btn:hover {
-  background: #13a05a;
+  background: var(--color-brand-strong);
 }
 .copy-url-btn svg {
   width: 16px;
