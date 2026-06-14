@@ -23,6 +23,11 @@
             </div>
             <div class="row-divider" />
             <div class="row">
+              <div class="row-label">{{ t('profile.nickname') }}</div>
+              <div class="row-value"><el-input v-model="form.nickname" :placeholder="t('profile.nicknamePlaceholder')" /></div>
+            </div>
+            <div class="row-divider" />
+            <div class="row">
               <div class="row-label">{{ t('profile.email') }}</div>
               <div class="row-value text-value">{{ form.email || '—' }}</div>
             </div>
@@ -128,12 +133,14 @@ import type { ImageVO } from '@/types/image'
 import { ElMessage } from 'element-plus'
 import ImageUpload from '@/components/common/ImageUpload.vue'
 import { useI18n } from '@/i18n'
+import { useUserStore } from '@/store/user'
 
 const userInfo = ref<MchUserVO | null>(null)
 const loading = ref(true)
 const saving = ref(false)
 const bannerPreviewUrl = ref('')
 const { t } = useI18n()
+const userStore = useUserStore()
 const defaultAvatar = 'https://cdn.wristo.io/test/avatar/561aae25-41bd-47ab-974e-7231f5a850e8.png'
 const avatarInputRef = ref<HTMLInputElement | null>(null)
 
@@ -181,6 +188,7 @@ async function fetchUserInfo() {
     const res: ApiResponse<MchUserVO> = await getMchUserInfo()
     if (res.code === 0 && res.data) {
       userInfo.value = res.data
+      userStore.setUserInfo(res.data)
       Object.assign(form, {
         username: res.data.username || '',
         nickname: res.data.nickname || '',
@@ -249,11 +257,18 @@ async function onAvatarFileChange(e: Event) {
 }
 
 async function handleSave() {
+  const username = form.username.trim()
+  const nickname = form.nickname.trim()
+  if (!username) {
+    ElMessage.error(t('profile.usernamePlaceholder'))
+    return
+  }
+
   saving.value = true
   try {
     const updateData: UserMchUpdateDTO = {
-      username: form.username,
-      nickname: form.nickname,
+      username,
+      nickname,
       avatar: form.avatar,
       payoutMethod: form.payoutMethod,
       payoutAccount: form.payoutAccount,
