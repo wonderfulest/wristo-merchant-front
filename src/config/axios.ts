@@ -14,6 +14,14 @@ const instance = axios.create({
   }
 })
 
+const redirectToLogin = (message = '登录已过期，请重新登录') => {
+  const userStore = useUserStore()
+  userStore.token = ''
+  userStore.userInfo = null
+  ElMessage.error(message)
+  redirectToSsoLogin('merchant', 1000)
+}
+
 // 请求拦截器
 instance.interceptors.request.use(config => {
   const userStore = useUserStore()
@@ -30,6 +38,9 @@ instance.interceptors.response.use(
     const res: ApiResponse<any> = response.data
     if (res.code === BizErrorCode.SUCCESS) {
       return response.data // 返回原始 response
+    } else if (res.code === 401 || res.code === 403) {
+      redirectToLogin(res.msg || '登录已过期，请重新登录')
+      return Promise.reject(response.data)
     } else {
       ElMessage.error(response.data.msg || '请求失败')
       return Promise.reject(response.data)
@@ -37,14 +48,8 @@ instance.interceptors.response.use(
   },
   error => {
     const status = error.response?.status
-    if (status === 401) {
-      const userStore = useUserStore()
-      userStore.token = ''
-      userStore.userInfo = null
-      ElMessage.error('登录已过期，请重新登录')
-      redirectToSsoLogin('merchant', 1000)
-    } else if (status === 403) {
-      ElMessage.error(error.response?.data?.msg || '当前账号无权限访问')
+    if (status === 401 || status === 403) {
+      redirectToLogin(error.response?.data?.msg || '登录已过期，请重新登录')
     } else {
       ElMessage.error('网络错误，请稍后重试')
     }
