@@ -271,12 +271,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; text-align: left; }
 .funnel-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .funnel-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-muted); }
 .funnel-chart { width: 100%; height: 360px; margin-bottom: 12px; }
 .funnel-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
-.funnel-step { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px; text-align: center; }
+.funnel-step { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px; text-align: left; }
 .funnel-step .step-title { font-size: 12px; color: var(--color-muted); }
 .funnel-step .step-value { font-size: 22px; font-weight: 700; color: var(--color-brand-strong); }
 .funnel-step .step-rate { margin-top: 6px; font-size: 12px; color: var(--color-muted); }

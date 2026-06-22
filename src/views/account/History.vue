@@ -31,8 +31,10 @@
           <tr>
             <th>{{ t('history.timestamp') }}</th>
             <th>{{ t('history.userEmail') }}</th>
-            <th>{{ t('history.appImage') }}</th>
+            <th class="app-image-column">{{ t('history.appImage') }}</th>
             <th>{{ t('history.product') }}</th>
+            <th>{{ t('history.country') }}</th>
+            <th>{{ t('history.device') }}</th>
             <th>{{ t('history.status') }}</th>
             <th>{{ t('history.paymentType') }}</th>
             <th>{{ t('history.orderSource') }}</th>
@@ -47,7 +49,7 @@
             <td>
               <span class="email-mask" :title="maskEmail(record.email)">{{ maskEmail(record.email) }}</span>
             </td>
-            <td>
+            <td class="app-image-column">
               <img 
                 v-if="getProductImage(record)" 
                 :src="getProductImage(record)" 
@@ -68,6 +70,10 @@
                 {{ formatProduct(record) }}
               </a>
               <span v-else class="product-name">{{ formatProduct(record) }}</span>
+            </td>
+            <td>{{ record.countryCode || '-' }}</td>
+            <td>
+              <span class="device-name" :title="formatDevice(record)">{{ formatDevice(record) }}</span>
             </td>
             <td>
               <span :class="['status-badge', getStatusClass(record.status)]">
@@ -120,7 +126,8 @@
             <el-descriptions-item :label="t('history.earnings')">${{ formatCurrency(selectedRecord.earnings / 100) }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.creditUsed')">${{ formatCurrency(selectedRecord.credit / 100) }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.currency')">{{ selectedRecord.currencyCode }}</el-descriptions-item>
-            <el-descriptions-item :label="t('history.country')">{{ selectedRecord.countryCode }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.country')">{{ selectedRecord.countryCode || '-' }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.device')">{{ formatDevice(selectedRecord) }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.origin')">{{ selectedRecord.origin }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.transactionId')">{{ selectedRecord.transactionId }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.customerId')">{{ selectedRecord.customerId }}</el-descriptions-item>
@@ -253,6 +260,11 @@ const formatProduct = (record: PurchaseRecordVO): string => {
     return record.product.name
   }
   return t('history.unknownProduct')
+}
+
+const formatDevice = (record: PurchaseRecordVO | null): string => {
+  if (!record) return '-'
+  return record.deviceDisplayName || record.partNumber || '-'
 }
 
 const recordBundles = (record: PurchaseRecordVO | null) => {
@@ -575,9 +587,16 @@ onMounted(() => {
 .product-image {
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--color-line);
+  display: block;
+  flex: 0 0 40px;
   transition: transform 0.2s ease;
 }
 
@@ -588,16 +607,38 @@ onMounted(() => {
 .no-image-placeholder {
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: var(--color-surface-soft);
   border: 2px solid var(--color-line);
   display: flex;
+  flex: 0 0 40px;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   color: var(--color-muted);
   text-align: center;
   line-height: 1;
+}
+
+.app-image-column {
+  min-width: 72px;
+  width: 72px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+td.app-image-column {
+  box-sizing: border-box;
+}
+
+td.app-image-column .product-image,
+td.app-image-column .no-image-placeholder {
+  margin: 0 auto;
 }
 
 .product-link {

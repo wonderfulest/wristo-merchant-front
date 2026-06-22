@@ -10,4 +10,5 @@ export interface PageResponse<T> {
   total: number
   pages: number
   list: T[]
+  meta?: Record<string, unknown>
 }

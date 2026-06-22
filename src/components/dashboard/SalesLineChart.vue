@@ -272,7 +272,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; text-align: left; }
 .error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 .filters { margin: 8px 0 12px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .app-id-input { width: 180px; }

@@ -100,7 +100,7 @@ onMounted(fetchSummaryPage)
 
 <style scoped>
 .dashboard-content { margin-top: 32px; }
-.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; }
+.section-title { font-size: 18px; font-weight: 700; color: var(--color-ink); margin: 16px 0; text-align: left; }
 .app-cell { display: flex; align-items: center; gap: 12px; }
 .app-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid var(--color-line); }
 .app-info { display: flex; flex-direction: column; }

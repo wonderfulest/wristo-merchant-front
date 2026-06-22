@@ -8,6 +8,9 @@
   <!-- 漏斗统计 -->
   <FunnelAnalytics />
 
+  <!-- 设备型号统计 -->
+  <DeviceOrderSummary />
+
   <!-- 应用销售总计（分页） -->
   <AppSalesSummary />
 
@@ -18,6 +21,7 @@ import FunnelAnalytics from '@/components/dashboard/FunnelAnalytics.vue'
 import PayoutOverview from '@/components/dashboard/PayoutOverview.vue'
 import AppSalesSummary from '@/components/dashboard/AppSalesSummary.vue'
 import SalesLineChart from '@/components/dashboard/SalesLineChart.vue'
+import DeviceOrderSummary from '@/components/dashboard/DeviceOrderSummary.vue'
 </script>
 
 <style scoped>

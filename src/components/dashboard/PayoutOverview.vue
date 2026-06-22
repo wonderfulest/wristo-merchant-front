@@ -94,10 +94,10 @@ onMounted(fetchPayoutInfo)
 .payout-title .title { font-size: 24px; font-weight: 700; color: var(--color-brand-strong); }
 .payout-title .subtitle { font-size: 12px; color: var(--color-muted); }
 
-.payout-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.payout-card { background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-canvas-top) 100%); border: 1px solid var(--color-line); border-radius: 12px; padding: 18px 16px; text-align: center; box-shadow: var(--shadow-sm); }
-.card-label { display: inline-block; font-size: 11px; font-weight: 700; color: var(--color-brand); background: var(--color-brand-soft); border: 1px solid var(--color-line); border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px; padding: 4px 10px; margin-bottom: 10px; }
-.card-value { font-size: 26px; font-weight: 800; color: var(--color-brand-strong); line-height: 1.2; }
+.payout-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.payout-card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 10px; padding: 12px; text-align: left; }
+.card-label { font-size: 12px; color: var(--color-muted); margin-bottom: 6px; }
+.card-value { font-size: 22px; font-weight: 700; color: var(--color-brand-strong); line-height: 1.2; }
 .loading-text { color: var(--color-muted); font-size: 16px; }
 .error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 </style>
