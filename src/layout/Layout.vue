@@ -72,6 +72,11 @@
     </header>
     <!-- Main Content -->
     <main class="main-content">
+      <nav class="mobile-primary-nav" aria-label="Primary navigation">
+        <router-link :to="localizedPath('/account')" class="mobile-nav-link">{{ t('nav.account') }}</router-link>
+        <a href="#" class="mobile-nav-link">{{ t('nav.documentation') }}</a>
+        <router-link v-if="hasMerchantRole" :to="localizedPath('/api')" class="mobile-nav-link">{{ t('nav.api') }}</router-link>
+      </nav>
       <router-view />
     </main>
     <!-- Footer -->
@@ -236,6 +241,9 @@ const localizedPath = (path: string) => addLocaleToPath(path, localeStore.curren
   width: 100%;
   padding: 16px 12px 0;
   min-height: 0; /* allow flex item to shrink to avoid pushing footer */
+}
+.mobile-primary-nav {
+  display: none;
 }
 .footer {
   color: $color-footer-text;
@@ -544,6 +552,7 @@ const localizedPath = (path: string) => addLocaleToPath(path, localeStore.curren
   .desktop-nav {
     justify-content: flex-end;
     gap: 4px;
+    flex: 0 0 auto;
   }
   .nav-link {
     display: none;
@@ -554,6 +563,45 @@ const localizedPath = (path: string) => addLocaleToPath(path, localeStore.curren
   .user-avatar-container {
     min-height: 42px;
     padding: 3px 8px 3px 4px;
+  }
+  .user-trigger-arrow {
+    display: none;
+  }
+  .main-content {
+    padding: 10px 10px 0;
+  }
+  .mobile-primary-nav {
+    display: flex;
+    gap: 8px;
+    margin: 0 -10px 10px;
+    padding: 0 10px 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-primary-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .mobile-nav-link {
+    flex: 0 0 auto;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(15, 107, 104, 0.12);
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.76);
+    color: $color-muted;
+    font-size: 0.86rem;
+    font-weight: 750;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .mobile-nav-link.router-link-active,
+  .mobile-nav-link.router-link-exact-active {
+    background: $color-brand-soft;
+    color: $color-brand-strong;
+    border-color: rgba(15, 107, 104, 0.22);
   }
   :global(.user-dropdown-menu) {
     width: min(344px, calc(100vw - 24px));

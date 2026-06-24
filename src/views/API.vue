@@ -130,4 +130,42 @@ async function generateKey() {
   background: $color-primary;
   border-color: $color-primary;
 }
+
+@media (max-width: 640px) {
+  .api-page {
+    min-height: auto;
+  }
+
+  .api-header {
+    padding: 26px 16px 18px;
+  }
+
+  .api-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: 0;
+  }
+
+  .api-content {
+    margin-top: 18px;
+    padding: 0;
+  }
+
+  .api-key-card {
+    display: block;
+    margin-top: 24px;
+  }
+
+  .el-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 18px 14px;
+  }
+
+  .api-key-input {
+    font-size: $font-size-sm;
+    letter-spacing: 0;
+  }
+}
 </style>

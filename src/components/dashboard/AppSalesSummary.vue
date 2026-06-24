@@ -108,4 +108,38 @@ onMounted(fetchSummaryPage)
 .app-sub { font-size: 12px; color: var(--color-muted); }
 .table-footer { display: flex; justify-content: flex-end; padding: 12px 0; }
 .error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    margin-top: 22px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-content :deep(.el-table) {
+    min-width: 620px;
+  }
+
+  .dashboard-content :deep(.el-table .cell) {
+    padding: 0 8px;
+    line-height: 1.35;
+  }
+
+  .app-name {
+    white-space: normal;
+  }
+
+  .app-cell {
+    gap: 8px;
+  }
+
+  .app-thumb {
+    width: 34px;
+    height: 34px;
+  }
+
+  .table-footer {
+    justify-content: center;
+  }
+}
 </style>

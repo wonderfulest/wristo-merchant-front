@@ -364,6 +364,7 @@ async function handleSave() {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   border-radius: 12px 0 0 12px;
   box-shadow: var(--shadow-md);
 }
@@ -615,6 +616,77 @@ input[data-short-underline] {
   width: 80px !important;
   min-width: 0;
   display: inline-block;
+}
+
+@media (max-width: 640px) {
+  .add-product-drawer {
+    min-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .drawer-header {
+    padding: 22px 18px 16px;
+  }
+
+  .drawer-header h2 {
+    font-size: 1.7rem;
+    font-weight: 650;
+  }
+
+  .drawer-body {
+    padding: 24px 18px 0;
+  }
+
+  .platform-img-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .img-uploader {
+    width: min(160px, 52vw);
+    height: min(160px, 52vw);
+  }
+
+  .custom-form-item {
+    margin-bottom: 28px;
+  }
+
+  .custom-label {
+    max-width: calc(100% - 8px);
+    font-size: 1rem;
+  }
+
+  .custom-input {
+    font-size: 1rem;
+  }
+
+  .custom-tip-right {
+    position: static;
+    transform: none;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .drawer-footer {
+    padding: 12px 18px max(18px, env(safe-area-inset-bottom));
+    border-radius: 0;
+    gap: 14px;
+  }
+
+  .footer-checkbox-text {
+    font-size: 0.95rem;
+  }
+
+  .create-btn {
+    height: 46px;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
 }
 </style>
 

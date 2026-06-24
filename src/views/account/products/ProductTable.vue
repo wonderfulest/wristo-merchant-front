@@ -11,7 +11,7 @@
       />
       <el-button type="primary" @click="handleSearch">{{ t('common.search') }}</el-button>
     </div>
-    <el-table :data="products" style="width: 100%" v-loading="loading">
+    <el-table class="desktop-product-table" :data="products" style="width: 100%" v-loading="loading">
       <el-table-column prop="appId" label="ID" width="80" />
       <el-table-column :label="t('products.productInfo')" min-width="280">
         <template #default="{ row }">
@@ -62,6 +62,38 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="mobile-product-list" v-loading="loading">
+      <button
+        v-for="product in products"
+        :key="product.appId"
+        type="button"
+        class="mobile-product-card"
+        @click="emit('edit', product)"
+      >
+        <div class="mobile-product-main">
+          <AppProductInfo :product="product" :thumb-size="50" />
+          <span class="mobile-edit-link">{{ t('products.edit') }}</span>
+        </div>
+        <div class="mobile-product-meta">
+          <span>ID {{ product.appId }}</span>
+          <span>${{ product.price }}</span>
+          <span>{{ formatDate(product.createdAt) || '-' }}</span>
+        </div>
+        <div class="mobile-product-stats">
+          <span>{{ t('products.downloads') }}: {{ product.download ?? '-' }}</span>
+          <span>{{ t('products.purchases') }}: {{ product.purchase ?? '-' }}</span>
+          <span>{{ t('products.trialLasts') }}: {{ product.trialLasts }} {{ t('products.hours') }}</span>
+        </div>
+        <div v-if="product.categories?.length" class="mobile-product-tags">
+          <el-tag v-for="cat in product.categories" :key="cat.id" size="small">
+            {{ cat.name }}
+          </el-tag>
+        </div>
+      </button>
+      <div v-if="!loading && products.length === 0" class="mobile-empty">
+        {{ t('common.noData') }}
+      </div>
+    </div>
     <div class="pagination-bar">
       <el-pagination
         v-model:current-page="pageNum"
@@ -176,14 +208,121 @@ onMounted(() => {
   justify-content: flex-end;
 }
 
+.mobile-product-list {
+  display: none;
+}
+
 @media (max-width: 640px) {
+  .mch-products-table {
+    padding: 8px;
+  }
+
   .product-table-toolbar {
-    align-items: stretch;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
   .product-search-input {
     width: 100%;
+  }
+
+  .product-table-toolbar :deep(.el-button) {
+    min-width: 78px;
+    padding: 8px 12px;
+  }
+
+  .desktop-product-table {
+    display: none;
+  }
+
+  .mobile-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-product-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    padding: 10px;
+    color: var(--color-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobile-product-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .mobile-edit-link {
+    color: var(--color-brand);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .mobile-product-meta,
+  .mobile-product-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .mobile-product-meta span,
+  .mobile-product-stats span {
+    min-width: 0;
+    padding: 5px 7px;
+    border-radius: 7px;
+    background: var(--color-surface-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-product-stats {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .mobile-product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .mobile-empty {
+    padding: 24px 12px;
+    border: 1px dashed var(--color-line);
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    text-align: center;
+  }
+
+  .pagination-bar {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .product-table-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-product-meta,
+  .mobile-product-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

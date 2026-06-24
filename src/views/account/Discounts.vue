@@ -20,4 +20,15 @@ const { t } = useI18n()
   box-shadow: var(--shadow-sm);
   min-height: 300px;
 }
+
+@media (max-width: 640px) {
+  .account-page {
+    padding: 18px;
+    min-height: 220px;
+  }
+
+  .account-page h2 {
+    font-size: 1.3rem;
+  }
+}
 </style> 

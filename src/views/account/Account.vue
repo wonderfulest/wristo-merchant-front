@@ -94,6 +94,7 @@ const localizedPath = (path: string) => addLocaleToPath(path, localeStore.curren
   align-items: center;
   min-height: 56px;
   z-index: 10;
+  overflow: hidden;
 }
 .header-sub-nav {
   width: 80%;
@@ -139,19 +140,36 @@ const localizedPath = (path: string) => addLocaleToPath(path, localeStore.curren
     width: 100%;
     max-width: 100%;
     padding: 0 12px;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
     justify-content: flex-start;
     box-sizing: border-box;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .header-sub-nav::-webkit-scrollbar {
+    display: none;
   }
   .header-sub-nav a {
+    flex: 0 0 auto;
     font-size: $font-size-sm;
-    padding: 6px 0 4px 0;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 7px 12px;
+  }
+  .header-sub-nav .active {
+    border: 1px solid rgba($color-primary, 0.18);
+    border-bottom-color: rgba($color-primary, 0.18);
+    background: rgba($color-primary, 0.08);
   }
   .main-content {
     max-width: 100%;
-    margin: 16px auto 0 auto;
-    padding: 0 12px;
+    margin: 12px auto 0 auto;
+    padding: 0;
     box-sizing: border-box;
   }
 }

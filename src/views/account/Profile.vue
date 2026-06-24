@@ -635,6 +635,13 @@ async function handleSave() {
   }
   .hero-name {
     font-size: 1.5rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .hero-email {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
   .section-card {
     border-radius: 12px;
@@ -651,11 +658,46 @@ async function handleSave() {
     justify-content: flex-start;
     text-align: left;
   }
+  .row-value {
+    min-width: 0;
+  }
+  .row-value-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .text-value {
+    min-width: 0;
+    text-align: right;
+  }
   .row-divider {
     margin-left: 16px;
   }
   .apple-input :deep(.el-input__inner) {
     text-align: right;
+  }
+  .banner-preview {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .row-value {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .text-value,
+  .apple-input :deep(.el-input__inner),
+  .apple-select :deep(.el-select__selected-item) {
+    text-align: left;
+    justify-content: flex-start;
   }
 }
 </style> 

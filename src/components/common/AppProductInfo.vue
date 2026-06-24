@@ -103,6 +103,7 @@ const imgUrl = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .product-thumb {
@@ -115,6 +116,7 @@ const imgUrl = computed(() => {
 }
 
 .product-meta {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -134,9 +136,27 @@ const imgUrl = computed(() => {
 
 .product-details {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 4px;
   color: var(--color-muted);
   font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .product-name {
+    align-items: flex-start;
+  }
+
+  .product-name a,
+  .product-name span {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .product-details {
+    gap: 4px 10px;
+  }
 }
 </style>

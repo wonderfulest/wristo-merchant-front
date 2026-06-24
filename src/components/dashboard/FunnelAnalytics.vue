@@ -283,4 +283,76 @@ onBeforeUnmount(() => {
 .error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
 .step-toggle { display: inline-flex; align-items: center; gap: 8px; }
 .toggle-label { color: var(--color-muted); font-size: 12px; }
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    margin-top: 22px;
+  }
+
+  .funnel-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .funnel-toolbar :deep(.el-radio-group) {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .funnel-toolbar :deep(.el-radio-group::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .funnel-toolbar :deep(.el-radio-button__inner) {
+    min-width: 74px;
+    border-left: var(--el-border);
+    border-radius: 6px !important;
+    padding: 7px 10px;
+    white-space: nowrap;
+  }
+
+  .funnel-toolbar :deep(.el-input),
+  .funnel-toolbar :deep(.el-button) {
+    width: 100% !important;
+  }
+
+  .step-toggle {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    padding: 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: var(--color-surface-soft);
+  }
+
+  .toggle-label {
+    width: 100%;
+  }
+
+  .funnel-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .funnel-chart {
+    height: 280px;
+    min-width: 460px;
+  }
+
+  :deep(.el-card__body) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .funnel-steps {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+}
 </style>

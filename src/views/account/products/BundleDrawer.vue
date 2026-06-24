@@ -138,7 +138,7 @@
         {{ props.bundle ? t('common.save') : t('bundle.create') }}
       </el-button>
     </div>
-    <el-dialog v-model="orderDialogVisible" width="700px" append-to-body class="sort-order-dialog" :show-close="true" :close-on-click-modal="false">
+    <el-dialog v-model="orderDialogVisible" width="min(700px, calc(100vw - 24px))" append-to-body class="sort-order-dialog" :show-close="true" :close-on-click-modal="false">
       <template #header>
         <div class="sort-dialog-header">
           <div class="sort-dialog-title">{{ t('bundle.manageOrder') }}</div>
@@ -422,6 +422,7 @@ defineExpose({ setForm, resetForm })
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   border-radius: 12px 0 0 12px;
   box-shadow: var(--shadow-md);
 }
@@ -820,5 +821,128 @@ defineExpose({ setForm, resetForm })
 .copy-url-btn svg {
   width: 16px;
   height: 16px;
+}
+
+@media (max-width: 640px) {
+  .add-bundle-drawer {
+    min-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .drawer-header {
+    padding: 22px 18px 16px;
+  }
+
+  .drawer-header h2 {
+    font-size: 22px;
+  }
+
+  .drawer-body {
+    padding: 18px 14px 0;
+  }
+
+  .custom-form,
+  .product-selector {
+    padding: 18px 14px 2px;
+  }
+
+  .product-selector {
+    margin: 16px 0 22px;
+  }
+
+  .custom-form-item {
+    margin-bottom: 28px;
+  }
+
+  .custom-label {
+    max-width: calc(100% - 8px);
+    font-size: 1rem;
+  }
+
+  .custom-input {
+    font-size: 1rem;
+  }
+
+  .selector-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .change-order {
+    line-height: 1.4;
+  }
+
+  .selector-item {
+    align-items: flex-start;
+    min-height: 54px;
+    padding: 10px;
+  }
+
+  .selector-label {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .selector-product-name {
+    white-space: normal;
+  }
+
+  .selector-app-id {
+    min-width: 0;
+  }
+
+  .bundle-url-display {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .copy-url-btn {
+    width: 100%;
+  }
+
+  .drawer-footer {
+    padding: 14px 14px max(18px, env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+
+  .create-btn {
+    height: 46px;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .sort-dialog-header {
+    padding: 18px 20px 12px;
+  }
+
+  .sort-dialog-title {
+    font-size: 1.35rem;
+  }
+
+  .sort-dialog-desc {
+    margin: 18px 0;
+    padding: 0 14px;
+    font-size: 0.95rem;
+  }
+
+  .order-list {
+    padding: 0 14px;
+  }
+
+  .order-item {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .sort-dialog-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 14px 14px;
+  }
 }
 </style>

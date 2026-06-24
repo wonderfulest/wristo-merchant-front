@@ -29,13 +29,18 @@
 
       <div class="table-panel">
         <el-table :data="items" border style="width: 100%" empty-text="No data">
-          <el-table-column prop="device" :label="t('dashboard.deviceModel')" min-width="220" show-overflow-tooltip />
-          <el-table-column prop="orderCount" :label="t('dashboard.orders')" width="120" align="right">
+          <el-table-column
+            prop="device"
+            :label="t('dashboard.deviceModel')"
+            :min-width="isMobile ? 136 : 220"
+            show-overflow-tooltip
+          />
+          <el-table-column prop="orderCount" :label="t('dashboard.orders')" :width="isMobile ? 72 : 120" align="right">
             <template #default="{ row }">
               {{ row.orderCount.toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US') }}
             </template>
           </el-table-column>
-          <el-table-column label="%" width="180" align="right">
+          <el-table-column label="%" :width="isMobile ? 150 : 180" align="right">
             <template #default="{ row }">
               <div class="percent-cell">
                 <el-progress
@@ -81,8 +86,10 @@ const totalDevices = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const chartRef = ref<HTMLElement | null>(null)
+const isMobile = ref(false)
 let echartsMod: any = null
 let chart: any = null
+let mobileMediaQuery: MediaQueryList | null = null
 
 const formatPercent = (value: number): string => {
   return `${(Number(value) || 0).toFixed(2)}%`
@@ -186,6 +193,10 @@ const handleResize = () => {
   if (chart) chart.resize()
 }
 
+const updateMobileState = () => {
+  isMobile.value = Boolean(mobileMediaQuery?.matches)
+}
+
 const updateChart = () => {
   if (!chart) return
   const pieData = items.value.map(item => ({
@@ -235,6 +246,9 @@ const updateChart = () => {
 }
 
 onMounted(async () => {
+  mobileMediaQuery = window.matchMedia('(max-width: 640px)')
+  updateMobileState()
+  mobileMediaQuery.addEventListener('change', updateMobileState)
   await fetchSummary()
   await nextTick()
   await initChart()
@@ -245,6 +259,7 @@ watch(locale, () => updateChart())
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  mobileMediaQuery?.removeEventListener('change', updateMobileState)
   if (chart) {
     chart.dispose()
     chart = null
@@ -269,5 +284,55 @@ onBeforeUnmount(() => {
   .summary-grid { grid-template-columns: 1fr; }
   .section-heading { align-items: flex-start; flex-direction: column; }
   .summary-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    margin-top: 22px;
+  }
+
+  .summary-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .total-orders {
+    white-space: normal;
+  }
+
+  .pie-chart {
+    height: 280px;
+    min-width: 360px;
+  }
+
+  :deep(.el-card__body) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-panel {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-panel :deep(.el-table) {
+    min-width: 358px;
+  }
+
+  .table-panel :deep(.el-table .cell) {
+    padding: 0 6px;
+    line-height: 1.35;
+  }
+
+  .percent-cell {
+    grid-template-columns: minmax(56px, 1fr) 48px;
+    gap: 6px;
+  }
+
+  .summary-pagination {
+    justify-content: center;
+  }
 }
 </style>

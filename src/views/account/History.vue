@@ -45,11 +45,11 @@
         </thead>
         <tbody>
           <tr v-for="record in purchaseRecords" :key="record.id">
-            <td>{{ formatTimestamp(record.createdAt) }}</td>
-            <td>
+            <td :data-label="t('history.timestamp')">{{ formatTimestamp(record.createdAt) }}</td>
+            <td :data-label="t('history.userEmail')">
               <span class="email-mask" :title="maskEmail(record.email)">{{ maskEmail(record.email) }}</span>
             </td>
-            <td class="app-image-column">
+            <td :data-label="t('history.appImage')" class="app-image-column">
               <img 
                 v-if="getProductImage(record)" 
                 :src="getProductImage(record)" 
@@ -59,7 +59,7 @@
               />
               <div v-else class="no-image-placeholder">{{ t('common.noImage') }}</div>
             </td>
-            <td>
+            <td :data-label="t('history.product')">
               <a 
                 v-if="getProductUrl(record)" 
                 :href="getProductUrl(record)" 
@@ -71,27 +71,27 @@
               </a>
               <span v-else class="product-name">{{ formatProduct(record) }}</span>
             </td>
-            <td>{{ record.countryCode || '-' }}</td>
-            <td>
+            <td :data-label="t('history.country')">{{ record.countryCode || '-' }}</td>
+            <td :data-label="t('history.device')">
               <span class="device-name" :title="formatDevice(record)">{{ formatDevice(record) }}</span>
             </td>
-            <td>
+            <td :data-label="t('history.status')">
               <span :class="['status-badge', getStatusClass(record.status)]">
                 {{ record.statusDesc }}
               </span>
             </td>
-            <td>
+            <td :data-label="t('history.paymentType')">
               <span class="pay-tag" :style="paymentTagStyle(record.paymentMethod)">
                 {{ paymentLabel(record.paymentMethod) }}
               </span>
             </td>
-            <td>
+            <td :data-label="t('history.orderSource')">
               <span v-if="record.origin" class="origin-badge" :style="originBadgeStyle(record.origin)">{{ record.origin }}</span>
               <span v-else>-</span>
             </td>
-            <td>{{ record.tax > 0 ? formatCurrency(record.tax / 100) : t('common.na') }}</td>
-            <td>${{ formatCurrency(record.earnings / 100) }}</td>
-            <td>
+            <td :data-label="t('history.tax')">{{ record.tax > 0 ? formatCurrency(record.tax / 100) : t('common.na') }}</td>
+            <td :data-label="t('history.wristoShare')">${{ formatCurrency(record.earnings / 100) }}</td>
+            <td :data-label="t('history.actions')">
               <el-button size="small" @click="openDetail(record)">{{ t('common.details') }}</el-button>
             </td>
           </tr>
@@ -99,7 +99,7 @@
       </table>
 
       <!-- Details Dialog -->
-      <el-dialog v-model="detailVisible" :title="t('history.orderDetails')" width="720px">
+      <el-dialog v-model="detailVisible" :title="t('history.orderDetails')" width="min(720px, calc(100vw - 24px))">
         <template v-if="selectedRecord">
           <el-descriptions :column="2" size="small" border>
             <el-descriptions-item :label="t('history.orderId')">{{ selectedRecord.id }}</el-descriptions-item>
@@ -414,8 +414,8 @@ onMounted(() => {
 }
 
 .filters { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-.filter-input { padding: 8px 10px; border: 1px solid var(--color-line); border-radius: 6px; width: 220px; }
-.filter-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--color-line); background: var(--color-surface-soft); cursor: pointer; }
+.filter-input { min-height: 38px; padding: 8px 10px; border: 1px solid var(--color-line); border-radius: 6px; width: 220px; }
+.filter-btn { min-height: 38px; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--color-line); background: var(--color-surface-soft); cursor: pointer; }
 .filter-btn.primary { background: var(--color-brand); color: var(--color-surface); border-color: var(--color-brand); }
 
 .loading-container {
@@ -450,10 +450,12 @@ onMounted(() => {
 .table-container {
   margin-top: 24px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .purchase-table {
   width: 100%;
+  min-width: 1120px;
   border-collapse: collapse;
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
@@ -753,24 +755,210 @@ td.app-image-column .no-image-placeholder {
 }
 
 @media (max-width: 768px) {
-  .purchase-table {
-    font-size: 12px;
+  .account-page {
+    padding: 10px;
   }
-  
-  .purchase-table th,
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .filter-input,
+  .filter-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  .filter-input:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .table-container {
+    margin-top: 14px;
+    overflow-x: visible;
+  }
+
+  .purchase-table {
+    min-width: 0;
+    display: block;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .purchase-table thead {
+    display: none;
+  }
+
+  .purchase-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .purchase-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
   .purchase-table td {
-    padding: 8px 12px;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+    color: var(--color-ink);
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .purchase-table td:nth-child(even),
+  .purchase-table td:last-child {
+    border-right: 0;
+  }
+
+  .purchase-table td:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .purchase-table td::before {
+    content: attr(data-label);
+    color: var(--color-muted);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .purchase-table tbody tr:hover {
+    background: var(--color-surface);
   }
   
   .product-image,
   .no-image-placeholder {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    max-width: 34px;
+    max-height: 34px;
+  }
+
+  .app-image-column {
+    width: auto;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  td.app-image-column .product-image,
+  td.app-image-column .no-image-placeholder {
+    margin: 0;
+  }
+
+  .email-mask,
+  .device-name,
+  .origin-badge {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .purchase-table td:nth-child(1),
+  .purchase-table td:nth-child(2),
+  .purchase-table td:nth-child(4),
+  .purchase-table td:nth-child(12) {
+    grid-column: 1 / -1;
+  }
+
+  .purchase-table td:nth-child(1),
+  .purchase-table td:nth-child(4) {
+    background: var(--color-surface-soft);
+  }
+
+  .purchase-table td:nth-child(12) :deep(.el-button) {
+    width: 100%;
+    min-height: 34px;
+  }
+
+  .nested-content {
+    flex-direction: column;
+  }
+
+  :deep(.el-descriptions__body .el-descriptions__table) {
+    display: block;
+  }
+
+  :deep(.el-descriptions__body .el-descriptions__table tbody),
+  :deep(.el-descriptions__body .el-descriptions__table tr),
+  :deep(.el-descriptions__body .el-descriptions__table th),
+  :deep(.el-descriptions__body .el-descriptions__table td) {
+    display: block;
+    width: 100% !important;
   }
   
   .pagination-container {
+    align-items: stretch;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .pagination-controls {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .page-btn {
+    flex: 1;
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  .page-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 86px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-input:nth-child(2) {
+    grid-column: auto;
+  }
+
+  .purchase-table tr {
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-table td,
+  .purchase-table td:nth-child(even) {
+    border-right: 0;
+  }
+
+  .purchase-table td:nth-last-child(2) {
+    border-bottom: 1px solid var(--color-line);
   }
 }
 </style> 

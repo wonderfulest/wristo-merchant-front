@@ -100,4 +100,26 @@ onMounted(fetchPayoutInfo)
 .card-value { font-size: 22px; font-weight: 700; color: var(--color-brand-strong); line-height: 1.2; }
 .loading-text { color: var(--color-muted); font-size: 16px; }
 .error-message { background: var(--color-danger-soft); border: 1px solid var(--color-danger-soft); border-radius: 8px; padding: 16px; margin: 24px 0; color: var(--color-danger); }
+
+@media (max-width: 640px) {
+  .payout-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .payout-title .title {
+    font-size: 20px;
+  }
+
+  .payout-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .card-value {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+}
 </style>

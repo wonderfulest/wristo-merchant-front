@@ -277,4 +277,51 @@ onBeforeUnmount(() => {
 .filters { margin: 8px 0 12px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .app-id-input { width: 180px; }
 .line-chart { width: 100%; height: 320px; }
+
+@media (max-width: 640px) {
+  .dashboard-content {
+    margin-top: 22px;
+  }
+
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filters :deep(.el-radio-group) {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filters :deep(.el-radio-group::-webkit-scrollbar) {
+    display: none;
+  }
+
+  .filters :deep(.el-radio-button__inner) {
+    min-width: 74px;
+    border-left: var(--el-border);
+    border-radius: 6px !important;
+    padding: 7px 10px;
+    white-space: nowrap;
+  }
+
+  .filters :deep(.el-input) {
+    width: 100% !important;
+  }
+
+  .line-chart {
+    height: 260px;
+    min-width: 460px;
+  }
+
+  :deep(.el-card__body) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 </style>

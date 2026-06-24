@@ -1,9 +1,9 @@
 <template>
   <div class="account-products-page">
-    <el-drawer v-model="drawerVisible" direction="ltr" size="480px" :with-header="false">
+    <el-drawer v-model="drawerVisible" direction="ltr" size="min(480px, 100vw)" :with-header="false">
       <ProductDrawer ref="addProductDrawerRef" :product="editProduct" @close="closeDrawer" />
     </el-drawer>
-    <el-drawer v-model="bundleDrawerVisible" direction="ltr" size="480px" :with-header="false">
+    <el-drawer v-model="bundleDrawerVisible" direction="ltr" size="min(480px, 100vw)" :with-header="false">
       <BundleDrawer ref="bundleDrawerRef" :bundle="editBundle" @close="closeBundleDrawer" />
     </el-drawer>
     <div class="products-header">
@@ -456,14 +456,49 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+  .account-products-page {
+    padding: 0 0 28px;
+  }
+
   .products-header,
   .products-section {
-    width: calc(100% - 24px);
+    width: 100%;
+  }
+
+  .products-header {
+    align-items: stretch;
+    margin-bottom: 16px;
+  }
+
+  .products-header-left,
+  .add-new-btn {
+    width: 100%;
   }
 
   .section-title-row {
     align-items: flex-start;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .bundle-card-content,
+  .product-card-content {
+    padding: 14px;
+  }
+
+  .bundle-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bundle-title,
+  .product-title {
+    white-space: normal;
   }
 
   .bundle-metrics {
@@ -471,7 +506,15 @@ onMounted(() => {
   }
 
   .bundle-actions {
+    align-items: stretch;
+    flex-direction: column;
     flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .view-content-btn,
+  .download-btn {
+    width: 100%;
   }
 }
 </style> 
