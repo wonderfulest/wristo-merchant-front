@@ -4,7 +4,9 @@
 
     <div class="funnel-toolbar">
       <el-radio-group v-model="rangeType" size="small" @change="handleRangeTypeChange">
-        <el-radio-button label="1d">{{ t('dashboard.last1d') }}</el-radio-button>
+        <el-radio-button label="today">{{ t('dashboard.today') }}</el-radio-button>
+        <el-radio-button label="yesterday">{{ t('dashboard.yesterday') }}</el-radio-button>
+        <el-radio-button label="dayBeforeYesterday">{{ t('dashboard.dayBeforeYesterday') }}</el-radio-button>
         <el-radio-button label="3d">{{ t('dashboard.last3d') }}</el-radio-button>
         <el-radio-button label="7d">{{ t('dashboard.lastWeek') }}</el-radio-button>
         <el-radio-button label="30d">{{ t('dashboard.lastMonth') }}</el-radio-button>
@@ -74,13 +76,18 @@ import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch } from 'vue'
 import { getFunnel } from '@/api/purchase'
 import type { AppFunnelVO, SalesQueryDTO } from '@/types/api'
 import { useI18n, type MessageKey } from '@/i18n'
-import { buildCompletedDayRange, buildSelectedDayRange } from './funnelRange.mjs'
+import {
+  buildCompletedDayRange,
+  buildCompletedDayRangeAtOffset,
+  buildCurrentDayRange,
+  buildSelectedDayRange,
+} from './funnelRange.mjs'
 
 // ===== Funnel state & methods =====
 const funnel = ref<AppFunnelVO | null>(null)
 const funnelLoading = ref(false)
 const funnelError = ref<string | null>(null)
-const rangeType = ref<'1d' | '3d' | '7d' | '30d' | 'custom'>('7d')
+const rangeType = ref<'today' | 'yesterday' | 'dayBeforeYesterday' | '3d' | '7d' | '30d' | 'custom'>('7d')
 const dateRange = ref<[string, string] | null>(null)
 const appId = ref<number | null>(null)
 const { t, locale } = useI18n()
@@ -97,12 +104,24 @@ const formatPercent = (fromVal?: number, toVal?: number) => {
 }
 
 const displayPeriod = ref('')
-const rangeDays = { '1d': 1, '3d': 3, '7d': 7, '30d': 30 } as const
+const rangeDays = { '3d': 3, '7d': 7, '30d': 30 } as const
 
 const applyRangeByType = () => {
   if (rangeType.value === 'custom') {
     if (!dateRange.value) return
     const range = buildSelectedDayRange(dateRange.value[0], dateRange.value[1])
+    displayPeriod.value = range.displayPeriod
+    return
+  }
+  if (rangeType.value === 'today') {
+    const range = buildCurrentDayRange()
+    dateRange.value = [range.startDate, range.endDate]
+    displayPeriod.value = range.displayPeriod
+    return
+  }
+  if (rangeType.value === 'yesterday' || rangeType.value === 'dayBeforeYesterday') {
+    const range = buildCompletedDayRangeAtOffset(rangeType.value === 'yesterday' ? 1 : 2)
+    dateRange.value = [range.startDate, range.endDate]
     displayPeriod.value = range.displayPeriod
     return
   }

@@ -5,4 +5,6 @@ export interface NaturalDayRange {
 }
 
 export function buildCompletedDayRange(days: number, now?: Date): NaturalDayRange
+export function buildCurrentDayRange(now?: Date): NaturalDayRange
+export function buildCompletedDayRangeAtOffset(daysAgo: number, now?: Date): NaturalDayRange
 export function buildSelectedDayRange(start: string | Date, end: string | Date): NaturalDayRange

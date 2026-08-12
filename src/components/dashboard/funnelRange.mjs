@@ -11,6 +11,13 @@ const formatLocalDate = (date) => {
   return `${year}-${month}-${day}`
 }
 
+const formatLocalTime = (date) => {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
+
 export const buildSelectedDayRange = (startValue, endValue) => {
   const start = toLocalDate(startValue)
   const endInclusive = toLocalDate(endValue)
@@ -33,4 +40,21 @@ export const buildCompletedDayRange = (days, now = new Date()) => {
   const endInclusive = new Date(endExclusive)
   endInclusive.setDate(endInclusive.getDate() - 1)
   return buildSelectedDayRange(start, endInclusive)
+}
+
+export const buildCurrentDayRange = (now = new Date()) => {
+  const current = new Date(now)
+  const currentDate = formatLocalDate(current)
+  return {
+    startDate: currentDate,
+    endDate: currentDate,
+    displayPeriod: `[${currentDate} 00:00, ${currentDate} ${formatLocalTime(current)}]`,
+  }
+}
+
+export const buildCompletedDayRangeAtOffset = (daysAgo, now = new Date()) => {
+  const day = new Date(now)
+  day.setHours(0, 0, 0, 0)
+  day.setDate(day.getDate() - daysAgo)
+  return buildSelectedDayRange(day, day)
 }

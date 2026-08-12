@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { buildCompletedDayRange } from '../src/components/dashboard/funnelRange.mjs'
+import * as funnelRange from '../src/components/dashboard/funnelRange.mjs'
+
+const { buildCompletedDayRange } = funnelRange
 
 test('merchant funnel uses completed natural days and displays a half-open interval', async () => {
   const source = await readFile(
@@ -32,5 +34,32 @@ test('completed natural-day ranges are shown as half-open intervals', () => {
     startDate: '2026-07-10',
     endDate: '2026-07-16',
     displayPeriod: '[2026-07-10 00:00, 2026-07-17 00:00)',
+  })
+})
+
+test('current day range starts at midnight and runs through the current time', () => {
+  assert.equal(typeof funnelRange.buildCurrentDayRange, 'function')
+
+  const now = new Date(2026, 6, 17, 18, 23, 45)
+  assert.deepEqual(funnelRange.buildCurrentDayRange(now), {
+    startDate: '2026-07-17',
+    endDate: '2026-07-17',
+    displayPeriod: '[2026-07-17 00:00, 2026-07-17 18:23:45]',
+  })
+})
+
+test('single completed-day ranges can select yesterday and the day before yesterday', () => {
+  assert.equal(typeof funnelRange.buildCompletedDayRangeAtOffset, 'function')
+
+  const now = new Date(2026, 6, 17, 18, 23, 45)
+  assert.deepEqual(funnelRange.buildCompletedDayRangeAtOffset(1, now), {
+    startDate: '2026-07-16',
+    endDate: '2026-07-16',
+    displayPeriod: '[2026-07-16 00:00, 2026-07-17 00:00)',
+  })
+  assert.deepEqual(funnelRange.buildCompletedDayRangeAtOffset(2, now), {
+    startDate: '2026-07-15',
+    endDate: '2026-07-15',
+    displayPeriod: '[2026-07-15 00:00, 2026-07-16 00:00)',
   })
 })
