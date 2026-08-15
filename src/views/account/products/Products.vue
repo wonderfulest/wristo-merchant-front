@@ -172,7 +172,6 @@ const handleBundleActiveChange = async (bundle: Bundle, value: string | number |
 }
 
 const handleShowInactiveBundlesChange = () => {
-  console.log('handleShowInactiveBundlesChange', showInactiveBundles.value)
   getBundles()
 }
 

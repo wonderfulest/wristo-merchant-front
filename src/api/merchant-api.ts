@@ -2,23 +2,23 @@ import instance from '@/config/axios'
 import type { ApiResponse } from '@/types/api'
 
 export const TOKEN_NAME = 'merchant-api-token'
-export interface TokenData {
+export interface TokenMetadata {
   id: number
-  token: string
-  userId: number
   name: string
   lastUsedAt: string | null
   isActive: boolean
   createdAt: string
   updatedAt: string
-  version: number
-  isDeleted: boolean
 }
 
-export const createOrUpdateToken = async (name: string): Promise<ApiResponse<TokenData>> => {
+export interface TokenSecretData extends TokenMetadata {
+  token: string
+}
+
+export const createOrRotateToken = async (name: string): Promise<ApiResponse<TokenSecretData>> => {
   return instance.post('/mch/tokens/create-or-update', { name })
 }
 
-export const getToken = async (): Promise<ApiResponse<TokenData>> => {
+export const getTokenMetadata = async (): Promise<ApiResponse<TokenMetadata>> => {
   return instance.get('/mch/tokens/get-by-name', { params: { name: TOKEN_NAME } })
 }
