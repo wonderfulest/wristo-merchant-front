@@ -366,10 +366,14 @@ async function handleSave() {
       instagramUrl: form.instagramUrl,
       xUrl: form.xUrl
     }
-    const res: ApiResponse<boolean> = await updateMchInfo(updateData)
-    if (res.code === 0) {
+    const res: ApiResponse<MchUserVO> = await updateMchInfo(updateData)
+    if (res.code === 0 && res.data) {
+      userInfo.value = res.data
+      userStore.setUserInfo(res.data)
+      syncFormFromUser()
+      bannerPreviewUrl.value = getImageUrl((res.data as any)?.bannerImage)
+      editMode.value = false
       ElMessage.success(t('profile.saveSuccess'))
-      await fetchUserInfo()
     } else {
       ElMessage.error(res.msg || t('profile.saveFailed'))
     }

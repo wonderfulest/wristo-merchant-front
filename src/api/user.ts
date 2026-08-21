@@ -9,7 +9,7 @@ export const getMchUserInfo = (): Promise<ApiResponse<MchUserVO>> => {
   return instance.get('/mch/user/info?populate=*')
 }
 
-export const updateMchInfo = (data: UserMchUpdateDTO): Promise<ApiResponse<boolean>> => {
+export const updateMchInfo = (data: UserMchUpdateDTO): Promise<ApiResponse<MchUserVO>> => {
   return instance.post('/mch/user/update', data)
 }
 
