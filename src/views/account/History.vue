@@ -86,7 +86,7 @@
               </span>
             </td>
             <td :data-label="t('history.orderSource')">
-              <span v-if="record.origin" class="origin-badge" :style="originBadgeStyle(record.origin)">{{ record.origin }}</span>
+              <span v-if="record.origin" class="origin-badge" :style="originBadgeStyle(record.origin)">{{ formatOrderOrigin(record.origin) }}</span>
               <span v-else>-</span>
             </td>
             <td :data-label="t('history.tax')">{{ record.tax > 0 ? formatCurrency(record.tax / 100) : t('common.na') }}</td>
@@ -128,7 +128,7 @@
             <el-descriptions-item :label="t('history.currency')">{{ selectedRecord.currencyCode }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.country')">{{ selectedRecord.countryCode || '-' }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.device')">{{ formatDevice(selectedRecord) }}</el-descriptions-item>
-            <el-descriptions-item :label="t('history.origin')">{{ selectedRecord.origin }}</el-descriptions-item>
+            <el-descriptions-item :label="t('history.origin')">{{ formatOrderOrigin(selectedRecord.origin) }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.transactionId')">{{ selectedRecord.transactionId }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.customerId')">{{ selectedRecord.customerId }}</el-descriptions-item>
             <el-descriptions-item :label="t('history.addressId')">{{ selectedRecord.addressId }}</el-descriptions-item>
@@ -212,6 +212,7 @@ import { ref, onMounted } from 'vue'
 import { getPurchaseRecordPageList } from '@/api/purchase'
 import type { PurchaseRecordVO, PurchaseRecordPageQueryDTO, PageResponse } from '@/types/api'
 import { useI18n } from '@/i18n'
+import { formatOrderOrigin, paymentDisplayKey } from './purchaseDisplay.mjs'
 
 const purchaseRecords = ref<PurchaseRecordVO[]>([])
 const loading = ref(true)
@@ -279,7 +280,7 @@ const getStatusClass = (status: number): string => {
 // Payment tag helpers
 type PaymentMeta = { label: string; color: string; bg: string; border: string }
 const paymentMeta = (method?: string | null): PaymentMeta => {
-  const key = (method || '').toLowerCase()
+  const key = paymentDisplayKey(method)
   switch (key) {
     case 'card':
     case 'stripe':
@@ -293,10 +294,12 @@ const paymentMeta = (method?: string | null): PaymentMeta => {
     case 'googlepay':
       return { label: 'Google Pay', color: '#1a73e8', bg: 'rgba(26,115,232,0.08)', border: 'rgba(26,115,232,0.3)' }
     case 'alipay':
-      return { label: 'Alipay', color: '#1677ff', bg: 'rgba(22,119,255,0.08)', border: 'rgba(22,119,255,0.3)' }
+      return { label: t('history.paymentAlipay'), color: '#1677ff', bg: 'rgba(22,119,255,0.08)', border: 'rgba(22,119,255,0.3)' }
     case 'wechat':
     case 'wechat_pay':
-      return { label: 'WeChat Pay', color: '#07c160', bg: 'rgba(7,193,96,0.08)', border: 'rgba(7,193,96,0.3)' }
+      return { label: t('history.paymentWechat'), color: '#07c160', bg: 'rgba(7,193,96,0.08)', border: 'rgba(7,193,96,0.3)' }
+    case 'other':
+      return { label: t('history.paymentOther'), color: '#4b5563', bg: '#f9fafb', border: '#d1d5db' }
     case 'credit':
       return { label: 'Credit', color: '#6f42c1', bg: 'rgba(111,66,193,0.08)', border: 'rgba(111,66,193,0.3)' }
     default:
@@ -314,7 +317,7 @@ const paymentTagStyle = (method?: string | null) => {
 }
 
 const originBadgeStyle = (origin?: string | null) => {
-  const key = (origin || '').toLowerCase()
+  const key = formatOrderOrigin(origin).toLowerCase()
   const styles: Record<string, { color: string; bg: string; border: string }> = {
     store: { color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
     store_cart: { color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
