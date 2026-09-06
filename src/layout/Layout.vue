@@ -10,7 +10,7 @@
         </div>
         <nav class="nav-area desktop-nav" aria-label="Primary navigation">
           <router-link :to="localizedPath('/account')" class="nav-link">{{ t('nav.account') }}</router-link>
-          <a href="#" class="nav-link">{{ t('nav.documentation') }}</a>
+          <a :href="merchantApiDocsUrl" class="nav-link" target="_blank" rel="noopener noreferrer">{{ t('nav.documentation') }}</a>
           <router-link v-if="hasMerchantRole" :to="localizedPath('/api')" class="nav-link">{{ t('nav.api') }}</router-link>
           <LanguageSwitcher />
         </nav>
@@ -74,7 +74,7 @@
     <main class="main-content">
       <nav class="mobile-primary-nav" aria-label="Primary navigation">
         <router-link :to="localizedPath('/account')" class="mobile-nav-link">{{ t('nav.account') }}</router-link>
-        <a href="#" class="mobile-nav-link">{{ t('nav.documentation') }}</a>
+        <a :href="merchantApiDocsUrl" class="mobile-nav-link" target="_blank" rel="noopener noreferrer">{{ t('nav.documentation') }}</a>
         <router-link v-if="hasMerchantRole" :to="localizedPath('/api')" class="mobile-nav-link">{{ t('nav.api') }}</router-link>
       </nav>
       <router-view />
@@ -87,8 +87,8 @@
           <span>© Wristo 2026</span>
         </div>
         <nav class="footer-nav" aria-label="Footer links">
-          <a href="#">{{ t('footer.terms') }}</a>
-          <a href="#">{{ t('footer.privacy') }}</a>
+          <a href="https://wristo.io/terms-and-conditions" target="_blank" rel="noopener noreferrer">{{ t('footer.terms') }}</a>
+          <a href="https://wristo.io/privacy-policy" target="_blank" rel="noopener noreferrer">{{ t('footer.privacy') }}</a>
           <a href="mailto:support@wristo.io">support@wristo.io</a>
         </nav>
       </div>
@@ -102,8 +102,9 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from '@/i18n'
 import { addLocaleToPath, useLocaleStore } from '@/store/locale'
-import { redirectToSsoLogin } from '@/utils/ssoRedirect'
+import { buildSsoPasswordUrl, redirectToSsoLogin } from '@/utils/ssoRedirect'
 import { ArrowDown, ArrowRight, Lock, SwitchButton, User } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const userStore = useUserStore()
@@ -115,6 +116,7 @@ const userAvatar = computed(() => userStore.userInfo?.avatar || defaultAvatar)
 const displayName = computed(() => userStore.userInfo?.nickname || userStore.userInfo?.username || 'Wristo')
 const userEmail = computed(() => userStore.userInfo?.email || 'merchant@wristo.io')
 const accountStatus = computed(() => hasMerchantRole.value ? 'Merchant' : 'Account')
+const merchantApiDocsUrl = import.meta.env.VITE_WRISTO_MERCHANT_API_DOCS_URL || 'https://api.wristo.io/swagger-ui.html'
 const handleLogout = async () => {
   await userStore.logout()
   redirectToSsoLogin('merchant')
@@ -130,7 +132,18 @@ const handleUserMenuCommand = async (command: string) => {
     return
   }
   if (command === 'password') {
-    router.push(localizedPath('/account/password'))
+    const token = userStore.token
+    const email = userStore.userInfo?.email
+    if (!token || !email) {
+      ElMessage.error(t('user.passwordUnavailable'))
+      redirectToSsoLogin('merchant')
+      return
+    }
+    window.location.assign(buildSsoPasswordUrl({
+      token,
+      email,
+      redirectUri: window.location.href,
+    }))
     return
   }
   if (command === 'logout') {

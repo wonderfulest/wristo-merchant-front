@@ -11,9 +11,8 @@ export const useUserStore = defineStore('user', {
     async logout() {
       try {
         await logoutApi()
-      } catch (e) {
-        // 可选：错误处理
-        console.error('logout error', e)
+      } catch {
+        // Local auth state still needs clearing when the server logout request fails.
       }
       this.token = ''
       this.userInfo = null

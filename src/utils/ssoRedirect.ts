@@ -25,6 +25,23 @@ function getSsoLoginBaseUrl() {
   return configuredLoginUrl || '/login'
 }
 
+export interface SsoPasswordUrlOptions {
+  token: string
+  email: string
+  redirectUri: string
+}
+
+export function buildSsoPasswordUrl({ token, email, redirectUri }: SsoPasswordUrlOptions) {
+  const passwordUrl = new URL(getSsoLoginBaseUrl(), window.location.origin)
+  passwordUrl.pathname = '/set-password'
+  passwordUrl.search = ''
+  passwordUrl.searchParams.set('token', token)
+  passwordUrl.searchParams.set('email', email)
+  passwordUrl.searchParams.set('redirect_uri', redirectUri)
+  passwordUrl.searchParams.set('mode', 'change')
+  return passwordUrl.toString()
+}
+
 export function buildSsoLoginUrl(client: string) {
   const loginUrl = new URL(getSsoLoginBaseUrl(), window.location.origin)
   loginUrl.searchParams.set('client', client)
